@@ -1,85 +1,7 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import 'UI/node_settings.dart';
+import 'UI/node_config.dart';
 import 'app_colors.dart';
-
-class RoundedButton extends StatelessWidget {
-  const RoundedButton({
-    Key? key,
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-    required this.width,
-    required this.fontSize,
-  }) : super(key: key);
-  final Function onPressed;
-  final Widget icon;
-  final Widget label;
-  final double width;
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () => onPressed(),
-      label: label,
-      icon: icon,
-      style: ElevatedButton.styleFrom(
-        elevation: 3,
-        fixedSize: Size(width, double.infinity),
-        primary: AppColors.black,
-        onPrimary: AppColors.white,
-        shadowColor: AppColors.orange,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(30),
-          ),
-        ),
-        textStyle: TextStyle(fontSize: fontSize),
-      ),
-    );
-  }
-}
-
-class SquareButton extends StatelessWidget {
-  const SquareButton({
-    Key? key,
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-    required this.width,
-    required this.height,
-    required this.fontSize,
-  }) : super(key: key);
-  final Function onPressed;
-  final Widget icon;
-  final Widget label;
-  final double width;
-  final double height;
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () => onPressed(),
-      label: label,
-      icon: icon,
-      style: ElevatedButton.styleFrom(
-        elevation: 3,
-        fixedSize: Size(width, height),
-        primary: AppColors.black,
-        onPrimary: AppColors.white,
-        textStyle: TextStyle(fontSize: fontSize),
-        side: const BorderSide(color: AppColors.orange, width: 1.0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(30),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class LinkNodeButton extends StatelessWidget {
   const LinkNodeButton({Key? key}) : super(key: key);
@@ -91,7 +13,7 @@ class LinkNodeButton extends StatelessWidget {
 
     return AvatarGlow(
       endRadius: 180,
-      glowColor: AppColors.red,
+      glowColor: AppColors.white,
       shape: BoxShape.circle,
       child: SizedBox(
         height: 120,
@@ -112,12 +34,12 @@ class LinkNodeButton extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NodeSettings(),
+                builder: (context) => NodeConfig(),
               ),
             );
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(AppColors.black),
+            backgroundColor: MaterialStateProperty.all(Colors.transparent),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(72.0),
@@ -126,6 +48,23 @@ class LinkNodeButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class AppBarIconButton extends StatelessWidget {
+  const AppBarIconButton({Key? key}) : super(key: key);
+  final String _logoPath =
+      'images/Firebolt-logos/Firebolt-logos-thumbnail.jpeg';
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () => Navigator.maybePop(
+        context,
+      ),
+      icon: Image.asset(
+        _logoPath,
       ),
     );
   }

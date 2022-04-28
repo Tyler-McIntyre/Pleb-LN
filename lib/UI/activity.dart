@@ -6,12 +6,12 @@ import '../app_colors.dart';
 class Activity extends StatelessWidget {
   const Activity({Key? key}) : super(key: key);
 
-  final List<Tuple5<Icon, String, String, String, String>> listTileInfo =
+  static List<Tuple5<Icon, String, String, String, String>> listTileInfo =
       const [
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.receipt,
+          color: AppColors.white,
         ),
         'Received',
         'off-chain',
@@ -19,8 +19,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'off-chain',
@@ -28,8 +28,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.currency_bitcoin,
-          color: AppColors.orange,
+          Icons.receipt,
+          color: AppColors.white,
         ),
         'Received',
         'on-chain',
@@ -37,8 +37,8 @@ class Activity extends StatelessWidget {
         '130,812 sats'),
     Tuple5(
         Icon(
-          Icons.currency_bitcoin,
-          color: AppColors.orange,
+          Icons.receipt,
+          color: AppColors.white,
         ),
         'Received',
         'on-chain',
@@ -46,8 +46,8 @@ class Activity extends StatelessWidget {
         '10,000,000 sats'),
     Tuple5(
         Icon(
-          Icons.currency_bitcoin,
-          color: AppColors.orange,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'on-chain',
@@ -55,8 +55,8 @@ class Activity extends StatelessWidget {
         '10,367 sats'),
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'off-chain',
@@ -64,8 +64,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'off-chain',
@@ -73,8 +73,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'off-chain',
@@ -82,8 +82,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.currency_bitcoin,
-          color: AppColors.orange,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'on-chain',
@@ -91,8 +91,8 @@ class Activity extends StatelessWidget {
         '10,367 sats'),
     Tuple5(
         Icon(
-          Icons.bolt,
-          color: AppColors.yellow,
+          Icons.receipt,
+          color: AppColors.white,
         ),
         'Received',
         'off-chain',
@@ -100,8 +100,8 @@ class Activity extends StatelessWidget {
         '10,000 sats'),
     Tuple5(
         Icon(
-          Icons.currency_bitcoin,
-          color: AppColors.orange,
+          Icons.send,
+          color: AppColors.white,
         ),
         'Sent',
         'on-chain',
@@ -163,7 +163,7 @@ class Activity extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         color: (listTileInfo[index].item2 == 'Sent'
-                            ? AppColors.red
+                            ? AppColors.redPrimary
                             : AppColors.green),
                       ),
                     ),

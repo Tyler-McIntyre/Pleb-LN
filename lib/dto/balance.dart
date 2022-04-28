@@ -13,13 +13,13 @@ class Balance {
       TextSpan(
         text: 'sats',
         style: TextStyle(
-          color: Colors.grey,
-          fontSize: 25,
+          color: Colors.white60,
+          fontSize: 22,
         ),
       ),
-    ): MoneyFormatter(amount: balanceSats.toDouble())
-        .output
-        .withoutFractionDigits,
+    ): MoneyFormatter(
+      amount: balanceSats.toDouble(),
+    ).output.withoutFractionDigits,
     const Icon(
       Icons.currency_bitcoin,
       color: Colors.orange,
