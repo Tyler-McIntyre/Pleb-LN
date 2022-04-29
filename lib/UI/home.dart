@@ -1,10 +1,9 @@
+import 'package:firebolt/mobileDb/secure_storage.dart';
 import 'package:flutter/material.dart';
-
 import '../app_colors.dart';
 import '../buttons.dart';
 import 'app_settings.dart';
 import 'dashboard.dart';
-import 'node_config.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -14,6 +13,18 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
+  String isConfigured = 'false';
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  Future init() async {
+    isConfigured = await SecureStorage.readValue('isConfigured') ?? 'false';
+  }
+
   final Future<String> getConfig = Future<String>.delayed(
     const Duration(seconds: 2),
     () => 'Data Loaded',
@@ -79,7 +90,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ],
-        body: NodeConfig.isConfigured
+        //TODO: FixMe, put this value back to true
+        body: isConfigured == 'false'
             ? FutureBuilder(
                 future: getConfig,
                 builder: (context, AsyncSnapshot<String> snapshot) {

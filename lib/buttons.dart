@@ -34,7 +34,7 @@ class LinkNodeButton extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NodeConfig(),
+                builder: (context) => const NodeConfig(),
               ),
             );
           },

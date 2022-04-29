@@ -45,10 +45,10 @@ class _DashboardState extends State<Dashboard> {
   }
 
   @override
-  // ignore: must_call_super
   void initState() {
     balanceShown = Balance.conversions.values.first;
     currencySymbolShown = Balance.conversions.keys.first;
+    super.initState();
   }
 
   final Map<String, Icon> _tabs = {
@@ -269,7 +269,7 @@ class _DashboardState extends State<Dashboard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => NodeConfig(),
+                                builder: (context) => const NodeConfig(),
                               ),
                             );
                           },
