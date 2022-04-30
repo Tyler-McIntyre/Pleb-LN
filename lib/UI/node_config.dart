@@ -2,6 +2,7 @@ import 'package:firebolt/UI/home.dart';
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../mobileDb/secure_storage.dart';
+import '../util/qr_scanner.dart';
 import 'curve_clipper.dart';
 
 class NodeConfig extends StatefulWidget {
@@ -211,17 +212,12 @@ class _NodeConfigState extends State<NodeConfig> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            const snackBar = SnackBar(
-                              content: Text(
-                                'Coming Soon -> Scan LNDConfig!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 20),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QrScanner(),
                               ),
-                              backgroundColor: (AppColors.blueSecondary),
                             );
-
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 3,
@@ -284,11 +280,11 @@ class _NodeConfigState extends State<NodeConfig> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               Icon(
-                                Icons.clear_all,
+                                Icons.restore,
                                 color: AppColors.white,
                               ),
                               Text(
-                                'Clear',
+                                'Reset',
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),

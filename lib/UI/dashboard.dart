@@ -1,7 +1,9 @@
 import 'package:firebolt/UI/node_config.dart';
+import 'package:firebolt/UI/receive.dart';
 import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../dto/balance.dart';
+import '../mobileDb/secure_storage.dart';
 import 'activity.dart';
 import 'curve_clipper.dart';
 
@@ -19,6 +21,7 @@ class _DashboardState extends State<Dashboard> {
   late Widget currencySymbolShown;
   bool satsIsVisable = true;
   bool btcIsVisable = false;
+  TextEditingController nicknameController = TextEditingController();
 
   updateBalance() {
     //increment the index
@@ -48,7 +51,16 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     balanceShown = Balance.conversions.values.first;
     currencySymbolShown = Balance.conversions.keys.first;
+    init();
     super.initState();
+  }
+
+  init() async {
+    final String nickname = await SecureStorage.readValue('nickname') ?? '';
+
+    setState(() {
+      nicknameController.text = nickname;
+    });
   }
 
   final Map<String, Icon> _tabs = {
@@ -79,11 +91,11 @@ class _DashboardState extends State<Dashboard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            'Nody_Montana',
-                            style: TextStyle(
+                            nicknameController.text,
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 22,
                             ),
@@ -220,17 +232,12 @@ class _DashboardState extends State<Dashboard> {
                         ),
                         TextButton(
                           onPressed: () {
-                            const snackBar = SnackBar(
-                              content: Text(
-                                'Coming Soon -> Create Invoices!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 20),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Receive(),
                               ),
-                              backgroundColor: (AppColors.blueSecondary),
                             );
-
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 3,

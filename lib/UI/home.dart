@@ -13,7 +13,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  String isConfigured = 'false';
+  String isConfigured = '';
 
   @override
   void initState() {
@@ -22,7 +22,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Future init() async {
-    isConfigured = await SecureStorage.readValue('isConfigured') ?? 'false';
+    // await SecureStorage.writeValue('isConfigured', 'false');
+    final isConfigured =
+        await SecureStorage.readValue('isConfigured') ?? 'false';
+
+    setState(() {
+      this.isConfigured = isConfigured;
+    });
   }
 
   final Future<String> getConfig = Future<String>.delayed(
@@ -91,7 +97,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ],
         //TODO: FixMe, put this value back to true
-        body: isConfigured == 'false'
+        body: isConfigured == 'true'
             ? FutureBuilder(
                 future: getConfig,
                 builder: (context, AsyncSnapshot<String> snapshot) {

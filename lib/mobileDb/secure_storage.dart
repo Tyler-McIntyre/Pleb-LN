@@ -24,8 +24,8 @@ class SecureStorage {
 //     await _storage.delete(key: key);
 //   }
 
-//   wipeStorage(key) async {
-// // Delete all
-//     await _storage.deleteAll();
-//   }
+  static Future wipeStorage(key) async {
+// Delete all
+    await _storage.deleteAll();
+  }
 }
