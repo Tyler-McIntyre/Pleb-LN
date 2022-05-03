@@ -19,6 +19,7 @@ class _NodeConfigState extends State<NodeConfig> {
   TextEditingController hostController = TextEditingController();
   TextEditingController restPortController = TextEditingController();
   TextEditingController macaroonController = TextEditingController();
+  static bool useTorIsSwitched = false;
 
   @override
   void initState() {
@@ -188,6 +189,24 @@ class _NodeConfigState extends State<NodeConfig> {
                               style: const TextStyle(
                                 color: AppColors.orange,
                                 fontSize: 20,
+                              ),
+                            ),
+                            SwitchListTile(
+                              title: const Text(
+                                'Use Tor',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              value: useTorIsSwitched,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  useTorIsSwitched = value;
+                                });
+                              },
+                              secondary: const Icon(
+                                Icons.private_connectivity,
+                                color: Colors.white,
                               ),
                             ),
                           ],

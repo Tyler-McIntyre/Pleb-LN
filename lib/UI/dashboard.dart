@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../dto/balance.dart';
 import '../mobileDb/secure_storage.dart';
+import '../util/qr_scanner.dart';
 import 'activity.dart';
 import 'curve_clipper.dart';
 
@@ -186,17 +187,12 @@ class _DashboardState extends State<Dashboard> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            const snackBar = SnackBar(
-                              content: Text(
-                                'Coming Soon -> Send Funds!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 20),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const QrScanner(),
                               ),
-                              backgroundColor: (AppColors.blueSecondary),
                             );
-
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 3,
@@ -334,6 +330,7 @@ class _DashboardState extends State<Dashboard> {
                         handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                             context),
                         sliver: SliverAppBar(
+                          automaticallyImplyLeading: false,
                           actions: [
                             PopupMenuButton<String>(
                               shape: RoundedRectangleBorder(

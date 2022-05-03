@@ -5,21 +5,21 @@ import 'curve_clipper.dart';
 
 class CreateInvoice extends StatefulWidget {
   const CreateInvoice({Key? key}) : super(key: key);
-  static final _formKey = GlobalKey<FormState>();
-  static bool routeHintsIsSwitched = false;
-  static bool ampInvoiceIsSwitched = false;
 
   @override
   State<CreateInvoice> createState() => _CreateInvoiceState();
 }
 
 class _CreateInvoiceState extends State<CreateInvoice> {
+  static final _formKey = GlobalKey<FormState>();
+  static bool routeHintsIsSwitched = false;
+  static bool ampInvoiceIsSwitched = false;
+  TextEditingController memoController = TextEditingController();
+  TextEditingController amountController = TextEditingController();
+  TextEditingController expirationController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController memoController = TextEditingController();
-    TextEditingController amountController = TextEditingController();
-    TextEditingController expirationController = TextEditingController();
-
     return Scaffold(
       backgroundColor: AppColors.redPrimary,
       resizeToAvoidBottomInset: false,
@@ -28,7 +28,7 @@ class _CreateInvoiceState extends State<CreateInvoice> {
         centerTitle: true,
       ),
       body: Form(
-        key: CreateInvoice._formKey,
+        key: _formKey,
         child: Stack(
           children: [
             ClipPath(
@@ -124,10 +124,10 @@ class _CreateInvoiceState extends State<CreateInvoice> {
                               'Include Route Hints',
                               style: TextStyle(color: Colors.white),
                             ),
-                            value: CreateInvoice.routeHintsIsSwitched,
+                            value: routeHintsIsSwitched,
                             onChanged: (bool value) {
                               setState(() {
-                                CreateInvoice.routeHintsIsSwitched = value;
+                                routeHintsIsSwitched = value;
                               });
                             },
                             secondary: const Icon(
@@ -141,10 +141,10 @@ class _CreateInvoiceState extends State<CreateInvoice> {
                               'AMP Invoice',
                               style: TextStyle(color: Colors.white),
                             ),
-                            value: CreateInvoice.ampInvoiceIsSwitched,
+                            value: ampInvoiceIsSwitched,
                             onChanged: (bool value) {
                               setState(() {
-                                CreateInvoice.ampInvoiceIsSwitched = value;
+                                ampInvoiceIsSwitched = value;
                               });
                             },
                             secondary: const Icon(
@@ -214,7 +214,7 @@ class _CreateInvoiceState extends State<CreateInvoice> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          if (CreateInvoice._formKey.currentState!.validate()) {
+                          if (_formKey.currentState!.validate()) {
                             //Navigate home
                             // Navigator.pushReplacement(
                             //   context,
@@ -222,6 +222,17 @@ class _CreateInvoiceState extends State<CreateInvoice> {
                             //     builder: (context) => const Home(),
                             //   ),
                             // );
+                            const snackBar = SnackBar(
+                              content: Text(
+                                'Coming Soon -> Create Invoice!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              backgroundColor: (AppColors.blueSecondary),
+                            );
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
                           }
                         },
                         style: ElevatedButton.styleFrom(

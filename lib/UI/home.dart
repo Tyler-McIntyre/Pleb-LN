@@ -22,7 +22,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Future init() async {
-    // await SecureStorage.writeValue('isConfigured', 'false');
+    //TODO: Remove me
+    // await SecureStorage.wipeStorage();
     final isConfigured =
         await SecureStorage.readValue('isConfigured') ?? 'false';
 
