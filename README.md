@@ -1,16 +1,32 @@
 # firebolt
 
-A new Flutter project.
+
+## Prerequisites for instructions below
+#### 1. Installed Git
+https://git-scm.com/downloads
+
+#### 2. Installed Flutter && Android Studio
+https://docs.flutter.dev/get-started/install
+##### Make sure you've also created a virtual device (an emulator) to use in android studio
+
+#### 3. Installed Visual Studio Code
+https://code.visualstudio.com/
+
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Choose where you'd like to keep the repo locally then...
+I.E. C:\Users\{YourName}\repos\
 
-A few resources to get you started if this is your first Flutter project:
+### Clone the repository
+git clone https://github.com/Tyler-McIntyre/FireBolt
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+### Open Visual Studio Code
+File >> Open Folder >> Navigate to the cloned repo and select the folder
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Run the emulator
+This opens the command palette 
+Enter & select 'Flutter: Launch Emulator' in the search bar.
+
+### Run the application
+Use CTRL + F5 to run the project without the debugger or open 'Run' in the top toolbar and select 'Run without the debugger'
