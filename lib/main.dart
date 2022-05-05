@@ -19,7 +19,7 @@ class _FireBoltState extends State<FireBolt> {
     return MaterialApp(
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.redPrimary,
-        colorScheme: const ColorScheme(
+        colorScheme: ColorScheme(
           background: AppColors.black,
           onPrimary: AppColors.white,
           brightness: Brightness.light,
@@ -28,8 +28,8 @@ class _FireBoltState extends State<FireBolt> {
           onError: AppColors.orange,
           onSecondary: AppColors.black,
           onSurface: AppColors.black,
-          primary: AppColors.red,
-          secondary: AppColors.red,
+          primary: AppColors.redPrimary,
+          secondary: AppColors.redSecondary,
           surface: AppColors.yellow,
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../util/app_colors.dart';
+
 class QrCodeGenerator extends StatefulWidget {
   const QrCodeGenerator({Key? key}) : super(key: key);
 
@@ -16,7 +18,7 @@ class _QrCodeGeneratorState extends State<QrCodeGenerator> {
       version: QrVersions.auto,
       size: 270,
       gapless: false,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
     );
   }
 }

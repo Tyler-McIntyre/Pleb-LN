@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 
+import '../util/app_colors.dart';
+
 class Balance {
   static int balanceSats = Balance.getOffChainBalance();
   static double balanceBitcoin = Balance.getOffChainBalance() / 10000000;
@@ -12,7 +14,7 @@ class Balance {
       TextSpan(
         text: 'sats',
         style: TextStyle(
-          color: Colors.white60,
+          color: AppColors.white60,
           fontSize: 22,
         ),
       ),
@@ -21,7 +23,7 @@ class Balance {
     ).output.withoutFractionDigits,
     const Icon(
       Icons.currency_bitcoin,
-      color: Colors.orange,
+      color: AppColors.orange,
       size: 35,
     ): '$balanceBitcoin',
     const SizedBox():

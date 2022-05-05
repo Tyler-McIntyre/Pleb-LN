@@ -116,11 +116,11 @@ class _ActivitiesState extends State<Activities> {
   final Map<String, Icon> _tabs = {
     'Off-Chain': const Icon(
       Icons.bolt,
-      color: Colors.yellow,
+      color: AppColors.yellow,
     ),
     'On-Chain': const Icon(
       Icons.currency_bitcoin,
-      color: Colors.orange,
+      color: AppColors.orange,
     ),
   };
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
@@ -133,7 +133,7 @@ class _ActivitiesState extends State<Activities> {
       child: DefaultTabController(
         length: _tabs.length,
         child: Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: AppColors.black,
           body: NestedScrollView(
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
@@ -163,7 +163,7 @@ class _ActivitiesState extends State<Activities> {
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontSize: 17),
                               ),
-                              textColor: Colors.white,
+                              textColor: AppColors.white,
                               trailing: Text.rich(
                                 TextSpan(
                                   text: '1,245,356',
@@ -171,7 +171,7 @@ class _ActivitiesState extends State<Activities> {
                                     TextSpan(
                                       text: 'sats',
                                       style: TextStyle(
-                                        color: Colors.grey,
+                                        color: AppColors.grey,
                                         fontSize: 17,
                                       ),
                                     ),
@@ -191,14 +191,14 @@ class _ActivitiesState extends State<Activities> {
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontSize: 17),
                               ),
-                              textColor: Colors.white,
+                              textColor: AppColors.white,
                               trailing: Text.rich(
                                 TextSpan(
                                   children: [
                                     WidgetSpan(
                                       child: _tabs.values.last,
                                       style: TextStyle(
-                                        color: Colors.grey,
+                                        color: AppColors.grey,
                                       ),
                                     ),
                                     TextSpan(
@@ -397,7 +397,8 @@ class _ActivitiesState extends State<Activities> {
                                                         (activityTileInfo[index]
                                                                     .item2 ==
                                                                 'Sent'
-                                                            ? AppColors.red
+                                                            ? AppColors
+                                                                .redPrimary
                                                             : AppColors.green),
                                                   ),
                                                 ),

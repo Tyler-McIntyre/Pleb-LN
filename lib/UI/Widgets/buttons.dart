@@ -37,11 +37,11 @@ class LinkNodeButton extends StatelessWidget {
             );
           },
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+            backgroundColor: MaterialStateProperty.all(AppColors.transparent),
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(72.0),
-                side: const BorderSide(color: Colors.transparent),
+                side: const BorderSide(color: AppColors.transparent),
               ),
             ),
           ),

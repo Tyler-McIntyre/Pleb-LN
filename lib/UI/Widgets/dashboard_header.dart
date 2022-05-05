@@ -92,7 +92,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     child: Text(
                       nicknameController.text,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.white70,
                         fontSize: 22,
                       ),
                     ),
@@ -141,7 +141,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                   TextSpan(
                                     text: 'Tap to convert',
                                     style: TextStyle(
-                                      color: Colors.white60,
+                                      color: AppColors.white60,
                                       fontSize: 19,
                                     ),
                                   )
@@ -215,7 +215,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                         Text(
                           'Send',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         ),
                       ],
@@ -233,7 +233,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     style: ElevatedButton.styleFrom(
                       elevation: 3,
                       fixedSize: const Size(100, 71),
-                      primary: Colors.black,
+                      primary: AppColors.black,
                       onPrimary: AppColors.white,
                       textStyle: const TextStyle(fontSize: 20),
                       side: const BorderSide(
@@ -256,7 +256,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                         Text(
                           'Receive',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       ],
@@ -274,8 +274,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     style: ElevatedButton.styleFrom(
                       elevation: 3,
                       fixedSize: const Size(100, 71),
-                      primary: Colors.black,
-                      onPrimary: Colors.white,
+                      primary: AppColors.black,
+                      onPrimary: AppColors.white,
                       textStyle: const TextStyle(fontSize: 20),
                       side:
                           const BorderSide(color: AppColors.orange, width: 1.0),
@@ -297,7 +297,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       ],

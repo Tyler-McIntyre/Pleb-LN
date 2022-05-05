@@ -135,7 +135,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
                         SwitchListTile(
                           title: const Text(
                             'Include Route Hints',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: AppColors.white),
                           ),
                           value: routeHintsIsSwitched,
                           onChanged: (bool value) {
@@ -145,14 +145,14 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
                           },
                           secondary: const Icon(
                             Icons.compare_arrows_sharp,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         ),
                         //* AMP Invoice switch
                         SwitchListTile(
                           title: const Text(
                             'AMP Invoice',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: AppColors.white),
                           ),
                           value: ampInvoiceIsSwitched,
                           onChanged: (bool value) {
@@ -162,7 +162,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
                           },
                           secondary: const Icon(
                             Icons.amp_stories,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       ],
@@ -231,7 +231,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
               Text(
                 'Reset',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ],
@@ -278,7 +278,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
               Text(
                 'Create',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ],

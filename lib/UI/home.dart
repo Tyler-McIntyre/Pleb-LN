@@ -117,7 +117,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       children: [
                         const Icon(
                           Icons.error_outline,
-                          color: Colors.red,
+                          color: AppColors.redPrimary,
                           size: 60,
                         ),
                         Padding(

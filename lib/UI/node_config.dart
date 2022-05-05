@@ -208,7 +208,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                           title: const Text(
                             'Use Tor',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                           value: useTorIsSwitched,
@@ -219,7 +219,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                           },
                           secondary: const Icon(
                             Icons.private_connectivity,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         ),
                       ],
@@ -299,7 +299,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           style: ElevatedButton.styleFrom(
             elevation: 3,
             fixedSize: const Size(100, 71),
-            primary: Colors.black,
+            primary: AppColors.black,
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
@@ -321,7 +321,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               ),
               Text(
                 'LNDConfig',
-                style: TextStyle(color: Colors.white, fontSize: 17),
+                style: TextStyle(color: AppColors.white, fontSize: 17),
               )
             ],
           ),
@@ -363,7 +363,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               Text(
                 'Reset',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ],
@@ -428,7 +428,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               Text(
                 'Save',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ],
