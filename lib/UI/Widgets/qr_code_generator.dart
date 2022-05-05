@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class QRCreator extends StatefulWidget {
-  const QRCreator({Key? key}) : super(key: key);
+class QrCodeGenerator extends StatefulWidget {
+  const QrCodeGenerator({Key? key}) : super(key: key);
 
   @override
-  State<QRCreator> createState() => _QRCreatorState();
+  State<QrCodeGenerator> createState() => _QrCodeGeneratorState();
 }
 
-class _QRCreatorState extends State<QRCreator> {
+class _QrCodeGeneratorState extends State<QrCodeGenerator> {
   @override
   Widget build(BuildContext context) {
     return QrImage(
