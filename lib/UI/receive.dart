@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../util/app_colors.dart';
 import 'create_invoice.dart';
-import 'curve_clipper.dart';
+import 'Widgets/curve_clipper.dart';
 
 class Receive extends StatelessWidget {
   const Receive({Key? key}) : super(key: key);

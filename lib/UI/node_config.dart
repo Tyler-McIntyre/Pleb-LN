@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../util/app_colors.dart';
 import '../database/secure_storage.dart';
 import '../models/lnd_connect.dart';
-import 'curve_clipper.dart';
+import 'Widgets/curve_clipper.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class NodeConfig extends StatefulWidget {

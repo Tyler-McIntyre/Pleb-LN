@@ -1,8 +1,8 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import '../util/app_assets.dart';
-import 'node_config.dart';
-import '../util/app_colors.dart';
+import '../../util/app_assets.dart';
+import '../node_config.dart';
+import '../../util/app_colors.dart';
 
 class LinkNodeButton extends StatelessWidget {
   const LinkNodeButton({Key? key}) : super(key: key);

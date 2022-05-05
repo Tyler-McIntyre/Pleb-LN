@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
-import 'buttons.dart';
+import 'Widgets/buttons.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({Key? key}) : super(key: key);

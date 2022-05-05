@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
-import 'curve_clipper.dart';
+import 'Widgets/curve_clipper.dart';
 
 class CreateInvoice extends StatefulWidget {
   const CreateInvoice({Key? key}) : super(key: key);
