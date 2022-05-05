@@ -8,7 +8,8 @@ class Balance {
   static double balanceBitcoin = Balance.getOffChainBalance() / 10000000;
 
   //TODO: need to pull current exchange rates {Bitcoin Amount} * {Exchange Rate}
-  static double balanceDollars = (balanceBitcoin * 40000);
+  static double currentBtcExchangeRate = 40000;
+  static double balanceDollars = (balanceBitcoin * currentBtcExchangeRate);
   static Map<Widget, String> conversions = {
     const Text.rich(
       TextSpan(
