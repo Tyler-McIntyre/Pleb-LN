@@ -1,10 +1,10 @@
 import 'package:firebolt/UI/node_config.dart';
 import 'package:firebolt/UI/receive.dart';
 import 'package:flutter/material.dart';
-import '../app_colors.dart';
-import '../dto/balance.dart';
-import '../mobileDb/secure_storage.dart';
-import 'activity.dart';
+import '../util/app_colors.dart';
+import '../models/balance.dart';
+import '../database/secure_storage.dart';
+import '../models/activity.dart';
 import 'curve_clipper.dart';
 
 enum activitySortOptions { DateReceived, SentOnly, ReceivedOnly }

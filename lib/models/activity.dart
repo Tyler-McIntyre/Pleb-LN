@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
-
-import '../app_colors.dart';
+import '../util/app_colors.dart';
 
 class Activity {
   static List<Tuple5<Icon, String, String, String, String>> listTileInfo =

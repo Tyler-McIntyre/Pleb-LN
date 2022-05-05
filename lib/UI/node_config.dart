@@ -1,9 +1,9 @@
 import 'package:firebolt/UI/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../app_colors.dart';
-import '../mobileDb/secure_storage.dart';
-import '../util/lnd_connect.dart';
+import '../util/app_colors.dart';
+import '../database/secure_storage.dart';
+import '../models/lnd_connect.dart';
 import 'curve_clipper.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 

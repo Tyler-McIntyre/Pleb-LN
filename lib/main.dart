@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'UI/home.dart';
-import 'app_colors.dart';
+import 'util/app_colors.dart';
 
 void main() {
   runApp(const FireBolt());

@@ -1,7 +1,7 @@
-import 'package:firebolt/mobileDb/secure_storage.dart';
+import 'package:firebolt/database/secure_storage.dart';
 import 'package:flutter/material.dart';
-import '../app_colors.dart';
-import '../buttons.dart';
+import '../util/app_colors.dart';
+import 'buttons.dart';
 import 'app_settings.dart';
 import 'dashboard.dart';
 
