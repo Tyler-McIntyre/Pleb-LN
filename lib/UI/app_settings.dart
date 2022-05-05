@@ -11,16 +11,20 @@ class AppSettings extends StatefulWidget {
 
 class _AppSettingsState extends State<AppSettings> {
   final Map<Icon, String> listTileInfo = {
-    const Icon(Icons.computer): 'Nody_Montana',
-    const Icon(Icons.insert_drive_file_outlined): 'Node Info',
-    const Icon(Icons.remove_red_eye): 'Privacy',
+    //* Decide if we need this option if we have the node config
+    // const Icon(Icons.computer): 'Nody_Montana',
+    // const Icon(Icons.insert_drive_file_outlined): 'Node Info',
+    //*
     const Icon(Icons.alt_route): 'Manage Channels',
+    const Icon(Icons.remove_red_eye): 'Privacy',
     const Icon(Icons.lock): 'Security',
     const Icon(Icons.verified): 'Sign or verify message',
-    const Icon(Icons.currency_bitcoin): 'Currency',
-    const Icon(Icons.language): 'Language',
-    const Icon(Icons.brush): 'Theme',
     const Icon(Icons.info_outline): 'About'
+    //* Less Important options
+    // const Icon(Icons.currency_bitcoin): 'Currency',
+    // const Icon(Icons.language): 'Language',
+    // const Icon(Icons.brush): 'Theme',
+    //*
   };
 
   @override

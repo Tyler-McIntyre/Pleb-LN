@@ -178,6 +178,8 @@ class _CreateInvoiceState extends State<CreateInvoice> {
                             memoController.clear();
                             amountController.clear();
                             expirationController.clear();
+                            routeHintsIsSwitched = false;
+                            ampInvoiceIsSwitched = false;
                           });
                         },
                         style: ElevatedButton.styleFrom(

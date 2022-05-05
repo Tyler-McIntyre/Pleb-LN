@@ -1,12 +1,15 @@
 import 'package:firebolt/UI/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app_colors.dart';
 import '../mobileDb/secure_storage.dart';
-import '../util/qr_scanner.dart';
+import '../util/lnd_connect.dart';
 import 'curve_clipper.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class NodeConfig extends StatefulWidget {
   const NodeConfig({Key? key}) : super(key: key);
+  static late LNDConnect lndConnectParams;
 
   @override
   State<NodeConfig> createState() => _NodeConfigState();
@@ -20,6 +23,7 @@ class _NodeConfigState extends State<NodeConfig> {
   TextEditingController restPortController = TextEditingController();
   TextEditingController macaroonController = TextEditingController();
   static bool useTorIsSwitched = false;
+  String qrCode = '';
 
   @override
   void initState() {
@@ -53,6 +57,21 @@ class _NodeConfigState extends State<NodeConfig> {
       'restPort': restPortController,
       'macaroon': macaroonController
     };
+
+    Future<void> scanQrCode() async {
+      try {
+        String qrCode = await FlutterBarcodeScanner.scanBarcode(
+            '#E62119', 'Cancel', true, ScanMode.QR);
+
+        if (!mounted) return;
+
+        setState(() {
+          this.qrCode = qrCode;
+        });
+      } on PlatformException {
+        this.qrCode = 'Failed to get platform version.';
+      }
+    }
 
     return Scaffold(
         backgroundColor: AppColors.redPrimary,
@@ -230,13 +249,28 @@ class _NodeConfigState extends State<NodeConfig> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QrScanner(),
-                              ),
-                            );
+                          onPressed: () async {
+                            //Scan the QRCode
+                            scanQrCode();
+                            String qrCodeResponse = qrCode;
+
+                            //TODO: Fix this error handling
+                            if (!qrCodeResponse.contains('Error')) {
+                              //Parse the raw data
+                              LNDConnect connectionParams =
+                                  await LNDConnect.parseConnectionString(
+                                      qrCodeResponse);
+
+                              //set the controller text states
+                              setState(() {
+                                hostController.text =
+                                    connectionParams.host ?? '';
+                                restPortController.text =
+                                    connectionParams.port ?? '';
+                                macaroonController.text =
+                                    connectionParams.macaroonHexFormat ?? '';
+                              });
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 3,
@@ -277,6 +311,7 @@ class _NodeConfigState extends State<NodeConfig> {
                               hostController.clear();
                               restPortController.clear();
                               macaroonController.clear();
+                              useTorIsSwitched = false;
                             });
                           },
                           style: ElevatedButton.styleFrom(

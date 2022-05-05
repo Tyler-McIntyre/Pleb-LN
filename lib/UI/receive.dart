@@ -65,7 +65,7 @@ class Receive extends StatelessWidget {
                               color: AppColors.white,
                             ),
                             Text(
-                              'Create invoice',
+                              'New invoice',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white,

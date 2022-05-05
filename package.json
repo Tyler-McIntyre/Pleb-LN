@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@radar/lnrpc": "^0.11.1-beta.1",
     "firebase": "^9.6.11"
   }
 }

@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../dto/balance.dart';
 import '../mobileDb/secure_storage.dart';
-import '../util/qr_scanner.dart';
 import 'activity.dart';
 import 'curve_clipper.dart';
+
+enum activitySortOptions { DateReceived, SentOnly, ReceivedOnly }
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _DashboardState extends State<Dashboard> {
   bool satsIsVisable = true;
   bool btcIsVisable = false;
   TextEditingController nicknameController = TextEditingController();
+  activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
 
   updateBalance() {
     //increment the index
@@ -187,12 +189,7 @@ class _DashboardState extends State<Dashboard> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const QrScanner(),
-                              ),
-                            );
+                            //TODO: add the QR scanner function
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 3,
@@ -294,11 +291,11 @@ class _DashboardState extends State<Dashboard> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               Icon(
-                                Icons.info,
+                                Icons.computer,
                                 color: AppColors.white,
                               ),
                               Text(
-                                'Config',
+                                'Node',
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.visible,
                                 style: TextStyle(
@@ -336,62 +333,67 @@ class _DashboardState extends State<Dashboard> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                                 side: const BorderSide(
-                                  color: Colors.orange,
+                                  color: AppColors.orange,
                                 ),
                               ),
-                              color: Colors.black,
+                              color: AppColors.secondaryBlack,
                               icon: const Icon(Icons.account_balance_wallet),
                               itemBuilder: (BuildContext context) =>
                                   <PopupMenuEntry<String>>[
-                                const PopupMenuItem<String>(
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  child: Center(
-                                    child: Text.rich(
+                                PopupMenuItem<String>(
+                                  child: ListTile(
+                                    tileColor: AppColors.secondaryBlack,
+                                    title: Text(
+                                      _tabs.keys.first,
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(fontSize: 17),
+                                    ),
+                                    textColor: Colors.white,
+                                    trailing: Text.rich(
                                       TextSpan(
-                                        text: 'Off-Chain: ',
+                                        text: '1,245,356',
                                         children: [
-                                          TextSpan(
-                                            text: '1,245,356 ',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.white,
-                                            ),
-                                          ),
                                           TextSpan(
                                             text: 'sats',
                                             style: TextStyle(
                                               color: Colors.grey,
+                                              fontSize: 17,
                                             ),
                                           ),
                                         ],
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const PopupMenuItem<String>(
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  child: Center(
-                                    child: Text.rich(
+                                PopupMenuItem<String>(
+                                  child: ListTile(
+                                    tileColor: AppColors.secondaryBlack,
+                                    title: Text(
+                                      _tabs.keys.last,
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(fontSize: 17),
+                                    ),
+                                    textColor: Colors.white,
+                                    trailing: Text.rich(
                                       TextSpan(
-                                        text: 'On-Chain: ',
                                         children: [
                                           WidgetSpan(
-                                            child: Icon(
-                                              Icons.currency_bitcoin,
-                                              color: Colors.orange,
+                                            child: _tabs.values.last,
+                                            style: TextStyle(
+                                              color: Colors.grey,
                                             ),
                                           ),
                                           TextSpan(
-                                            text: '1.01846 ',
+                                            text: '1.01846',
+                                            style: TextStyle(fontSize: 20),
                                           ),
                                         ],
+                                        style: TextStyle(fontSize: 20),
                                       ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
@@ -416,68 +418,77 @@ class _DashboardState extends State<Dashboard> {
                             PopupMenuButton<String>(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0),
-                                side: const BorderSide(color: Colors.orange),
+                                side: const BorderSide(color: AppColors.orange),
                               ),
-                              color: Colors.black,
+                              color: AppColors.secondaryBlack,
                               icon: const Icon(Icons.filter_alt),
                               onSelected: (String result) {
                                 switch (result) {
                                   case 'Date Received':
+                                    setState(() {
+                                      _activitySortOption =
+                                          activitySortOptions.DateReceived;
+                                    });
                                     break;
-                                  case 'Sent':
-                                    print('filter 2 clicked');
+                                  case 'Sent Only':
+                                    setState(() {
+                                      _activitySortOption =
+                                          activitySortOptions.SentOnly;
+                                    });
                                     break;
-                                  case 'Received':
-                                    print('Received only');
+                                  case 'Received Only':
+                                    setState(() {
+                                      _activitySortOption =
+                                          activitySortOptions.ReceivedOnly;
+                                    });
                                     break;
                                   default:
-                                    const snackBar = SnackBar(
-                                      content: Text(
-                                        'Coming Soon -> Sort Activities!',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                      backgroundColor:
-                                          (AppColors.blueSecondary),
-                                    );
-
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(snackBar);
                                 }
                               },
-                              //TODO: FixMe! Put the values back for each item
                               itemBuilder: (BuildContext context) => [
-                                const PopupMenuItem<String>(
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
+                                PopupMenuItem<String>(
+                                  value: 'Date Received',
+                                  child: ListTile(
+                                    leading: Radio<activitySortOptions>(
+                                      fillColor: MaterialStateProperty.all(
+                                          AppColors.white),
+                                      value: activitySortOptions.DateReceived,
+                                      groupValue: _activitySortOption,
+                                      onChanged: null,
+                                    ),
+                                    tileColor: AppColors.secondaryBlack,
+                                    textColor: AppColors.white,
+                                    title: Text('Date Received'),
                                   ),
-                                  // value: 'Date Received',
-                                  value: '',
-
-                                  child: Text('Date Received'),
                                 ),
-                                const PopupMenuItem<String>(
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
+                                PopupMenuItem<String>(
+                                  value: 'Sent Only',
+                                  child: ListTile(
+                                    leading: Radio<activitySortOptions>(
+                                      fillColor: MaterialStateProperty.all(
+                                          AppColors.white),
+                                      value: activitySortOptions.SentOnly,
+                                      groupValue: _activitySortOption,
+                                      onChanged: null,
+                                    ),
+                                    tileColor: AppColors.secondaryBlack,
+                                    textColor: AppColors.white,
+                                    title: Text('Sent Only'),
                                   ),
-                                  // value: 'Sent only',
-                                  value: '',
-
-                                  child: Text('Sent only'),
                                 ),
-                                const PopupMenuItem<String>(
-                                  textStyle: TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  // value: 'Received only',
-                                  value: '',
-
-                                  child: Text(
-                                    'Received only',
-                                    style: TextStyle(),
+                                PopupMenuItem<String>(
+                                  value: 'Received Only',
+                                  child: ListTile(
+                                    leading: Radio<activitySortOptions>(
+                                      fillColor: MaterialStateProperty.all(
+                                          AppColors.white),
+                                      value: activitySortOptions.ReceivedOnly,
+                                      groupValue: _activitySortOption,
+                                      onChanged: null,
+                                    ),
+                                    tileColor: AppColors.secondaryBlack,
+                                    textColor: AppColors.white,
+                                    title: Text('Received Only'),
                                   ),
                                 ),
                               ],
@@ -526,67 +537,74 @@ class _DashboardState extends State<Dashboard> {
                                           return ListTileTheme(
                                             tileColor: AppColors.secondaryBlack,
                                             textColor: AppColors.white,
-                                            child: ListView.builder(
-                                              itemCount:
-                                                  Activity.listTileInfo.length,
-                                              itemBuilder: (context, index) {
-                                                return Card(
-                                                  color: AppColors.blueGrey,
-                                                  child: ListTile(
-                                                    leading: Activity
-                                                        .listTileInfo[index]
-                                                        .item1,
-                                                    title: Text.rich(
-                                                      TextSpan(
-                                                        text: null,
-                                                        children: [
-                                                          TextSpan(
-                                                            text: Activity
-                                                                .listTileInfo[
-                                                                    index]
-                                                                .item2,
-                                                            style: const TextStyle(
-                                                                color: AppColors
-                                                                    .grey,
-                                                                fontSize: 15),
-                                                          ),
-                                                          WidgetSpan(
-                                                            child: Container(),
-                                                          ),
-                                                          TextSpan(
-                                                            text: Activity
-                                                                .listTileInfo[
-                                                                    index]
-                                                                .item4,
-                                                            style:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        15),
-                                                          ),
-                                                          WidgetSpan(
-                                                            child: Container(),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    trailing: Text(
-                                                      Activity
+                                            child: Scrollbar(
+                                              child: ListView.builder(
+                                                itemCount: Activity
+                                                    .listTileInfo.length,
+                                                itemBuilder: (context, index) {
+                                                  return Card(
+                                                    color: AppColors.blueGrey,
+                                                    child: ListTile(
+                                                      style: ListTileStyle.list,
+                                                      leading: Activity
                                                           .listTileInfo[index]
-                                                          .item5,
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        color: (Activity
-                                                                    .listTileInfo[
-                                                                        index]
-                                                                    .item2 ==
-                                                                'Sent'
-                                                            ? AppColors.red
-                                                            : AppColors.green),
+                                                          .item1,
+                                                      title: Text.rich(
+                                                        TextSpan(
+                                                          text: null,
+                                                          children: [
+                                                            TextSpan(
+                                                              text: Activity
+                                                                  .listTileInfo[
+                                                                      index]
+                                                                  .item2,
+                                                              style: const TextStyle(
+                                                                  color:
+                                                                      AppColors
+                                                                          .grey,
+                                                                  fontSize: 15),
+                                                            ),
+                                                            WidgetSpan(
+                                                              child:
+                                                                  Container(),
+                                                            ),
+                                                            TextSpan(
+                                                              text: Activity
+                                                                  .listTileInfo[
+                                                                      index]
+                                                                  .item4,
+                                                              style:
+                                                                  const TextStyle(
+                                                                      fontSize:
+                                                                          15),
+                                                            ),
+                                                            WidgetSpan(
+                                                              child:
+                                                                  Container(),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      trailing: Text(
+                                                        Activity
+                                                            .listTileInfo[index]
+                                                            .item5,
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: (Activity
+                                                                      .listTileInfo[
+                                                                          index]
+                                                                      .item2 ==
+                                                                  'Sent'
+                                                              ? AppColors.red
+                                                              : AppColors
+                                                                  .green),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
+                                                  );
+                                                },
+                                              ),
                                             ),
                                           );
                                         },

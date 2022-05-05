@@ -34,7 +34,7 @@ dependencies:
   tuple: ^2.0.0
   avatar_glow: ^2.0.2
   flutter_secure_storage: ^5.0.2
-  mobile_scanner: ^1.0.0
+  flutter_barcode_scanner: ^2.0.0
   rename: ^2.0.1
 
   # The following adds the Cupertino Icons font to your application.
