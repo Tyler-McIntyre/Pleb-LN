@@ -1,12 +1,11 @@
 {
   "dependencies": {
-    "@radar/lnrpc": "^0.11.1-beta.1",
-    "firebase": "^9.6.11"
+    "@radar/lnrpc": "^0.11.1-beta.1"
   },
   "scripts": {
     "build": "npm install && flutter pub get",
     "test": "flutter test",
     "rebuild": "npm ci && flutter clean && npm run build_flutter",
-    "build_flutter":"flutter pub get"
+    "build_flutter": "flutter pub get"
   }
 }
