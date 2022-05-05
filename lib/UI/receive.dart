@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../util/app_colors.dart';
 import 'create_invoice.dart';
 import 'Widgets/curve_clipper.dart';
@@ -76,14 +75,6 @@ class Receive extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const CreateInvoice(),
-                          //   ),
-                          // );
-
-                          //Show the snackbar
                           const snackBar = SnackBar(
                             content: Text(
                               'Coming Soon -> LNURL!',
