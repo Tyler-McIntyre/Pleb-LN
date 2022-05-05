@@ -30,7 +30,7 @@ C:\Users\tmcin\repos
 ```
 Then I will enter this in the terminal
 ```
-'cd repos'
+cd repos
 ```
 I should then be in my repos folder where I will run the line below...
 ```
