@@ -1,5 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+//TODO: test if further settings are needed for IOS Storage. currently only tested on Android.
+
 class SecureStorage {
   // Create storage
   static const _storage = FlutterSecureStorage();
@@ -19,13 +21,8 @@ class SecureStorage {
     return await _storage.readAll();
   }
 
-//   deleteValue(key) async {
-// // Delete value
-//     await _storage.delete(key: key);
-//   }
-
   static Future wipeStorage() async {
-// Delete all
+    // Delete all
     await _storage.deleteAll();
   }
 }
