@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../app_colors.dart';
+import '../buttons.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({Key? key}) : super(key: key);
@@ -11,20 +11,30 @@ class AppSettings extends StatefulWidget {
 
 class _AppSettingsState extends State<AppSettings> {
   final Map<Icon, String> listTileInfo = {
-    const Icon(Icons.computer): 'Nody_Montana',
-    const Icon(Icons.insert_drive_file_outlined): 'Node Info',
+    //* Decide if we need this option if we have the node config
+    // const Icon(Icons.computer): 'Nody_Montana',
+    // const Icon(Icons.insert_drive_file_outlined): 'Node Info',
+    //*
+    const Icon(Icons.alt_route): 'Manage Channels',
     const Icon(Icons.remove_red_eye): 'Privacy',
     const Icon(Icons.lock): 'Security',
     const Icon(Icons.verified): 'Sign or verify message',
-    const Icon(Icons.currency_bitcoin): 'Currency',
-    const Icon(Icons.language): 'Language',
-    const Icon(Icons.brush): 'Theme',
     const Icon(Icons.info_outline): 'About'
+    //* Less Important options
+    // const Icon(Icons.currency_bitcoin): 'Currency',
+    // const Icon(Icons.language): 'Language',
+    // const Icon(Icons.brush): 'Theme',
+    //*
   };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        leadingWidth: 70,
+        leading: const AppBarIconButton(),
+      ),
       body: Center(
         child: Container(
           margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -39,6 +49,18 @@ class _AppSettingsState extends State<AppSettings> {
                 return Card(
                   color: AppColors.white,
                   child: ListTile(
+                    onTap: () {
+                      final snackBar = SnackBar(
+                        content: Text(
+                          'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        backgroundColor: (AppColors.blueSecondary),
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    },
                     leading: listTileInfo.keys.toList()[index],
                     title: Text(listTileInfo.values.toList()[index]),
                     trailing: const Icon(Icons.arrow_forward_ios),
