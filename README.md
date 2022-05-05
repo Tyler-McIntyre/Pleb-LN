@@ -50,7 +50,7 @@ This will install the dependencies for the app
 ### Run the emulator
 Press
 ```
-'SHIFT + CTRL + P'
+SHIFT + CTRL + P
 ```
 This opens the command palette 
 Enter & select 'Flutter: Launch Emulator' in the search bar.
