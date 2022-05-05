@@ -74,3 +74,12 @@ Use
 CTRL + F5 
 ```
 to run the project without the debugger or open 'Run' in the top toolbar and select 'Run without the debugger'
+
+
+
+
+
+## The backlog
+A running list of tasks that need to be completed for this application. Anyone is welcome to edit it. If you see a task you'd like to work on, just add your name and it's yours! If there's any questions (which there will be a lot of) just ping me on discord in the #firebolt channel.
+https://docs.google.com/spreadsheets/d/1LSVl5OSKyrjWt00WewR-J-PChMhZRTFUALc_x9mfIak/edit?usp=sharing
+
