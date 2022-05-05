@@ -54,7 +54,7 @@ File >> Open Folder >> Navigate to the cloned repo and select the folder
 ### Run 'NPM install'
 In the toolbar click... Terminal >> New Terminal and enter...
 ```
-NPM install
+NPM run build
 ```
 This will install the dependencies for the app
 
