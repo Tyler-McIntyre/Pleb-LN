@@ -4,7 +4,7 @@
     "firebase": "^9.6.11"
   },
   "scripts": {
-    "build": "echo 'build script executed'",
-    "test": "echo 'test script executed'"
+    "build": "flutter clean && flutter pub get",
+    "test": "echo 'TODO: create a test script!'"
   }
 }
