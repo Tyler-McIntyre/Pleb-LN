@@ -13,7 +13,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  late String nodeIsConfigured;
+  String nodeIsConfigured = '';
 
   @override
   void initState() {

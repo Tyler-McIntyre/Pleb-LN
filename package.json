@@ -4,7 +4,9 @@
     "firebase": "^9.6.11"
   },
   "scripts": {
-    "build": "flutter clean && flutter pub get",
-    "test": "echo 'TODO: create a test script!'"
+    "build": "npm install && flutter pub get",
+    "test": "flutter test",
+    "rebuild": "npm ci && flutter clean && npm run build_flutter",
+    "build_flutter":"flutter pub get"
   }
 }
