@@ -18,6 +18,16 @@ https://nodejs.org/en/download/
 
 ## Getting Started
 
+### Set your username in git
+open the terminal and set your username with...
+```
+git config --global user.name "YourGitHubUsername"
+```
+You can then check that it was successful by entering
+```
+git config --global user.name
+```
+
 ### Clone the repository
 open a terminal and navigate to where you'd like to keep the repo. Use 'cd' to change the directory you're in,
 for instance if my terminal is currently pointed at...
@@ -36,6 +46,7 @@ I should then be in my repos folder where I will run the line below...
 ```
 git clone https://github.com/Tyler-McIntyre/FireBolt
 ```
+Git will check if you have permission to clone this repo by having you login to GitHub and confim your identity
 
 ### Open Visual Studio Code
 File >> Open Folder >> Navigate to the cloned repo and select the folder
