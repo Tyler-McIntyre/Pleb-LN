@@ -2,14 +2,14 @@
 
 
 ## Prerequisites for instructions below
-#### 1. Installed Git
+#### 1. Install Git
 https://git-scm.com/downloads
 
-#### 2. Installed Flutter && Android Studio
+#### 2. Install Flutter && Android Studio
 https://docs.flutter.dev/get-started/install
 ##### Make sure you've also created a virtual device (an emulator) to use in android studio
 
-#### 3. Installed Visual Studio Code
+#### 3. Install Visual Studio Code
 https://code.visualstudio.com/
 
 ### 4. Install Node.js
