@@ -19,8 +19,8 @@ https://nodejs.org/en/download/
 ## Getting Started
 
 ### Clone the repository
-open a terminal and navigate to where you'd like to keep the repo. Use 'cd' to change the directory you're in
-for instance if my terminal is currently pointed at...C:\Users\tmcin\repos
+open a terminal and navigate to where you'd like to keep the repo. Use 'cd' to change the directory you're in,
+for instance if my terminal is currently pointed at...
 ```
 C:\Users\tmcin
 ```
@@ -28,7 +28,7 @@ and I want to store the repo in...
 ```
 C:\Users\tmcin\repos
 ```
-Then I will enter this in the terminal
+Then I will enter 'change directory' followed by the folder name
 ```
 cd repos
 ```
