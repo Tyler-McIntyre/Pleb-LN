@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../app_colors.dart';
+import '../util/app_colors.dart';
 import 'create_invoice.dart';
-import 'curve_clipper.dart';
+import 'Widgets/curve_clipper.dart';
 
 class Receive extends StatelessWidget {
   const Receive({Key? key}) : super(key: key);
@@ -26,7 +25,7 @@ class Receive extends StatelessWidget {
                     child: Text(
                       'How\'d you like to receive?:',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                      style: TextStyle(color: AppColors.white, fontSize: 25),
                     ),
                   ),
                   Row(
@@ -68,7 +67,7 @@ class Receive extends StatelessWidget {
                               'New invoice',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             ),
                           ],
@@ -76,14 +75,6 @@ class Receive extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const CreateInvoice(),
-                          //   ),
-                          // );
-
-                          //Show the snackbar
                           const snackBar = SnackBar(
                             content: Text(
                               'Coming Soon -> LNURL!',
@@ -98,7 +89,7 @@ class Receive extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           elevation: 3,
                           fixedSize: const Size(175, 100),
-                          primary: Colors.black,
+                          primary: AppColors.black,
                           onPrimary: AppColors.white,
                           textStyle: const TextStyle(fontSize: 20),
                           side: const BorderSide(
@@ -121,7 +112,7 @@ class Receive extends StatelessWidget {
                             Text(
                               'LNURL',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.white,
                               ),
                             )
                           ],

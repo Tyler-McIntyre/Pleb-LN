@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../app_colors.dart';
-import '../buttons.dart';
+import '../util/app_colors.dart';
+import 'Widgets/buttons.dart';
 
 class AppSettings extends StatefulWidget {
   const AppSettings({Key? key}) : super(key: key);
@@ -11,7 +11,7 @@ class AppSettings extends StatefulWidget {
 
 class _AppSettingsState extends State<AppSettings> {
   final Map<Icon, String> listTileInfo = {
-    //* Decide if we need this option if we have the node config
+    //TODO: Decide if we need this option if we have the node config
     // const Icon(Icons.computer): 'Nody_Montana',
     // const Icon(Icons.insert_drive_file_outlined): 'Node Info',
     //*
@@ -20,7 +20,7 @@ class _AppSettingsState extends State<AppSettings> {
     const Icon(Icons.lock): 'Security',
     const Icon(Icons.verified): 'Sign or verify message',
     const Icon(Icons.info_outline): 'About'
-    //* Less Important options
+    //* Less Important options, these will be done after all other pages are finished
     // const Icon(Icons.currency_bitcoin): 'Currency',
     // const Icon(Icons.language): 'Language',
     // const Icon(Icons.brush): 'Theme',
@@ -30,7 +30,7 @@ class _AppSettingsState extends State<AppSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.black,
       appBar: AppBar(
         leadingWidth: 70,
         leading: const AppBarIconButton(),
