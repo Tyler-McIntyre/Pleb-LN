@@ -23,8 +23,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future init() async {
     //TODO: Remove me & add as a script
-    //* This serves as a temporary workaround until a script is created to
-    //* wipe the emulator data. Uncomment the line below & save, restart the app, comment it back out & save
+    //* This serves as a temporary workaround until a script is created to wipe the emulator data.
+    //* Uncomment the line below & save, restart the app, comment it back out & save
     // await SecureStorage.wipeStorage();
     final nodeIsConfigured =
         await SecureStorage.readValue('isConfigured') ?? 'false';
