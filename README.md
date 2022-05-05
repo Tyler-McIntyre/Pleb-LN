@@ -46,15 +46,16 @@ I should then be in my repos folder where I will run the line below...
 ```
 git clone https://github.com/Tyler-McIntyre/FireBolt
 ```
-Git will check if you have permission to clone this repo by having you login to GitHub and confim your identity
+Git will check if you have permission to clone this repo by having you login to GitHub and confim your identity.
+#### HEADS UP. Sometimes the window prompting you for your credentials will be hidden behind your other open windows on the screen!!!
 
 ### Open Visual Studio Code
 File >> Open Folder >> Navigate to the cloned repo and select the folder
 
-### Run 'NPM install'
+### Build the project dependencies 
 In the toolbar click... Terminal >> New Terminal and enter...
 ```
-NPM install
+NPM run build
 ```
 This will install the dependencies for the app
 
