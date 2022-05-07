@@ -1,4 +1,4 @@
-# firebolt
+# Firebolt
 
 
 ## Prerequisites for instructions below
@@ -82,4 +82,7 @@ to run the project without the debugger or open 'Run' in the top toolbar and sel
 ## The backlog
 A running list of tasks that need to be completed for this application. Anyone is welcome to edit it. If you see a task you'd like to work on, just add your name and it's yours! If there's any questions (which there will be a lot of) just ping me on discord in the #firebolt channel.
 https://docs.google.com/spreadsheets/d/1LSVl5OSKyrjWt00WewR-J-PChMhZRTFUALc_x9mfIak/edit?usp=sharing
+
+#### Design related items
+Since we do not have a designated designer, and we are the users of this app. It would most likely be a good idea to bring UI related design tasks to the team to have a conversation about the direction we'd like to take with whatever the given task might be.
 
