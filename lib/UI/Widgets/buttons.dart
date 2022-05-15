@@ -1,7 +1,7 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import '../../util/app_assets.dart';
-import '../node_config.dart';
+import '../node_config_screen.dart';
 import '../../util/app_colors.dart';
 
 class LinkNodeButton extends StatelessWidget {
@@ -32,7 +32,7 @@ class LinkNodeButton extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const NodeConfig(),
+                builder: (context) => const NodeConfigScreen(),
               ),
             );
           },
