@@ -1,10 +1,10 @@
-import 'package:firebolt/UI/receive.dart';
+import 'package:firebolt/UI/receive_screen.dart';
 import 'package:flutter/material.dart';
 import '../../database/secure_storage.dart';
 import '../../models/balance.dart';
 import '../../util/app_colors.dart';
 import 'curve_clipper.dart';
-import '../node_config.dart';
+import '../node_config_screen.dart';
 
 class DashboardHeader extends StatefulWidget {
   const DashboardHeader({Key? key}) : super(key: key);
@@ -226,7 +226,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const Receive(),
+                          builder: (context) => const ReceiveScreen(),
                         ),
                       );
                     },
@@ -267,7 +267,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const NodeConfig(),
+                          builder: (context) => const NodeConfigScreen(),
                         ),
                       );
                     },

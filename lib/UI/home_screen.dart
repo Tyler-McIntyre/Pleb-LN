@@ -2,8 +2,8 @@ import 'package:firebolt/database/secure_storage.dart';
 import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
 import 'Widgets/buttons.dart';
-import 'app_settings.dart';
-import 'dashboard.dart';
+import 'app_settings_screen.dart';
+import 'dashboard_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -94,7 +94,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AppSettings(),
+                        builder: (context) => const AppSettingsScreen(),
                       ),
                     );
                   },
@@ -111,7 +111,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   Widget child;
                   if (snapshot.hasData) {
                     //* If the node is configured display the dashboard
-                    child = const Dashboard();
+                    child = const DashboardScreen();
                   } else if (snapshot.hasError) {
                     //* If the there is an error loading the node, display error
                     child = Column(

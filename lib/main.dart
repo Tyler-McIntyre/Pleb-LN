@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'UI/home.dart';
+import 'UI/home_screen.dart';
 import 'util/app_colors.dart';
 
 void main() {
@@ -33,7 +33,7 @@ class _FireBoltState extends State<FireBolt> {
           surface: AppColors.yellow,
         ),
       ),
-      home: const Home(),
+      home: const HomeScreen(),
     );
   }
 }

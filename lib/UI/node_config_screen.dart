@@ -1,4 +1,4 @@
-import 'package:firebolt/UI/home.dart';
+import 'package:firebolt/UI/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../util/app_colors.dart';
@@ -7,15 +7,15 @@ import '../models/lnd_connect.dart';
 import 'Widgets/curve_clipper.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
-class NodeConfig extends StatefulWidget {
-  const NodeConfig({Key? key}) : super(key: key);
+class NodeConfigScreen extends StatefulWidget {
+  const NodeConfigScreen({Key? key}) : super(key: key);
   static late LNDConnect lndConnectParams;
 
   @override
-  State<NodeConfig> createState() => _NodeConfigState();
+  State<NodeConfigScreen> createState() => _NodeConfigScreenState();
 }
 
-class _NodeConfigState extends State<NodeConfig> {
+class _NodeConfigScreenState extends State<NodeConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,19 +25,19 @@ class _NodeConfigState extends State<NodeConfig> {
         title: const Text('Node Configuration'),
         centerTitle: true,
       ),
-      body: NodeConfigForm(),
+      body: NodeConfigScreenForm(),
     );
   }
 }
 
-class NodeConfigForm extends StatefulWidget {
-  const NodeConfigForm({Key? key}) : super(key: key);
+class NodeConfigScreenForm extends StatefulWidget {
+  const NodeConfigScreenForm({Key? key}) : super(key: key);
 
   @override
-  State<NodeConfigForm> createState() => _NodeConfigFormState();
+  State<NodeConfigScreenForm> createState() => _NodeConfigScreenFormState();
 }
 
-class _NodeConfigFormState extends State<NodeConfigForm> {
+class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   static final _formKey = GlobalKey<FormState>();
   TextEditingController nicknameController = TextEditingController();
   TextEditingController nodeInterfaceController = TextEditingController();
@@ -239,7 +239,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               height: 100.0,
               width: MediaQuery.of(context).size.width,
               child: SizedBox(
-                child: NodeConfigButtonBar(),
+                child: NodeConfigScreenButtonBar(),
               ),
             ),
           )
@@ -263,7 +263,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
     }
   }
 
-  NodeConfigButtonBar() {
+  NodeConfigScreenButtonBar() {
     Map<String, TextEditingController> configSettings = {
       'nickname': nicknameController,
       'nodeInterface': nodeInterfaceController,
@@ -397,7 +397,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const Home(),
+                  builder: (context) => const HomeScreen(),
                 ),
               );
             }

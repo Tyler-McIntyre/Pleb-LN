@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
-import 'create_invoice.dart';
+import 'create_invoice_screen.dart';
 import 'Widgets/curve_clipper.dart';
 
-class Receive extends StatelessWidget {
-  const Receive({Key? key}) : super(key: key);
+class ReceiveScreen extends StatelessWidget {
+  const ReceiveScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class Receive extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
                     child: Text(
-                      'How\'d you like to receive?:',
+                      'How\'d you like to ReceiveScreen?:',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: AppColors.white, fontSize: 25),
                     ),
@@ -36,7 +36,7 @@ class Receive extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const CreateInvoice(),
+                              builder: (context) => const CreateInvoiceScreen(),
                             ),
                           );
                         },
