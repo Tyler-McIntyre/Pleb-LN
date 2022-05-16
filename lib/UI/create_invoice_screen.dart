@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
 
-class CreateInvoice extends StatefulWidget {
-  const CreateInvoice({Key? key}) : super(key: key);
+class CreateInvoiceScreen extends StatefulWidget {
+  const CreateInvoiceScreen({Key? key}) : super(key: key);
 
   @override
-  State<CreateInvoice> createState() => _CreateInvoiceState();
+  State<CreateInvoiceScreen> createState() => _CreateInvoiceScreenState();
 }
 
-class _CreateInvoiceState extends State<CreateInvoice> {
+class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,19 +19,20 @@ class _CreateInvoiceState extends State<CreateInvoice> {
         title: const Text('Create Invoice'),
         centerTitle: true,
       ),
-      body: CreateInvoiceForm(),
+      body: CreateInvoiceScreenForm(),
     );
   }
 }
 
-class CreateInvoiceForm extends StatefulWidget {
-  const CreateInvoiceForm({Key? key}) : super(key: key);
+class CreateInvoiceScreenForm extends StatefulWidget {
+  const CreateInvoiceScreenForm({Key? key}) : super(key: key);
 
   @override
-  State<CreateInvoiceForm> createState() => _CreateInvoiceFormState();
+  State<CreateInvoiceScreenForm> createState() =>
+      _CreateInvoiceScreenFormState();
 }
 
-class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
+class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
   static final _formKey = GlobalKey<FormState>();
   static bool routeHintsIsSwitched = false;
   static bool ampInvoiceIsSwitched = false;
@@ -182,7 +183,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
               height: 100.0,
               width: MediaQuery.of(context).size.width,
               child: SizedBox(
-                child: CreateInvoiceButtonBar(),
+                child: CreateInvoiceScreenButtonBar(),
               ),
             ),
           )
@@ -191,7 +192,7 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
     );
   }
 
-  CreateInvoiceButtonBar() {
+  CreateInvoiceScreenButtonBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

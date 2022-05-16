@@ -1,45 +1,49 @@
 class LNDConnect {
-  String? host;
-  String? port;
-  String? macaroonHexFormat;
+  late String host;
+  late String port;
+  late String macaroonHexFormat;
+  bool useTor = false;
 
   static Map<String, RegExp> _lndConnectParsePatterns = {
     'findHost': RegExp('.*(?=:)'), //Replace LNDConnect with https?
     'findPort': RegExp('(?<=:)[0-9]*'),
-    'findMacaroon': RegExp('(?<=macaroon=).*') //convert this to hex
+    'findMacaroon': RegExp('(?<=macaroon=).*(?<=&)') //convert this to hex
   };
 
   static Future<LNDConnect> parseConnectionString(
       String connectionString) async {
     //create a new instance of LNDConnect
     LNDConnect lndConnectParams = LNDConnect();
-    RegExpMatch? hostMatch =
-        _lndConnectParsePatterns['findHost']?.firstMatch(connectionString);
-    RegExpMatch? portMatch =
-        _lndConnectParsePatterns['findPort']?.firstMatch(connectionString);
-    RegExpMatch? macaroonMatch =
-        _lndConnectParsePatterns['findMacaroon']?.firstMatch(connectionString);
+    String? hostMatch = _lndConnectParsePatterns['findHost']
+        ?.firstMatch(connectionString)!
+        .group(0);
+    String? portMatch = _lndConnectParsePatterns['findPort']
+        ?.allMatches(connectionString)
+        .last
+        .group(0);
+    String? macaroonMatch = _lndConnectParsePatterns['findMacaroon']
+        ?.firstMatch(connectionString)!
+        .group(0);
 
     //iterate through each regex pattern and set the LNDConnect instance properties
     hostMatch != null
-        ? lndConnectParams.host = hostMatch.input
-        : lndConnectParams.host = null;
+        ? lndConnectParams.host = _formatHost(hostMatch)
+        : lndConnectParams.host = '';
     portMatch != null
-        ? lndConnectParams.host = portMatch.input
-        : lndConnectParams.host = null;
+        ? lndConnectParams.port = portMatch
+        : lndConnectParams.port = '';
     macaroonMatch != null
-        ? lndConnectParams.host = _convertToHex(macaroonMatch.input).toString()
-        : lndConnectParams.host = null;
+        ? lndConnectParams.macaroonHexFormat = _formatMacaroon(macaroonMatch)
+        : lndConnectParams.macaroonHexFormat = '';
 
     return lndConnectParams;
   }
 
-  static String _convertToHex(String macaroon) {
-    String macaroonAsHexString = '';
-    for (int i = 0; i <= macaroon.length - 8; i += 8) {
-      final hex = macaroon.substring(i, i + 8);
-      macaroonAsHexString = int.parse(hex, radix: 36).toString();
-    }
-    return macaroonAsHexString;
+  static _formatHost(String host) {
+    return host.replaceFirst('lndconnect', 'https');
+  }
+
+  static _formatMacaroon(String macaroon) {
+    return macaroon.replaceFirst('&', '=');
   }
 }

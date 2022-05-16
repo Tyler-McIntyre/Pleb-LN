@@ -5,14 +5,14 @@ import 'Widgets/buttons.dart';
 import 'app_settings_screen.dart';
 import 'dashboard_screen.dart';
 
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String nodeIsConfigured = '';
 
   @override
@@ -42,7 +42,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     () => 'Data Loaded',
   );
 
-  //* Home screen animations
+  //* HomeScreen screen animations
   late final AnimationController _iconController = AnimationController(
     duration: const Duration(seconds: 3),
     vsync: this,
@@ -69,6 +69,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _iconController.dispose();
     super.dispose();
   }
+
+  //TODO: If nodeConfigured = true, fetch the node info
 
   @override
   Widget build(BuildContext context) {

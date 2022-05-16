@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
 import 'Widgets/buttons.dart';
 
-class AppSettings extends StatefulWidget {
-  const AppSettings({Key? key}) : super(key: key);
+class AppSettingsScreen extends StatefulWidget {
+  const AppSettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<AppSettings> createState() => _AppSettingsState();
+  State<AppSettingsScreen> createState() => _AppSettingsScreenState();
 }
 
-class _AppSettingsState extends State<AppSettings> {
+class _AppSettingsScreenState extends State<AppSettingsScreen> {
   final Map<Icon, String> listTileInfo = {
     //TODO: Decide if we need this option if we have the node config
     // const Icon(Icons.computer): 'Nody_Montana',

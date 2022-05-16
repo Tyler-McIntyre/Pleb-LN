@@ -46,6 +46,8 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   TextEditingController macaroonController = TextEditingController();
   static bool useTorIsSwitched = false;
   late String qrCode;
+  LNDConnect connectionParams = LNDConnect();
+  late Map<String, TextEditingController> configSettings;
 
   @override
   void initState() {
@@ -55,11 +57,11 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
 
   Future init() async {
     final String nickname = await SecureStorage.readValue('nickname') ?? '';
-    final String nodeInterface =
-        await SecureStorage.readValue('nodeInterface') ?? '';
+    final String nodeInterface = 'LND';
     final String host = await SecureStorage.readValue('host') ?? '';
     final String restPort = await SecureStorage.readValue('restPort') ?? '';
     final String macaroon = await SecureStorage.readValue('macaroon') ?? '';
+    final String useTor = await SecureStorage.readValue('useTor') ?? 'false';
 
     setState(() {
       nicknameController.text = nickname;
@@ -67,7 +69,14 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
       hostController.text = host;
       restPortController.text = restPort;
       macaroonController.text = macaroon;
-      //TODO: Add useTor here
+      useTorIsSwitched = useTor.toLowerCase() == 'true' ? true : false;
+      configSettings = {
+        'nickname': nicknameController,
+        'nodeInterface': nodeInterfaceController,
+        'host': hostController,
+        'restPort': restPortController,
+        'macaroon': macaroonController,
+      };
     });
   }
 
@@ -109,12 +118,27 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
                         ),
                         //*Interface
                         TextFormField(
+                          enabled: false,
                           controller: nodeInterfaceController,
                           cursorColor: AppColors.white,
                           decoration: const InputDecoration(
-                            label: Text(
-                              'Node Interface',
-                              style: TextStyle(color: AppColors.white),
+                            label: Text.rich(
+                              TextSpan(
+                                text: 'Node Interface ',
+                                children: [
+                                  TextSpan(
+                                    text: '(V0.1.0 supports LND only)',
+                                    style: TextStyle(
+                                      color: AppColors.grey,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                                style: TextStyle(
+                                  color: AppColors.white,
+                                  fontSize: 21,
+                                ),
+                              ),
                             ),
                             border: UnderlineInputBorder(),
                             hintStyle: TextStyle(color: AppColors.grey),
@@ -248,6 +272,21 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
     );
   }
 
+  void saveUserSettings() async {
+    String userTorSetting = 'false';
+    if (useTorIsSwitched) {
+      userTorSetting = 'true';
+      connectionParams.useTor = true;
+    }
+
+    for (MapEntry<String, TextEditingController> entry
+        in configSettings.entries) {
+      await SecureStorage.writeValue(entry.key, entry.value.text);
+    }
+    await SecureStorage.writeValue('useTor', userTorSetting);
+    await SecureStorage.writeValue('isConfigured', 'true');
+  }
+
   Future<void> scanQrCode() async {
     try {
       String qrCode = await FlutterBarcodeScanner.scanBarcode(
@@ -264,35 +303,43 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   }
 
   NodeConfigScreenButtonBar() {
-    Map<String, TextEditingController> configSettings = {
-      'nickname': nicknameController,
-      'nodeInterface': nodeInterfaceController,
-      'host': hostController,
-      'restPort': restPortController,
-      'macaroon': macaroonController,
-    };
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         TextButton(
           onPressed: () async {
             //Scan the QRCode
-            scanQrCode();
-            String qrCodeResponse = qrCode;
+            await scanQrCode();
 
+            String qrCodeResponse = qrCode;
             //TODO: Fix this error handling
             if (!qrCodeResponse.contains('Error')) {
               //Parse the raw data
-              LNDConnect connectionParams =
+              connectionParams =
                   await LNDConnect.parseConnectionString(qrCodeResponse);
+
+              //TODO: Move to a function?
+              if (connectionParams.host == '' ||
+                  connectionParams.port == '' ||
+                  connectionParams.macaroonHexFormat == '') {
+                //Show the snackbar
+                const snackBar = SnackBar(
+                  content: Text(
+                    'Error parsing the LNDConfig',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  backgroundColor: (AppColors.redPrimary),
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
 
               //set the controller text states
               setState(() {
-                hostController.text = connectionParams.host ?? '';
-                restPortController.text = connectionParams.port ?? '';
-                macaroonController.text =
-                    connectionParams.macaroonHexFormat ?? '';
+                hostController.text = connectionParams.host;
+                restPortController.text = connectionParams.port;
+                macaroonController.text = connectionParams.macaroonHexFormat;
               });
             }
           },
@@ -330,7 +377,6 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           onPressed: () {
             setState(() {
               nicknameController.clear();
-              nodeInterfaceController.clear();
               hostController.clear();
               restPortController.clear();
               macaroonController.clear();
@@ -372,16 +418,10 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              for (MapEntry<String, TextEditingController> entry
-                  in configSettings.entries) {
-                await SecureStorage.writeValue(entry.key, entry.value.text);
-              }
+              //TODO: Check if the save was successful
+              saveUserSettings();
 
-              await SecureStorage.writeValue('isConfigured', 'true');
-              //TODO: Save 'useTor' value here
-
-              //TODO: Check if the save was successful and display the appropriate snackbar message
-              //Show the snackbar
+              //TODO: display the appropriate snackbar message based on the save result
               const snackBar = SnackBar(
                 content: Text(
                   'Node Saved!',
