@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'UI/home_screen.dart';
 import 'util/app_colors.dart';
+import 'util/my_http_overrides .dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
+
   runApp(const FireBolt());
 }
 
