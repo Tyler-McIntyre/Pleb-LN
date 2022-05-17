@@ -1,5 +1,5 @@
 import 'package:firebolt/UI/receive_screen.dart';
-import 'package:firebolt/models/channel_balance.dart';
+import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:firebolt/util/restapi.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
@@ -34,16 +34,17 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     });
   }
 
-  Future<ChannelBalance> _nodeBalance() async {
+  Future<BlockchainBalance> _nodeBalance() async {
     RestApi api = RestApi();
     //TODO: Fetch the current exchange rate
     double currentBtcExchangeRate = 40000;
-    ChannelBalance result = await api.getLightningBalance();
+    BlockchainBalance result = await api.getBlockchainBalance();
+    String totalBalance = result.totalBalance;
     balanceWidgets = [
       Text.rich(
         TextSpan(
             text: MoneyFormatter(
-              amount: int.parse(result.balance).toDouble(),
+              amount: int.parse(totalBalance).toDouble(),
             ).output.withoutFractionDigits,
             children: [
               TextSpan(
@@ -66,14 +67,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
               size: 43,
             ),
           ),
-          TextSpan(text: '${(int.parse(result.balance) / 10000000)}'),
+          TextSpan(text: '${(int.parse(totalBalance) / 10000000)}'),
         ]),
         style: TextStyle(color: AppColors.white, fontSize: 36),
       ),
       //balance in bitcoin / the current exchange rate
       Text(
         (MoneyFormatter(
-                amount: ((int.parse(result.balance) / 10000000) *
+                amount: ((int.parse(totalBalance) / 10000000) *
                     currentBtcExchangeRate))
             .output
             .symbolOnLeft),
@@ -110,10 +111,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        FutureBuilder<ChannelBalance>(
+                        FutureBuilder<BlockchainBalance>(
                           future: _nodeBalance(),
                           builder: (BuildContext context,
-                              AsyncSnapshot<ChannelBalance> snapshot) {
+                              AsyncSnapshot<BlockchainBalance> snapshot) {
                             List<Widget> children;
                             if (snapshot.hasData) {
                               children = [
@@ -136,14 +137,27 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                               ];
                             } else if (snapshot.hasError) {
                               children = <Widget>[
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red,
-                                  size: 60,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: Text('Error: ${snapshot.error}'),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.25,
+                                  child: Column(
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red,
+                                        size: 40,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 16),
+                                        child: Text(
+                                          'Error: ${snapshot.error}',
+                                          style: TextStyle(
+                                              color: AppColors.redPrimary),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 )
                               ];
                             } else {

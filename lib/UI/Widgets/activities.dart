@@ -155,7 +155,7 @@ class _ActivitiesState extends State<Activities> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height / 1.25,
       child: DefaultTabController(
         length: _tabs.length,
         child: Scaffold(
@@ -216,7 +216,7 @@ class _ActivitiesState extends State<Activities> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 3),
                     sliver: SliverFixedExtentList(
-                      itemExtent: 1000,
+                      itemExtent: 470,
                       delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                           return ListTileTheme(

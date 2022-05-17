@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebolt/database/secure_storage.dart';
+import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:http/http.dart' as http;
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
@@ -8,9 +9,14 @@ import '../models/payment.dart';
 import '../models/payment_response.dart';
 
 class RestApi {
-  Future<ChannelBalance> getLightningBalance() async {
+  Future<ChannelBalance> getChannelsBalance() async {
     String response = await _getRequest('/v1/balance/channels');
     return ChannelBalance.fromJson(jsonDecode(response));
+  }
+
+  Future<BlockchainBalance> getBlockchainBalance() async {
+    String response = await _getRequest('/v1/balance/blockchain');
+    return BlockchainBalance.fromJson(jsonDecode(response));
   }
 
   Future<PaymentResponse> payLightningInvoice(Payment data) async {
