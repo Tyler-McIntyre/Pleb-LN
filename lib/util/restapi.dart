@@ -8,21 +8,9 @@ import '../models/payment.dart';
 import '../models/payment_response.dart';
 
 class RestApi {
-  //OnChain balance /v1/balance/blockchain
-  //Get open channels /v1/channels
-  ///Lighting activity /v1/channels/transactions
-
-  // channel policy /v1/chanpolicy
-  // Node info GET /v1/getinfo
   Future<ChannelBalance> getLightningBalance() async {
     String response = await _getRequest('/v1/balance/channels');
     return ChannelBalance.fromJson(jsonDecode(response));
-  }
-
-  Future<void> getTransactions() async {
-    String response = await _getRequest('/v1/transactions');
-    print(response);
-    // return ChannelBalance.fromJson(jsonDecode(response));
   }
 
   Future<PaymentResponse> payLightningInvoice(Payment data) async {

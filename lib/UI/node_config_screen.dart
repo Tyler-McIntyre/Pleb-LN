@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebolt/UI/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,13 +41,13 @@ class NodeConfigScreenForm extends StatefulWidget {
 
 class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   static final _formKey = GlobalKey<FormState>();
+  static bool useTorIsSwitched = false;
+  late String qrCode;
   TextEditingController nicknameController = TextEditingController();
   TextEditingController nodeInterfaceController = TextEditingController();
   TextEditingController hostController = TextEditingController();
   TextEditingController restPortController = TextEditingController();
   TextEditingController macaroonController = TextEditingController();
-  static bool useTorIsSwitched = false;
-  late String qrCode;
   LNDConnect connectionParams = LNDConnect();
   late Map<String, TextEditingController> configSettings;
 
@@ -56,8 +58,8 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   }
 
   Future init() async {
-    final String nickname = await SecureStorage.readValue('nickname') ?? '';
     final String nodeInterface = 'LND';
+    final String nickname = await SecureStorage.readValue('nickname') ?? '';
     final String host = await SecureStorage.readValue('host') ?? '';
     final String restPort = await SecureStorage.readValue('restPort') ?? '';
     final String macaroon = await SecureStorage.readValue('macaroon') ?? '';
@@ -93,160 +95,11 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
               color: AppColors.black,
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  padding: const EdgeInsets.only(top: 10),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width / 1.1,
                     child: Column(
-                      children: [
-                        //*Nickname (optional)
-                        TextFormField(
-                          controller: nicknameController,
-                          cursorColor: AppColors.white,
-                          decoration: const InputDecoration(
-                            label: Text(
-                              'Nickname (Optional)',
-                              style: TextStyle(color: AppColors.white),
-                            ),
-                            border: UnderlineInputBorder(),
-                            hintStyle: TextStyle(color: AppColors.grey),
-                            hintText: 'Nody_Montana',
-                          ),
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontSize: 20,
-                          ),
-                        ),
-                        //*Interface
-                        TextFormField(
-                          enabled: false,
-                          controller: nodeInterfaceController,
-                          cursorColor: AppColors.white,
-                          decoration: const InputDecoration(
-                            label: Text.rich(
-                              TextSpan(
-                                text: 'Node Interface ',
-                                children: [
-                                  TextSpan(
-                                    text: '(V0.1.0 supports LND only)',
-                                    style: TextStyle(
-                                      color: AppColors.grey,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                                style: TextStyle(
-                                  color: AppColors.white,
-                                  fontSize: 21,
-                                ),
-                              ),
-                            ),
-                            border: UnderlineInputBorder(),
-                            hintStyle: TextStyle(color: AppColors.grey),
-                            hintText: 'lnd',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your interface';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontSize: 20,
-                          ),
-                        ),
-                        //*Host
-                        TextFormField(
-                          controller: hostController,
-                          cursorColor: AppColors.white,
-                          decoration: const InputDecoration(
-                            label: Text(
-                              'Host',
-                              style: TextStyle(color: AppColors.white),
-                            ),
-                            border: UnderlineInputBorder(),
-                            hintStyle: TextStyle(color: AppColors.grey),
-                            hintText: 'https://...',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter the host';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontSize: 20,
-                          ),
-                        ),
-                        //*REST port
-                        TextFormField(
-                          controller: restPortController,
-                          cursorColor: AppColors.white,
-                          decoration: const InputDecoration(
-                            label: Text(
-                              'REST Port',
-                              style: TextStyle(color: AppColors.white),
-                            ),
-                            border: UnderlineInputBorder(),
-                            hintStyle: TextStyle(color: AppColors.grey),
-                            hintText: '8080',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter the REST port';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontSize: 20,
-                          ),
-                        ),
-                        //*Macaroon
-                        TextFormField(
-                          controller: macaroonController,
-                          cursorColor: AppColors.white,
-                          decoration: const InputDecoration(
-                            label: Text(
-                              'Macaroon (Hex Format)',
-                              style: TextStyle(color: AppColors.white),
-                            ),
-                            border: UnderlineInputBorder(),
-                            hintStyle: TextStyle(color: AppColors.grey),
-                            hintText: '020103...',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter the macaroon in hex format';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(
-                            color: AppColors.orange,
-                            fontSize: 20,
-                          ),
-                        ),
-                        //* Use Tor
-                        SwitchListTile(
-                          title: const Text(
-                            'Use Tor',
-                            style: TextStyle(
-                              color: AppColors.white,
-                            ),
-                          ),
-                          value: useTorIsSwitched,
-                          onChanged: (bool value) {
-                            setState(() {
-                              useTorIsSwitched = value;
-                            });
-                          },
-                          secondary: const Icon(
-                            Icons.private_connectivity,
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ],
+                      children: _configFormFields(),
                     ),
                   ),
                 ),
@@ -263,28 +116,13 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
               height: 100.0,
               width: MediaQuery.of(context).size.width,
               child: SizedBox(
-                child: NodeConfigScreenButtonBar(),
+                child: _buttonBar(),
               ),
             ),
           )
         ],
       ),
     );
-  }
-
-  void saveUserSettings() async {
-    String userTorSetting = 'false';
-    if (useTorIsSwitched) {
-      userTorSetting = 'true';
-      connectionParams.useTor = true;
-    }
-
-    for (MapEntry<String, TextEditingController> entry
-        in configSettings.entries) {
-      await SecureStorage.writeValue(entry.key, entry.value.text);
-    }
-    await SecureStorage.writeValue('useTor', userTorSetting);
-    await SecureStorage.writeValue('isConfigured', 'true');
   }
 
   Future<void> scanQrCode() async {
@@ -302,46 +140,168 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
     }
   }
 
-  NodeConfigScreenButtonBar() {
+  _configFormFields() {
+    return [
+      //*Nickname (optional)
+      TextFormField(
+        controller: nicknameController,
+        cursorColor: AppColors.white,
+        decoration: const InputDecoration(
+          label: Text(
+            'Nickname (Optional)',
+            style: TextStyle(color: AppColors.white),
+          ),
+          border: UnderlineInputBorder(),
+          hintStyle: TextStyle(color: AppColors.grey),
+          hintText: 'Nody_Montana',
+        ),
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 20,
+        ),
+      ),
+      //*Interface
+      TextFormField(
+        enabled: false,
+        controller: nodeInterfaceController,
+        cursorColor: AppColors.white,
+        decoration: const InputDecoration(
+          label: Text.rich(
+            TextSpan(
+              text: 'Node Interface ',
+              children: [
+                TextSpan(
+                  text: '(V0.1.0 supports LND only)',
+                  style: TextStyle(
+                    color: AppColors.grey,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+              style: TextStyle(
+                color: AppColors.white,
+                fontSize: 21,
+              ),
+            ),
+          ),
+          border: UnderlineInputBorder(),
+          hintStyle: TextStyle(color: AppColors.grey),
+          hintText: 'lnd',
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your nodes interface';
+          }
+          return null;
+        },
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 20,
+        ),
+      ),
+      //*Host
+      TextFormField(
+        controller: hostController,
+        cursorColor: AppColors.white,
+        decoration: const InputDecoration(
+          label: Text(
+            'Host',
+            style: TextStyle(color: AppColors.white),
+          ),
+          border: UnderlineInputBorder(),
+          hintStyle: TextStyle(color: AppColors.grey),
+          hintText: 'https://...',
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter the host';
+          }
+          return null;
+        },
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 20,
+        ),
+      ),
+      //*REST port
+      TextFormField(
+        controller: restPortController,
+        cursorColor: AppColors.white,
+        decoration: const InputDecoration(
+          label: Text(
+            'REST Port',
+            style: TextStyle(color: AppColors.white),
+          ),
+          border: UnderlineInputBorder(),
+          hintStyle: TextStyle(color: AppColors.grey),
+          hintText: '8080',
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter the REST port';
+          }
+          return null;
+        },
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 20,
+        ),
+      ),
+      //*Macaroon
+      TextFormField(
+        controller: macaroonController,
+        cursorColor: AppColors.white,
+        decoration: const InputDecoration(
+          label: Text(
+            'Macaroon (Hex Format)',
+            style: TextStyle(color: AppColors.white),
+          ),
+          border: UnderlineInputBorder(),
+          hintStyle: TextStyle(color: AppColors.grey),
+          hintText: '020103...',
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter the macaroon in hex format';
+          }
+          return null;
+        },
+        style: const TextStyle(
+          color: AppColors.orange,
+          fontSize: 20,
+        ),
+      ),
+      //* Use Tor
+      SwitchListTile(
+        title: const Text(
+          'Use Tor',
+          style: TextStyle(
+            color: AppColors.white,
+          ),
+        ),
+        value: useTorIsSwitched,
+        onChanged: (bool value) {
+          setState(() {
+            useTorIsSwitched = value;
+          });
+        },
+        secondary: const Icon(
+          Icons.private_connectivity,
+          color: AppColors.white,
+        ),
+      )
+    ];
+  }
+
+  _buttonBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         TextButton(
           onPressed: () async {
-            //Scan the QRCode
             await scanQrCode();
-
-            String qrCodeResponse = qrCode;
-            //TODO: Fix this error handling
-            if (!qrCodeResponse.contains('Error')) {
-              //Parse the raw data
-              connectionParams =
-                  await LNDConnect.parseConnectionString(qrCodeResponse);
-
-              //TODO: Move to a function?
-              if (connectionParams.host == '' ||
-                  connectionParams.port == '' ||
-                  connectionParams.macaroonHexFormat == '') {
-                //Show the snackbar
-                const snackBar = SnackBar(
-                  content: Text(
-                    'Error parsing the LNDConfig',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  backgroundColor: (AppColors.redPrimary),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
-
-              //set the controller text states
-              setState(() {
-                hostController.text = connectionParams.host;
-                restPortController.text = connectionParams.port;
-                macaroonController.text = connectionParams.macaroonHexFormat;
-              });
-            }
+            String qrCodeRawData = qrCode;
+            _setConfigFormFields(qrCodeRawData);
           },
           style: ElevatedButton.styleFrom(
             elevation: 3,
@@ -376,6 +336,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         TextButton(
           onPressed: () {
             setState(() {
+              //reset form fields
               nicknameController.clear();
               hostController.clear();
               restPortController.clear();
@@ -418,28 +379,39 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              //TODO: Check if the save was successful
-              saveUserSettings();
+              bool saveWasSuccessful = await saveUserSettings();
 
-              //TODO: display the appropriate snackbar message based on the save result
-              const snackBar = SnackBar(
-                content: Text(
-                  'Node Saved!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
-                backgroundColor: (AppColors.blueSecondary),
-              );
+              if (saveWasSuccessful) {
+                const snackBar = SnackBar(
+                  content: Text(
+                    'Node Saved!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  backgroundColor: (AppColors.blueSecondary),
+                );
 
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-              //Navigate home
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomeScreen(),
-                ),
-              );
+                //Navigate home
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HomeScreen(),
+                  ),
+                );
+              } else {
+                const snackBar = SnackBar(
+                  content: Text(
+                    'An error occured while trying to save the settings',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  backgroundColor: (AppColors.blueSecondary),
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              }
             }
           },
           style: ElevatedButton.styleFrom(
@@ -476,5 +448,56 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         ),
       ],
     );
+  }
+
+  Future<bool> saveUserSettings() async {
+    String userTorSetting = 'false';
+    if (useTorIsSwitched) {
+      userTorSetting = 'true';
+      connectionParams.useTor = true;
+    }
+    try {
+      for (MapEntry<String, TextEditingController> entry
+          in configSettings.entries) {
+        await SecureStorage.writeValue(entry.key, entry.value.text);
+      }
+      await SecureStorage.writeValue('useTor', userTorSetting);
+      await SecureStorage.writeValue('isConfigured', 'true');
+      return true;
+    } catch (ex) {
+      log('An error occured while saving the node configuration');
+      return false;
+    }
+  }
+
+  void _setConfigFormFields(String qrCodeRawData) async {
+    //TODO: Fix this error handling
+    if (!qrCodeRawData.contains('Error')) {
+      connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
+
+      //TODO: Move to a function?
+      if (connectionParams.host == '' ||
+          connectionParams.port == '' ||
+          connectionParams.macaroonHexFormat == '') {
+        //Show the snackbar
+        const snackBar = SnackBar(
+          content: Text(
+            'Error parsing the LNDConfig',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20),
+          ),
+          backgroundColor: (AppColors.redPrimary),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        //set the controller text states
+        setState(() {
+          hostController.text = connectionParams.host;
+          restPortController.text = connectionParams.port;
+          macaroonController.text = connectionParams.macaroonHexFormat;
+        });
+      }
+    }
   }
 }

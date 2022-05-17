@@ -101,15 +101,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         body: FutureBuilder(
           future: _nodeIsConfigured(),
           builder: (context, AsyncSnapshot<String> snapshot) {
-            Widget child;
+            late Widget child;
             if (snapshot.hasData) {
               if (snapshot.data == 'true') {
                 //* If the node is configured display the dashboard
                 child = const DashboardScreen();
               } else if (snapshot.data == 'false') {
-                child = //* If the node is NOT configured then present an icon on startup
-                    Center(
-                        child: Column(
+                //* If the node is NOT configured then present an icon on startup
+                child = Center(
+                    child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FadeTransition(
@@ -126,30 +126,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ],
                 ));
               }
-            }
-            if (snapshot.data == 'true') {
-              //* If the node is configured display the dashboard
-              child = const DashboardScreen();
-            } else if (snapshot.data == 'false') {
-              child = //* If the node is NOT configured then present an icon on startup
-                  Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FadeTransition(
-                      opacity: _iconAnimation,
-                      child: const LinkNodeButton(),
-                    ),
-                    FadeTransition(
-                      opacity: _textAnimation,
-                      child: const Text(
-                        'Tap the icon to link your node',
-                        style: TextStyle(color: AppColors.white, fontSize: 20),
-                      ),
-                    ),
-                  ],
-                ),
-              );
             } else if (snapshot.hasError) {
               //* If the there is an error loading the node, display error
               child = Column(
