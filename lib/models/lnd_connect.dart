@@ -1,3 +1,5 @@
+import 'package:firebolt/util/restapi.dart';
+
 class LNDConnect {
   late String host;
   late String port;
@@ -33,7 +35,8 @@ class LNDConnect {
         ? lndConnectParams.port = portMatch
         : lndConnectParams.port = '';
     macaroonMatch != null
-        ? lndConnectParams.macaroonHexFormat = _formatMacaroon(macaroonMatch)
+        ? lndConnectParams.macaroonHexFormat =
+            RestApi.base64ToHex(_formatMacaroon(macaroonMatch))
         : lndConnectParams.macaroonHexFormat = '';
 
     return lndConnectParams;
@@ -54,7 +57,7 @@ class LNDConnect {
   //!Move to a DB seed script
   // LNDConnect lndConnectParams = LNDConnect();
   //!Android emulator uses 10.0.2.2 as an alias for localHost
-  // lndConnectParams.host = 'https://10.0.0.2';
+  // lndConnectParams.host = 'https://10.0.2.2';
   // lndConnectParams.port = '8082';
   //!Macaroon is in base64
   // lndConnectParams.macaroonHexFormat =

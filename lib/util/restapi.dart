@@ -53,7 +53,7 @@ class RestApi {
     return Invoice.fromJson(jsonDecode(response));
   }
 
-  String base64ToHex(String source) =>
+  static String base64ToHex(String source) =>
       base64Decode(LineSplitter.split(source).join())
           .map((e) => e.toRadixString(16).padLeft(2, '0'))
           .join();
