@@ -37,7 +37,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
       ),
       body: Center(
         child: Container(
-          margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+          margin: const EdgeInsets.only(top: 10),
           width: MediaQuery.of(context).size.width / 1.2,
           child: ListTileTheme(
             tileColor: AppColors.secondaryBlack,

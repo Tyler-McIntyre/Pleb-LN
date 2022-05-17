@@ -50,7 +50,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                 text: 'sats',
                 style: TextStyle(
                   color: AppColors.white60,
-                  fontSize: 32,
+                  fontSize: 30,
                 ),
               ),
             ]),
@@ -91,21 +91,18 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ClipPath(
           clipper: CurveClipper(),
           child: Container(
-            height: MediaQuery.of(context).size.height * .35,
+            height: MediaQuery.of(context).size.height * .25,
             color: AppColors.black,
             child: Padding(
-              padding: const EdgeInsets.only(top: 16.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      nicknameController.text,
-                      style: const TextStyle(
-                        color: AppColors.white70,
-                        fontSize: 22,
-                      ),
+                  Text(
+                    nicknameController.text,
+                    style: const TextStyle(
+                      color: AppColors.white70,
+                      fontSize: 22,
                     ),
                   ),
                   Padding(
@@ -123,7 +120,6 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                 TextButton(
                                   onPressed: () {
                                     setState(() {
-                                      print(balanceWidgetIndex);
                                       balanceWidgetIndex >=
                                               balanceWidgets.length - 1
                                           ? balanceWidgetIndex = 0
@@ -135,7 +131,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                 Text(
                                   'Tap to convert',
                                   style: TextStyle(
-                                      color: AppColors.grey, fontSize: 20),
+                                      color: AppColors.grey, fontSize: 19),
                                 ),
                               ];
                             } else if (snapshot.hasError) {
@@ -182,7 +178,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         Container(
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * .28,
+              top: MediaQuery.of(context).size.height * .19,
               right: 20.0,
               left: 20.0),
           child: SizedBox(
@@ -191,141 +187,143 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             child: SizedBox(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      //TODO: add the QR scanner function
-                      const snackBar = SnackBar(
-                        content: Text(
-                          'Coming Soon -> Open a channel.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        backgroundColor: (AppColors.blueSecondary),
-                      );
-
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      fixedSize: const Size(100, 71),
-                      primary: AppColors.black,
-                      onPrimary: AppColors.white,
-                      textStyle: const TextStyle(fontSize: 20),
-                      side: const BorderSide(
-                        color: AppColors.green,
-                        width: 1.0,
-                      ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.send,
-                          color: AppColors.white,
-                        ),
-                        Text(
-                          'Send',
-                          style: TextStyle(
-                            color: AppColors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ReceiveScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      fixedSize: const Size(100, 71),
-                      primary: AppColors.black,
-                      onPrimary: AppColors.white,
-                      textStyle: const TextStyle(fontSize: 20),
-                      side: const BorderSide(
-                        color: AppColors.blueSecondary,
-                        width: 1.0,
-                      ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.receipt,
-                          color: AppColors.white,
-                        ),
-                        Text(
-                          'Receive',
-                          style: TextStyle(
-                            color: AppColors.white,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NodeConfigScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 3,
-                      fixedSize: const Size(100, 71),
-                      primary: AppColors.black,
-                      onPrimary: AppColors.white,
-                      textStyle: const TextStyle(fontSize: 20),
-                      side:
-                          const BorderSide(color: AppColors.orange, width: 1.0),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(10),
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.computer,
-                          color: AppColors.white,
-                        ),
-                        Text(
-                          'Node',
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.visible,
-                          style: TextStyle(
-                            color: AppColors.white,
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
+                children: _dashboardButtonBar(),
               ),
             ),
           ),
         )
       ],
     );
+  }
+
+  _dashboardButtonBar() {
+    return [
+      TextButton(
+        onPressed: () {
+          const snackBar = SnackBar(
+            content: Text(
+              'Coming Soon -> Send an invoice.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20),
+            ),
+            backgroundColor: (AppColors.blueSecondary),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 3,
+          fixedSize: const Size(100, 71),
+          primary: AppColors.black,
+          onPrimary: AppColors.white,
+          textStyle: const TextStyle(fontSize: 20),
+          side: const BorderSide(
+            color: AppColors.green,
+            width: 1.0,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.send,
+              color: AppColors.white,
+            ),
+            Text(
+              'Send',
+              style: TextStyle(
+                color: AppColors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+      TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ReceiveScreen(),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 3,
+          fixedSize: const Size(100, 71),
+          primary: AppColors.black,
+          onPrimary: AppColors.white,
+          textStyle: const TextStyle(fontSize: 20),
+          side: const BorderSide(
+            color: AppColors.blueSecondary,
+            width: 1.0,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.receipt,
+              color: AppColors.white,
+            ),
+            Text(
+              'Receive',
+              style: TextStyle(
+                color: AppColors.white,
+              ),
+            )
+          ],
+        ),
+      ),
+      TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NodeConfigScreen(),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 3,
+          fixedSize: const Size(100, 71),
+          primary: AppColors.black,
+          onPrimary: AppColors.white,
+          textStyle: const TextStyle(fontSize: 20),
+          side: const BorderSide(color: AppColors.orange, width: 1.0),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.computer,
+              color: AppColors.white,
+            ),
+            Text(
+              'Node',
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.visible,
+              style: TextStyle(
+                color: AppColors.white,
+              ),
+            )
+          ],
+        ),
+      )
+    ];
   }
 }

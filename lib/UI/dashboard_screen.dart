@@ -16,7 +16,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: ListView(
         children: [
           DashboardHeader(),
-          const Divider(),
           Activities(),
         ],
       ),
