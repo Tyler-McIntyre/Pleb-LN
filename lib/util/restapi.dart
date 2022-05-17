@@ -8,15 +8,25 @@ import '../models/payment.dart';
 import '../models/payment_response.dart';
 
 class RestApi {
+  //OnChain balance /v1/balance/blockchain
+  //Get open channels /v1/channels
+  ///Lighting activity /v1/channels/transactions
+
+  // channel policy /v1/chanpolicy
+  // Node info GET /v1/getinfo
   Future<ChannelBalance> getLightningBalance() async {
     String response = await _getRequest('/v1/balance/channels');
-    print(jsonDecode(response));
     return ChannelBalance.fromJson(jsonDecode(response));
+  }
+
+  Future<void> getTransactions() async {
+    String response = await _getRequest('/v1/transactions');
+    print(response);
+    // return ChannelBalance.fromJson(jsonDecode(response));
   }
 
   Future<PaymentResponse> payLightningInvoice(Payment data) async {
     String response = await _postRequest('/v2/router/send', data.toJson());
-    print(response);
     if (response.contains('SUCCEEDED')) {
       return PaymentResponse('SUCCESS', hackOutThePaymentHash(response));
     } else if (response.contains('error')) {
@@ -75,7 +85,6 @@ class RestApi {
     //     '0201036c6e6402f801030a10c01c88e04f42bb66550b480a5580f1411201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e657261746512047265616400000620a857db5bf3c465433105712d8df2d2dcff300efa662dda470a1a23c5f3234d66';
 
     String url = _getURL(host, port, route);
-    print(url);
     Map<String, String> headers = {
       'Grpc-Metadata-macaroon': macaroon,
       'Content-Type': 'application/json',
@@ -105,7 +114,6 @@ class RestApi {
     Map<String, dynamic>? data,
   ) async {
     late http.Response response;
-    print(headers);
 
     if (method == 'get') {
       response = await http.get(
@@ -121,8 +129,6 @@ class RestApi {
         ),
       );
     }
-
-    print(response);
 
     return response.body;
   }

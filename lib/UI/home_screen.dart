@@ -26,21 +26,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     //* This serves as a temporary workaround until a script is created to wipe the emulator data.
     //* Uncomment the line below & save, restart the app, comment it back out & save
     // await SecureStorage.wipeStorage();
-    final nodeIsConfigured =
-        await SecureStorage.readValue('isConfigured') ?? 'false';
 
     setState(() {
       this.nodeIsConfigured = nodeIsConfigured;
     });
   }
-
-  //* This mimics the load time when connecting to a node
-  //* when we are actually connecting to a node, the delayed
-  //* function will be replaced with a call to make the connection
-  final Future<String> getConfig = Future<String>.delayed(
-    const Duration(seconds: 2),
-    () => 'Data Loaded',
-  );
 
   //* HomeScreen screen animations
   late final AnimationController _iconController = AnimationController(
@@ -70,7 +60,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  //TODO: If nodeConfigured = true, fetch the node info
+  Future<String> _nodeIsConfigured() async {
+    return await SecureStorage.readValue('isConfigured') ?? 'false';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,58 +98,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ],
-        body: nodeIsConfigured == 'true'
-            ? FutureBuilder(
-                future: getConfig,
-                builder: (context, AsyncSnapshot<String> snapshot) {
-                  Widget child;
-                  if (snapshot.hasData) {
-                    //* If the node is configured display the dashboard
-                    child = const DashboardScreen();
-                  } else if (snapshot.hasError) {
-                    //* If the there is an error loading the node, display error
-                    child = Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: AppColors.redPrimary,
-                          size: 60,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Text('Error: ${snapshot.error}'),
-                        )
-                      ],
-                    );
-                  } else {
-                    //* Otherwise show a loading bar
-                    child = Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CircularProgressIndicator(
-                            color: AppColors.white,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 16),
-                          child: Text(
-                            'Syncing node...',
-                            style: TextStyle(color: AppColors.white),
-                          ),
-                        )
-                      ],
-                    );
-                  }
-                  return child;
-                },
-              )
-            :
-            //* If the node is NOT configured then present an icon on startup
-            Center(
+        body: FutureBuilder(
+          future: _nodeIsConfigured(),
+          builder: (context, AsyncSnapshot<String> snapshot) {
+            Widget child;
+            if (snapshot.hasData) {
+              if (snapshot.data == 'true') {
+                //* If the node is configured display the dashboard
+                child = const DashboardScreen();
+              } else if (snapshot.data == 'false') {
+                child = //* If the node is NOT configured then present an icon on startup
+                    Center(
+                        child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FadeTransition(
+                      opacity: _iconAnimation,
+                      child: const LinkNodeButton(),
+                    ),
+                    FadeTransition(
+                      opacity: _textAnimation,
+                      child: const Text(
+                        'Tap the icon to link your node',
+                        style: TextStyle(color: AppColors.white, fontSize: 20),
+                      ),
+                    ),
+                  ],
+                ));
+              }
+            }
+            if (snapshot.data == 'true') {
+              //* If the node is configured display the dashboard
+              child = const DashboardScreen();
+            } else if (snapshot.data == 'false') {
+              child = //* If the node is NOT configured then present an icon on startup
+                  Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -174,7 +149,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-              ),
+              );
+            } else if (snapshot.hasError) {
+              //* If the there is an error loading the node, display error
+              child = Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: AppColors.redPrimary,
+                    size: 60,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text('Error: ${snapshot.error}'),
+                  )
+                ],
+              );
+            } else {
+              //* Otherwise show a loading bar
+              child = Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: CircularProgressIndicator(
+                      color: AppColors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text(
+                      'Syncing node...',
+                      style: TextStyle(color: AppColors.white),
+                    ),
+                  )
+                ],
+              );
+            }
+            return child;
+          },
+        ),
       ),
     );
   }

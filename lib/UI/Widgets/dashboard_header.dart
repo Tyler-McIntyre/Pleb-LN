@@ -1,7 +1,9 @@
 import 'package:firebolt/UI/receive_screen.dart';
+import 'package:firebolt/models/channel_balance.dart';
+import 'package:firebolt/util/restapi.dart';
 import 'package:flutter/material.dart';
+import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
-import '../../models/balance.dart';
 import '../../util/app_colors.dart';
 import 'curve_clipper.dart';
 import '../node_config_screen.dart';
@@ -14,53 +16,12 @@ class DashboardHeader extends StatefulWidget {
 }
 
 class _DashboardHeaderState extends State<DashboardHeader> {
-  int balanceIndex = 0;
-  late String balanceTotal;
-  late Widget currencySymbolShown;
-  bool symbolIsVisable = true;
-  bool satsIsVisable = true;
-  bool btcIsVisable = false;
+  late List<Widget> balanceWidgets;
+  static int balanceWidgetIndex = 0;
   TextEditingController nicknameController = TextEditingController();
-  //Default Sorting option
-
-  updateBalance() {
-    //increment the index
-    balanceIndex >= Balance.conversions.length - 1
-        ? balanceIndex = 0
-        : balanceIndex += 1;
-
-    //update the balance shown
-    setState(
-      () {
-        balanceTotal = Balance.conversions.values.toList()[balanceIndex];
-        currencySymbolShown = Balance.conversions.keys.toList()[balanceIndex];
-
-        switch (balanceIndex) {
-          case 0:
-            {
-              satsIsVisable = true;
-            }
-            break;
-          case 1:
-            {
-              satsIsVisable = false;
-              btcIsVisable = true;
-            }
-            break;
-          default:
-            {
-              btcIsVisable = false;
-            }
-            break;
-        }
-      },
-    );
-  }
 
   @override
   void initState() {
-    balanceTotal = Balance.conversions.values.first;
-    currencySymbolShown = Balance.conversions.keys.first;
     init();
     super.initState();
   }
@@ -73,6 +34,56 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     });
   }
 
+  Future<ChannelBalance> _nodeBalance() async {
+    RestApi api = RestApi();
+    //TODO: Fetch the current exchange rate
+    double currentBtcExchangeRate = 40000;
+    ChannelBalance result = await api.getLightningBalance();
+    balanceWidgets = [
+      Text.rich(
+        TextSpan(
+            text: MoneyFormatter(
+              amount: int.parse(result.balance).toDouble(),
+            ).output.withoutFractionDigits,
+            children: [
+              TextSpan(
+                text: 'sats',
+                style: TextStyle(
+                  color: AppColors.white60,
+                  fontSize: 32,
+                ),
+              ),
+            ]),
+        style: TextStyle(color: AppColors.white, fontSize: 36),
+      ),
+      //balance in sats / 10000000
+      Text.rich(
+        TextSpan(children: [
+          WidgetSpan(
+            child: Icon(
+              Icons.currency_bitcoin,
+              color: AppColors.orange,
+              size: 43,
+            ),
+          ),
+          TextSpan(text: '${(int.parse(result.balance) / 10000000)}'),
+        ]),
+        style: TextStyle(color: AppColors.white, fontSize: 36),
+      ),
+      //balance in bitcoin / the current exchange rate
+      Text(
+        (MoneyFormatter(
+                amount: ((int.parse(result.balance) / 10000000) *
+                    currentBtcExchangeRate))
+            .output
+            .symbolOnLeft),
+        style: TextStyle(color: AppColors.white, fontSize: 36),
+      )
+    ];
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -83,12 +94,12 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             height: MediaQuery.of(context).size.height * .35,
             color: AppColors.black,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(top: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       nicknameController.text,
                       style: const TextStyle(
@@ -102,57 +113,63 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Column(
-                          children: [
-                            TextButton(
-                              onPressed: updateBalance,
-                              child: Text.rich(
-                                TextSpan(
-                                  children: [
-                                    btcIsVisable
-                                        ? WidgetSpan(
-                                            child: currencySymbolShown,
-                                          )
-                                        : const WidgetSpan(
-                                            child: SizedBox.shrink(),
-                                          ),
-                                    TextSpan(
-                                        text: balanceTotal.toString(),
-                                        style: const TextStyle(fontSize: 35),
-                                        children: [
-                                          satsIsVisable
-                                              ? WidgetSpan(
-                                                  child: currencySymbolShown,
-                                                )
-                                              : const WidgetSpan(
-                                                  child: SizedBox.shrink(),
-                                                ),
-                                        ]),
-                                  ],
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 240, 240, 238),
-                                  ),
+                        FutureBuilder<ChannelBalance>(
+                          future: _nodeBalance(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<ChannelBalance> snapshot) {
+                            List<Widget> children;
+                            if (snapshot.hasData) {
+                              children = [
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      print(balanceWidgetIndex);
+                                      balanceWidgetIndex >=
+                                              balanceWidgets.length - 1
+                                          ? balanceWidgetIndex = 0
+                                          : balanceWidgetIndex += 1;
+                                    });
+                                  },
+                                  child: balanceWidgets[balanceWidgetIndex],
                                 ),
-                              ),
-                            ),
-                            const Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Tap to convert',
-                                    style: TextStyle(
-                                      color: AppColors.white60,
-                                      fontSize: 19,
-                                    ),
-                                  )
-                                ],
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 240, 240, 238),
+                                Text(
+                                  'Tap to convert',
+                                  style: TextStyle(
+                                      color: AppColors.grey, fontSize: 20),
                                 ),
+                              ];
+                            } else if (snapshot.hasError) {
+                              children = <Widget>[
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 60,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Text('Error: ${snapshot.error}'),
+                                )
+                              ];
+                            } else {
+                              children = const <Widget>[
+                                SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: CircularProgressIndicator(),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 16),
+                                  child: Text('Awaiting result...'),
+                                )
+                              ];
+                            }
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: children,
                               ),
-                              textAlign: TextAlign.start,
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ],
                     ),
