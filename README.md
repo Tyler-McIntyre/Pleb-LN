@@ -86,3 +86,19 @@ https://docs.google.com/spreadsheets/d/1LSVl5OSKyrjWt00WewR-J-PChMhZRTFUALc_x9mf
 #### Design related items
 Since we do not have a designated designer, and we are the users of this app. It would most likely be a good idea to bring UI related design tasks to the team to have a conversation about the direction we'd like to take with whatever the given task might be.
 
+## Testing with polar
+Download Polar for testing locally
+https://lightningpolar.com/
+
+As of now, Firebolt only support LND nodes, so when creating your local network make sure you're using LND nodes only.
+
+You'll need three parameters to make the connection
+select a node, select 'connect'
+#### If you're using an an android emulator, 
+The host will be 10.0.2.2. Android emulators use this as an alias for the local host (127.0.0.1)
+
+#### find the port number
+Under the connect tab, look at the rest host. You'll see the port number listed after the host. I.E. 127.0.0.1:8082. 8082 is your port.
+
+#### find the macaroon
+Under base64 you'll find the admin macaroon. This delegates read and write permissions to the user. Invoice and read-only are more restrictive.

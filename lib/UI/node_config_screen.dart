@@ -46,7 +46,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
   TextEditingController nicknameController = TextEditingController();
   TextEditingController nodeInterfaceController = TextEditingController();
   TextEditingController hostController = TextEditingController();
-  TextEditingController restPortController = TextEditingController();
+  TextEditingController portController = TextEditingController();
   TextEditingController macaroonController = TextEditingController();
   LNDConnect connectionParams = LNDConnect();
   late Map<String, TextEditingController> configSettings;
@@ -61,7 +61,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
     final String nodeInterface = 'LND';
     final String nickname = await SecureStorage.readValue('nickname') ?? '';
     final String host = await SecureStorage.readValue('host') ?? '';
-    final String restPort = await SecureStorage.readValue('restPort') ?? '';
+    final String port = await SecureStorage.readValue('restPort') ?? '';
     final String macaroon = await SecureStorage.readValue('macaroon') ?? '';
     final String useTor = await SecureStorage.readValue('useTor') ?? 'false';
 
@@ -69,14 +69,14 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
       nicknameController.text = nickname;
       nodeInterfaceController.text = nodeInterface;
       hostController.text = host;
-      restPortController.text = restPort;
+      portController.text = port;
       macaroonController.text = macaroon;
       useTorIsSwitched = useTor.toLowerCase() == 'true' ? true : false;
       configSettings = {
         'nickname': nicknameController,
         'nodeInterface': nodeInterfaceController,
         'host': hostController,
-        'restPort': restPortController,
+        'restPort': portController,
         'macaroon': macaroonController,
       };
     });
@@ -225,7 +225,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
       ),
       //*REST port
       TextFormField(
-        controller: restPortController,
+        controller: portController,
         cursorColor: AppColors.white,
         decoration: const InputDecoration(
           label: Text(
@@ -339,7 +339,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
               //reset form fields
               nicknameController.clear();
               hostController.clear();
-              restPortController.clear();
+              portController.clear();
               macaroonController.clear();
               useTorIsSwitched = false;
             });
@@ -494,7 +494,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         //set the controller text states
         setState(() {
           hostController.text = connectionParams.host;
-          restPortController.text = connectionParams.port;
+          portController.text = connectionParams.port;
           macaroonController.text = connectionParams.macaroonHexFormat;
         });
       }

@@ -1,6 +1,6 @@
 import 'package:firebolt/UI/receive_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
-import 'package:firebolt/util/restapi.dart';
+import 'package:firebolt/api/lnd.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
@@ -35,7 +35,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
   }
 
   Future<BlockchainBalance> _nodeBalance() async {
-    RestApi api = RestApi();
+    LND api = LND();
     //TODO: Fetch the current exchange rate
     double currentBtcExchangeRate = 40000;
     BlockchainBalance result = await api.getBlockchainBalance();
