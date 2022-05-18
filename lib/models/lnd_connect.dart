@@ -35,13 +35,9 @@ class LNDConnect {
         ? lndConnectParams.port = portMatch
         : lndConnectParams.port = '';
     macaroonMatch != null
-        ? lndConnectParams.macaroonHexFormat = Formatting.base64ToHex(
-            Formatting.formatMacaroon(
-                'AgEDbG5kAvgBAwoQwByI4E9Cu2ZVC0gKVYDxQRIBMBoWCgdhZGRyZXNzEgRyZWFkEgV3cml0ZRoTCgRpbmZvEgRyZWFkEgV3cml0ZRoXCghpbnZvaWNlcxIEcmVhZBIFd3JpdGUaIQoIbWFjYXJvb24SCGdlbmVyYXRlEgRyZWFkEgV3cml0ZRoWCgdtZXNzYWdlEgRyZWFkEgV3cml0ZRoXCghvZmZjaGFpbhIEcmVhZBIFd3JpdGUaFgoHb25jaGFpbhIEcmVhZBIFd3JpdGUaFAoFcGVlcnMSBHJlYWQSBXdyaXRlGhgKBnNpZ25lchIIZ2VuZXJhdGUSBHJlYWQAAAYgqFfbW/PEZUMxBXEtjfLS3P8wDvpmLdpHChojxfMjTWY='))
+        ? lndConnectParams.macaroonHexFormat =
+            Formatting.base64ToHex(Formatting.formatMacaroon(macaroonMatch))
         : lndConnectParams.macaroonHexFormat = '';
-
-    lndConnectParams.host = 'https://10.0.2.2';
-    lndConnectParams.port = '8082';
 
     return lndConnectParams;
   }
