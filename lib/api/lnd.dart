@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:firebolt/models/transactions.dart';
+
 import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
@@ -18,6 +20,12 @@ class LND {
   Future<BlockchainBalance> getBlockchainBalance() async {
     String response = await rest.getRequest('/v1/balance/blockchain');
     return BlockchainBalance.fromJson(jsonDecode(response));
+  }
+
+  Future<Transactions> getTransactions() async {
+    String response = await rest.getRequest('/v1/transactions');
+    print(response);
+    return Transactions.fromJson(jsonDecode(response));
   }
 
   Future<PaymentResponse> payLightningInvoice(Payment data) async {
