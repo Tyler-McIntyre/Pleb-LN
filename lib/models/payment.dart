@@ -10,7 +10,7 @@ class Payment {
   String paymentRequest;
 
   @JsonKey(name: 'timeout_seconds')
-  int timeoutSeconds;
+  int? timeoutSeconds;
 
   @JsonKey(name: 'allow_self_payment')
   bool allowSelfPayment;

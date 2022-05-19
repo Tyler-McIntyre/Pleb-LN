@@ -1,5 +1,11 @@
+import 'package:firebolt/models/payment_response.dart';
+import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
+import '../../api/lnd.dart';
+import '../../models/invoice.dart';
+import '../../models/invoices.dart';
+import '../../models/payments.dart';
 import '../../util/app_colors.dart';
 
 enum activitySortOptions { DateReceived, SentOnly, ReceivedOnly }
@@ -12,134 +18,6 @@ class Activities extends StatefulWidget {
 }
 
 class _ActivitiesState extends State<Activities> {
-  List<Tuple5<Icon, String, String, String, String>> activityTileInfo = const [
-    Tuple5(
-        Icon(
-          Icons.receipt,
-          color: AppColors.white,
-        ),
-        'Received',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.receipt,
-          color: AppColors.white,
-        ),
-        'Received',
-        'on-chain',
-        '1/28/2022',
-        '130,812 sats'),
-    Tuple5(
-        Icon(
-          Icons.receipt,
-          color: AppColors.white,
-        ),
-        'Received',
-        'on-chain',
-        '12/10/2021',
-        '10,000,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-    Tuple5(
-        Icon(
-          Icons.receipt,
-          color: AppColors.white,
-        ),
-        'Received',
-        'off-chain',
-        '4/10/2022',
-        '10,000 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-    Tuple5(
-        Icon(
-          Icons.send,
-          color: AppColors.white,
-        ),
-        'Sent',
-        'on-chain',
-        '6/19/2021',
-        '10,367 sats'),
-  ];
   final Map<String, Icon> _tabs = {
     'Off-Chain': const Icon(
       Icons.bolt,
@@ -151,6 +29,53 @@ class _ActivitiesState extends State<Activities> {
     ),
   };
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
+
+  Future<List<Tuple5<Icon, String, String, String, String>>>
+      _getTransactions() async {
+    LND api = LND();
+    List<Tuple5<Icon, String, String, String, String>> txHistory = [];
+    Payments payments = await api.getPayments();
+
+    for (PaymentResponse payment in payments.payments) {
+      String dateSent = Formatting.timestampNanoSecondsToDate(
+          int.parse(payment.creationTimeNanoSeconds));
+
+      txHistory.add(
+        Tuple5(
+            Icon(
+              Icons.receipt,
+              color: AppColors.white,
+            ),
+            'Sent',
+            'off-chain',
+            dateSent,
+            '${payment.valueSat} sats'),
+      );
+    }
+
+    Invoices invoices = await api.getInvoices();
+    for (Invoice invoice in invoices.invoices) {
+      if (invoice.settleDate != '0') {
+        String receivedDate =
+            Formatting.timestampToDateTime(int.parse(invoice.settleDate));
+        txHistory.add(
+          Tuple5(
+              Icon(
+                Icons.send,
+                color: AppColors.white,
+              ),
+              'Received',
+              'off-chain',
+              receivedDate,
+              '${invoice.value} sats'),
+        );
+      }
+    }
+
+    txHistory;
+
+    return txHistory;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,52 +148,60 @@ class _ActivitiesState extends State<Activities> {
                             tileColor: AppColors.secondaryBlack,
                             textColor: AppColors.white,
                             child: Scrollbar(
-                              child: ListView.builder(
-                                itemCount: activityTileInfo.length,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    color: AppColors.blueGrey,
-                                    child: ListTile(
-                                      style: ListTileStyle.list,
-                                      leading: activityTileInfo[index].item1,
-                                      title: Text.rich(
-                                        TextSpan(
-                                          text: null,
+                              child: FutureBuilder(
+                                future: _getTransactions(),
+                                builder: (context,
+                                    AsyncSnapshot<
+                                            List<
+                                                Tuple5<Icon, String, String,
+                                                    String, String>>>
+                                        snapshot) {
+                                  List<Widget> children = [];
+                                  if (snapshot.hasData) {
+                                    children = _activityCards(snapshot.data!);
+                                  } else if (snapshot.hasError) {
+                                    children = <Widget>[
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                1.25,
+                                        child: Column(
                                           children: [
-                                            TextSpan(
-                                              text:
-                                                  activityTileInfo[index].item2,
-                                              style: const TextStyle(
-                                                  color: AppColors.grey,
-                                                  fontSize: 15),
+                                            const Icon(
+                                              Icons.error_outline,
+                                              color: Colors.red,
+                                              size: 40,
                                             ),
-                                            WidgetSpan(
-                                              child: Container(),
-                                            ),
-                                            TextSpan(
-                                              text:
-                                                  activityTileInfo[index].item4,
-                                              style:
-                                                  const TextStyle(fontSize: 15),
-                                            ),
-                                            WidgetSpan(
-                                              child: Container(),
-                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 16),
+                                              child: Text(
+                                                'Error: ${snapshot.error}',
+                                                style: TextStyle(
+                                                    color:
+                                                        AppColors.redPrimary),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            )
                                           ],
                                         ),
+                                      )
+                                    ];
+                                  } else {
+                                    children = const <Widget>[
+                                      SizedBox(
+                                        width: 60,
+                                        height: 60,
+                                        child: CircularProgressIndicator(),
                                       ),
-                                      trailing: Text(
-                                        activityTileInfo[index].item5,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color:
-                                              (activityTileInfo[index].item2 ==
-                                                      'Sent'
-                                                  ? AppColors.redPrimary
-                                                  : AppColors.green),
-                                        ),
-                                      ),
-                                    ),
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 16),
+                                        child: Text('Awaiting result...'),
+                                      )
+                                    ];
+                                  }
+                                  return Column(
+                                    children: children,
                                   );
                                 },
                               ),
@@ -286,6 +219,63 @@ class _ActivitiesState extends State<Activities> {
         );
       },
     ).toList();
+  }
+
+  _activityCards(List<Tuple5<Icon, String, String, String, String>> txHistory) {
+    List<Card> txCardList = [];
+
+//  Tuple5(
+//         Icon(
+//           Icons.receipt,
+//           color: AppColors.white,
+//         ),
+//         'Received',
+//         'off-chain',
+//         '4/10/2022',
+//         '10,000 sats'),
+    for (Tuple5<Icon, String, String, String, String> tx in txHistory) {
+      txCardList.add(
+        Card(
+          color: AppColors.blueGrey,
+          child: ListTile(
+            style: ListTileStyle.list,
+            leading: tx.item1, //Icon
+            title: Text.rich(
+              TextSpan(
+                text: null,
+                children: [
+                  TextSpan(
+                    text: tx.item2, //sent/received
+                    style: const TextStyle(color: AppColors.grey, fontSize: 15),
+                  ),
+                  WidgetSpan(
+                    child: Container(),
+                  ),
+                  TextSpan(
+                    text: tx.item3, //date
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  WidgetSpan(
+                    child: Container(),
+                  ),
+                ],
+              ),
+            ),
+            trailing: Text(
+              tx.item5, //amount
+              style: TextStyle(
+                fontSize: 16,
+                color: (tx.item2 == 'Sent'
+                    ? AppColors.redPrimary
+                    : AppColors.green),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return txCardList;
   }
 
   _actionsButtonBar() {

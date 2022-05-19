@@ -5,8 +5,8 @@ import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
 import '../models/invoice_request.dart';
-import '../models/payment.dart';
-import '../models/payment_response.dart';
+import '../models/invoices.dart';
+import '../models/payments.dart';
 import '../util/formatting.dart';
 import 'rest.dart';
 
@@ -22,23 +22,28 @@ class LND {
     return BlockchainBalance.fromJson(jsonDecode(response));
   }
 
+  Future<Payments> getPayments() async {
+    String response = await rest.getRequest('/v1/payments');
+    return Payments.fromJson(jsonDecode(response));
+  }
+
+  Future<Invoices> getInvoices() async {
+    String response = await rest
+        .getRequest('/v1/invoices?reversed=true&num_max_invoices=100');
+    return Invoices.fromJson(jsonDecode(response));
+  }
+
   Future<Transactions> getTransactions() async {
     String response = await rest.getRequest('/v1/transactions');
     print(response);
     return Transactions.fromJson(jsonDecode(response));
   }
 
-  Future<PaymentResponse> payLightningInvoice(Payment data) async {
-    String response = await rest.postRequest('/v2/router/send', data.toJson());
-    if (response.contains('SUCCEEDED')) {
-      return PaymentResponse('SUCCESS', hackOutThePaymentHash(response));
-    } else if (response.contains('error')) {
-      return PaymentResponse('ERROR', 'Invoice has already been paid');
-    } else if (response.contains('IN_FLIGHT')) {
-      return PaymentResponse('NO ROUTE', '');
-    }
-    return PaymentResponse('FAILED', hackOutThePaymentHash(response));
-  }
+  // Future<PaymentResponse> payLightningInvoice(Payment data) async {
+  //   String response = await rest.postRequest('/v2/router/send', data.toJson());
+
+  //   return );
+  // }
 
   //TODO: parse the lightning payment response correctly, wrap in an annotated result class with a property of type paymentResponse
   String hackOutThePaymentHash(String response) {

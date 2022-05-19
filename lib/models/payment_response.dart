@@ -8,8 +8,17 @@ class PaymentResponse {
   String status;
   @JsonKey(name: 'payment_hash')
   String paymentHash;
+  @JsonKey(name: 'creation_time_ns')
+  String creationTimeNanoSeconds;
+  @JsonKey(name: 'value_sat')
+  String valueSat;
+  @JsonKey(name: 'fee_sat')
+  String feeSat;
+  @JsonKey(name: 'payment_index')
+  String paymentIndex;
 
-  PaymentResponse(this.status, this.paymentHash);
+  PaymentResponse(this.status, this.paymentHash, this.creationTimeNanoSeconds,
+      this.valueSat, this.feeSat, this.paymentIndex);
 
   factory PaymentResponse.fromJson(Map<String, dynamic> json) =>
       _$PaymentResponseFromJson(json);

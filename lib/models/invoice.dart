@@ -19,10 +19,21 @@ class Invoice {
   @JsonKey(name: 'payment_request')
   String paymentRequest;
 
+  @JsonKey(name: 'settle_date')
+  String settleDate;
+
   bool? settled;
 
-  Invoice(this.paymentRequest, this.rHash, this.addIndex, this.paymentAddress,
-      {this.memo, this.value, this.settled});
+  Invoice(
+    this.paymentRequest,
+    this.rHash,
+    this.addIndex,
+    this.paymentAddress,
+    this.settleDate, {
+    this.memo,
+    this.value,
+    this.settled,
+  });
 
   factory Invoice.fromJson(Map<String, dynamic> json) =>
       _$InvoiceFromJson(json);

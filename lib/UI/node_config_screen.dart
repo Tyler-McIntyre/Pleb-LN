@@ -272,6 +272,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         ),
       ),
       //* Use Tor
+      //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
         title: const Text(
           'Use Tor',
