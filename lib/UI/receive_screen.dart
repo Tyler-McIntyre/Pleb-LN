@@ -20,14 +20,6 @@ class ReceiveScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                    child: Text(
-                      'How\'d you like to ReceiveScreen?:',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.white, fontSize: 25),
-                    ),
-                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -64,7 +56,7 @@ class ReceiveScreen extends StatelessWidget {
                               color: AppColors.white,
                             ),
                             Text(
-                              'New invoice',
+                              'Create invoice',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: AppColors.white,
