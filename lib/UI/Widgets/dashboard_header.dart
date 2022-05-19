@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
 import '../../util/app_colors.dart';
+import '../app_settings_screen.dart';
 import 'curve_clipper.dart';
 import '../node_config_screen.dart';
 
@@ -92,19 +93,49 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ClipPath(
           clipper: CurveClipper(),
           child: Container(
-            height: MediaQuery.of(context).size.height * .25,
+            height: MediaQuery.of(context).size.height * .35,
             color: AppColors.black,
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 30, horizontal: 10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    nicknameController.text,
-                    style: const TextStyle(
-                      color: AppColors.white70,
-                      fontSize: 22,
-                    ),
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            nicknameController.text,
+                            style: const TextStyle(
+                              color: AppColors.white70,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AppSettingsScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.settings,
+                              color: Color(0xffF3F3F4),
+                            ),
+                          ),
+                        ],
+                      ))
+                    ],
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -151,8 +182,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                         padding: const EdgeInsets.only(top: 16),
                                         child: Text(
                                           'Error: ${snapshot.error}',
-                                          style: TextStyle(
-                                              color: AppColors.redPrimary),
+                                          style:
+                                              TextStyle(color: AppColors.red),
                                           textAlign: TextAlign.center,
                                         ),
                                       )
@@ -188,7 +219,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         Container(
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * .19,
+              top: MediaQuery.of(context).size.height * .28,
               right: 20.0,
               left: 20.0),
           child: SizedBox(

@@ -14,7 +14,7 @@ class LNDConnect {
 
   static Future<LNDConnect> parseConnectionString(
       String connectionString) async {
-    // //create a new instance of LNDConnect
+    //TODO: Error handling for null matches
     LNDConnect lndConnectParams = LNDConnect();
     String? hostMatch = _lndConnectParsePatterns['findHost']
         ?.firstMatch(connectionString)!
@@ -27,7 +27,6 @@ class LNDConnect {
         ?.firstMatch(connectionString)!
         .group(0);
 
-    //iterate through each regex pattern and set the LNDConnect instance properties
     hostMatch != null
         ? lndConnectParams.host = Formatting.formatHost(hostMatch)
         : lndConnectParams.host = '';

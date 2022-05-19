@@ -13,10 +13,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
+      body: Column(
         children: [
           DashboardHeader(),
-          Activities(),
+          Expanded(
+            child: Activities(),
+          )
         ],
       ),
     );

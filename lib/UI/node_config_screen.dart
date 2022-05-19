@@ -21,25 +21,32 @@ class _NodeConfigScreenState extends State<NodeConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.redPrimary,
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: const Text('Node Configuration'),
-        centerTitle: true,
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniStartDocked,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FloatingActionButton(
+            backgroundColor: AppColors.black,
+            foregroundColor: AppColors.white,
+            child: Icon(Icons.arrow_back),
+            onPressed: () => Navigator.maybePop(
+                  context,
+                )),
       ),
-      body: NodeConfigScreenForm(),
+      resizeToAvoidBottomInset: false,
+      body: NodeConfigForm(),
     );
   }
 }
 
-class NodeConfigScreenForm extends StatefulWidget {
-  const NodeConfigScreenForm({Key? key}) : super(key: key);
+class NodeConfigForm extends StatefulWidget {
+  const NodeConfigForm({Key? key}) : super(key: key);
 
   @override
-  State<NodeConfigScreenForm> createState() => _NodeConfigScreenFormState();
+  State<NodeConfigForm> createState() => _NodeConfigFormState();
 }
 
-class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
+class _NodeConfigFormState extends State<NodeConfigForm> {
   static final _formKey = GlobalKey<FormState>();
   static bool useTorIsSwitched = false;
   late String qrCode;
@@ -91,11 +98,11 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           ClipPath(
             clipper: CurveClipper(),
             child: Container(
-              height: MediaQuery.of(context).size.height * .75,
+              height: MediaQuery.of(context).size.height * .73,
               color: AppColors.black,
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(top: 60),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width / 1.1,
                     child: Column(
@@ -146,17 +153,28 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
       TextFormField(
         controller: nicknameController,
         cursorColor: AppColors.white,
-        decoration: const InputDecoration(
-          label: Text(
-            'Nickname (Optional)',
-            style: TextStyle(color: AppColors.white),
+        decoration: InputDecoration(
+          label: Text.rich(
+            TextSpan(
+              text: 'Nickname ',
+              children: [
+                TextSpan(
+                  text: '(Optional)',
+                  style: TextStyle(
+                    color: AppColors.grey,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+              style: TextStyle(
+                color: AppColors.testColor,
+                fontSize: 21,
+              ),
+            ),
           ),
-          border: UnderlineInputBorder(),
-          hintStyle: TextStyle(color: AppColors.grey),
-          hintText: 'Nody_Montana',
         ),
         style: const TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 20,
         ),
       ),
@@ -179,14 +197,14 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
                 ),
               ],
               style: TextStyle(
-                color: AppColors.white,
+                color: AppColors.testColor,
                 fontSize: 21,
               ),
             ),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
-          hintText: 'lnd',
+          hintText: 'Nody_Montana',
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -195,7 +213,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           return null;
         },
         style: const TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 20,
         ),
       ),
@@ -206,7 +224,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         decoration: const InputDecoration(
           label: Text(
             'Host',
-            style: TextStyle(color: AppColors.white),
+            style: TextStyle(color: AppColors.testColor),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -219,7 +237,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           return null;
         },
         style: const TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 20,
         ),
       ),
@@ -230,7 +248,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         decoration: const InputDecoration(
           label: Text(
             'REST Port',
-            style: TextStyle(color: AppColors.white),
+            style: TextStyle(color: AppColors.testColor),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -243,7 +261,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           return null;
         },
         style: const TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 20,
         ),
       ),
@@ -254,7 +272,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
         decoration: const InputDecoration(
           label: Text(
             'Macaroon (Hex Format)',
-            style: TextStyle(color: AppColors.white),
+            style: TextStyle(color: AppColors.testColor),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -267,13 +285,14 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
           return null;
         },
         style: const TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 20,
         ),
       ),
       //* Use Tor
       //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
+        activeColor: Color(0xffF75C03),
         title: const Text(
           'Use Tor',
           style: TextStyle(
@@ -311,7 +330,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
-              color: AppColors.orange,
+              color: AppColors.green,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(
@@ -352,7 +371,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
-              color: AppColors.redPrimary,
+              color: AppColors.red,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(
@@ -473,7 +492,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
 
   void _setConfigFormFields(String qrCodeRawData) async {
     //TODO: Fix this error handling
-    if (!qrCodeRawData.contains('Error')) {
+    if (!qrCode.isEmpty && !qrCodeRawData.contains('Error')) {
       connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
 
       //TODO: Move to a function?
@@ -487,7 +506,7 @@ class _NodeConfigScreenFormState extends State<NodeConfigScreenForm> {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 20),
           ),
-          backgroundColor: (AppColors.redPrimary),
+          backgroundColor: (AppColors.red),
         );
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar);

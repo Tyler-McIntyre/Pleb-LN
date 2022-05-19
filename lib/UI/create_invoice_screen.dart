@@ -13,7 +13,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.redPrimary,
+      backgroundColor: AppColors.red,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Create Invoice'),
@@ -213,7 +213,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
-              color: AppColors.redPrimary,
+              color: AppColors.red,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(

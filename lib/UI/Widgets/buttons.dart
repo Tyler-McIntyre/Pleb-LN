@@ -1,5 +1,6 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../util/app_assets.dart';
 import '../node_config_screen.dart';
 import '../../util/app_colors.dart';
@@ -11,6 +12,7 @@ class LinkNodeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AvatarGlow(
       endRadius: 180,
+      showTwoGlows: false,
       glowColor: AppColors.white,
       shape: BoxShape.circle,
       child: SizedBox(
@@ -20,11 +22,10 @@ class LinkNodeButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ClipOval(
-                child: Image.asset(
-                  AppAssets.logoPath,
-                  scale: 1,
-                ),
+              Icon(
+                FontAwesomeIcons.raspberryPi,
+                color: AppColors.white,
+                size: 100,
               ),
             ],
           ),

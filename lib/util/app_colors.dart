@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const black = Colors.black;
-  static const secondaryBlack = Color.fromRGBO(27, 27, 27, 1);
-  static const orange = Colors.orange;
-  static const white = Colors.white;
   static const blueGrey = Colors.blueGrey;
-  static const grey = Colors.grey;
   static Color? secondaryGrey = Colors.grey[900];
   static const green = Colors.green;
-  static const blue = Colors.blue;
-  static const redPrimary = Color.fromRGBO(220, 25, 33, 1);
   static const redSecondary = Color.fromRGBO(230, 25, 32, 1);
   static const yellow = Color.fromRGBO(230, 226, 48, 1);
   static const bluePrimary = Color.fromRGBO(2, 146, 230, 1);
@@ -18,4 +11,15 @@ class AppColors {
   static const transparent = Colors.transparent;
   static const white60 = Colors.white60;
   static const white70 = Colors.white70;
+
+  //new colors
+  static const testColor = Color.fromARGB(158, 243, 243, 244);
+  static const white = Color(0xffF3F3F4);
+  static const orange = Color(0xffF75C03);
+  static const grey = Color(0xff7E7F83);
+  static const blackSecondary = Color(0xff34312D);
+  static const black = Color(0xff14110F);
+  static const blue = Color(0xff473BF0);
+  static const red = Color(0xffDE1A1A);
+  static const teal = Color(0xff80D39B);
 }
