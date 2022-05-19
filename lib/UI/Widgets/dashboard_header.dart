@@ -167,10 +167,6 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                   height: 60,
                                   child: CircularProgressIndicator(),
                                 ),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 16),
-                                  child: Text('Awaiting result...'),
-                                )
                               ];
                             }
                             return Center(

@@ -29,18 +29,23 @@ class _ActivitiesState extends State<Activities> {
     ),
   };
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
+  List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
+      [];
+  List<Widget> _activityCardList = [];
 
-  Future<List<Tuple5<Icon, String, String, String, String>>>
+  Future<List<Tuple5<Icon, String, String, DateTime, String>>>
       _getTransactions() async {
+    List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
+        [];
+
     LND api = LND();
-    List<Tuple5<Icon, String, String, String, String>> txHistory = [];
     Payments payments = await api.getPayments();
 
     for (PaymentResponse payment in payments.payments) {
-      String dateSent = Formatting.timestampNanoSecondsToDate(
+      DateTime sentDateTime = Formatting.timestampNanoSecondsToDate(
           int.parse(payment.creationTimeNanoSeconds));
 
-      txHistory.add(
+      allOffChainTxHistory.add(
         Tuple5(
             Icon(
               Icons.receipt,
@@ -48,17 +53,18 @@ class _ActivitiesState extends State<Activities> {
             ),
             'Sent',
             'off-chain',
-            dateSent,
+            sentDateTime,
             '${payment.valueSat} sats'),
       );
     }
 
     Invoices invoices = await api.getInvoices();
     for (Invoice invoice in invoices.invoices) {
+      DateTime receivedDateTime =
+          Formatting.timestampToDateTime(int.parse(invoice.settleDate));
+
       if (invoice.settleDate != '0') {
-        String receivedDate =
-            Formatting.timestampToDateTime(int.parse(invoice.settleDate));
-        txHistory.add(
+        allOffChainTxHistory.add(
           Tuple5(
               Icon(
                 Icons.send,
@@ -66,15 +72,22 @@ class _ActivitiesState extends State<Activities> {
               ),
               'Received',
               'off-chain',
-              receivedDate,
+              receivedDateTime,
               '${invoice.value} sats'),
         );
       }
     }
 
-    txHistory;
+    //sort by date
+    allOffChainTxHistory.sort((a, b) {
+      return a.item4.compareTo(b.item4);
+    });
 
-    return txHistory;
+    setState(() {
+      this.allOffChainTxHistory = allOffChainTxHistory;
+    });
+
+    return allOffChainTxHistory;
   }
 
   @override
@@ -138,8 +151,7 @@ class _ActivitiesState extends State<Activities> {
                         context),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 3),
+                    padding: const EdgeInsets.only(top: 0),
                     sliver: SliverFixedExtentList(
                       itemExtent: 470,
                       delegate: SliverChildBuilderDelegate(
@@ -154,11 +166,15 @@ class _ActivitiesState extends State<Activities> {
                                     AsyncSnapshot<
                                             List<
                                                 Tuple5<Icon, String, String,
-                                                    String, String>>>
+                                                    DateTime, String>>>
                                         snapshot) {
                                   List<Widget> children = [];
                                   if (snapshot.hasData) {
-                                    children = _activityCards(snapshot.data!);
+                                    if (_activityCardList.isEmpty) {
+                                      _activityCardList = _buildActivityCards(
+                                          allOffChainTxHistory);
+                                    }
+                                    children = _activityCardList;
                                   } else if (snapshot.hasError) {
                                     children = <Widget>[
                                       Container(
@@ -189,15 +205,10 @@ class _ActivitiesState extends State<Activities> {
                                     ];
                                   } else {
                                     children = const <Widget>[
-                                      SizedBox(
-                                        width: 60,
-                                        height: 60,
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 50.0),
                                         child: CircularProgressIndicator(),
                                       ),
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 16),
-                                        child: Text('Awaiting result...'),
-                                      )
                                     ];
                                   }
                                   return Column(
@@ -221,19 +232,11 @@ class _ActivitiesState extends State<Activities> {
     ).toList();
   }
 
-  _activityCards(List<Tuple5<Icon, String, String, String, String>> txHistory) {
+  _buildActivityCards(
+      List<Tuple5<Icon, String, String, DateTime, String>> txHistory) {
     List<Card> txCardList = [];
 
-//  Tuple5(
-//         Icon(
-//           Icons.receipt,
-//           color: AppColors.white,
-//         ),
-//         'Received',
-//         'off-chain',
-//         '4/10/2022',
-//         '10,000 sats'),
-    for (Tuple5<Icon, String, String, String, String> tx in txHistory) {
+    for (Tuple5<Icon, String, String, DateTime, String> tx in txHistory) {
       txCardList.add(
         Card(
           color: AppColors.blueGrey,
@@ -252,7 +255,7 @@ class _ActivitiesState extends State<Activities> {
                     child: Container(),
                   ),
                   TextSpan(
-                    text: tx.item3, //date
+                    text: Formatting.dateTimeToShortDate(tx.item4), //date
                     style: const TextStyle(fontSize: 15),
                   ),
                   WidgetSpan(
@@ -307,16 +310,24 @@ class _ActivitiesState extends State<Activities> {
             case 'Date Received':
               setState(() {
                 _activitySortOption = activitySortOptions.DateReceived;
+                _activityCardList = _buildActivityCards(allOffChainTxHistory);
               });
               break;
             case 'Sent Only':
               setState(() {
                 _activitySortOption = activitySortOptions.SentOnly;
+                _activityCardList = _buildActivityCards(allOffChainTxHistory
+                    .where((element) => element.item2.toLowerCase() == 'sent')
+                    .toList());
               });
               break;
             case 'Received Only':
               setState(() {
                 _activitySortOption = activitySortOptions.ReceivedOnly;
+                _activityCardList = _buildActivityCards(allOffChainTxHistory
+                    .where(
+                        (element) => element.item2.toLowerCase() == 'received')
+                    .toList());
               });
               break;
             default:

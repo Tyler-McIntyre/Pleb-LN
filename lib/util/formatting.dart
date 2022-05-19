@@ -17,14 +17,18 @@ class Formatting {
           .map((e) => e.toRadixString(16).padLeft(2, '0'))
           .join();
 
-  static String timestampToDateTime(int timestamp) {
+  static DateTime timestampToDateTime(int timestamp) {
     DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    return formatter.format(date);
+    return date;
   }
 
-  static String timestampNanoSecondsToDate(int creationTimeNanoSeconds) {
+  static DateTime timestampNanoSecondsToDate(int creationTimeNanoSeconds) {
     DateTime date = DateTime.fromMicrosecondsSinceEpoch(
         (creationTimeNanoSeconds / 1000).round());
+    return date;
+  }
+
+  static String dateTimeToShortDate(DateTime date) {
     return formatter.format(date);
   }
 }
