@@ -18,6 +18,10 @@ class Activities extends StatefulWidget {
 }
 
 class _ActivitiesState extends State<Activities> {
+  activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
+  List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory = [];
+  //TODO: create the onChainTxHistory list
+  List<Widget> _activityCardList = [];
   final Map<String, Icon> _tabs = {
     'Off-Chain': const Icon(
       Icons.bolt,
@@ -28,66 +32,25 @@ class _ActivitiesState extends State<Activities> {
       color: AppColors.orange,
     ),
   };
-  activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
-  List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
-      [];
-  List<Widget> _activityCardList = [];
 
   Future<List<Tuple5<Icon, String, String, DateTime, String>>>
       _getTransactions() async {
-    List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
-        [];
+    List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory =
+        await _buildOffChainTxList();
 
-    LND api = LND();
-    Payments payments = await api.getPayments();
+    //build the on chain tx list
 
-    for (PaymentResponse payment in payments.payments) {
-      DateTime sentDateTime = Formatting.timestampNanoSecondsToDate(
-          int.parse(payment.creationTimeNanoSeconds));
-
-      allOffChainTxHistory.add(
-        Tuple5(
-            Icon(
-              Icons.receipt,
-              color: AppColors.white,
-            ),
-            'Sent',
-            'off-chain',
-            sentDateTime,
-            '${payment.valueSat} sats'),
-      );
-    }
-
-    Invoices invoices = await api.getInvoices();
-    for (Invoice invoice in invoices.invoices) {
-      DateTime receivedDateTime =
-          Formatting.timestampToDateTime(int.parse(invoice.settleDate));
-
-      if (invoice.settleDate != '0') {
-        allOffChainTxHistory.add(
-          Tuple5(
-              Icon(
-                Icons.send,
-                color: AppColors.white,
-              ),
-              'Received',
-              'off-chain',
-              receivedDateTime,
-              '${invoice.value} sats'),
-        );
-      }
-    }
-
-    //sort by date
-    allOffChainTxHistory.sort((a, b) {
+    //sort both by date
+    offChainTxHistory.sort((a, b) {
       return a.item4.compareTo(b.item4);
     });
 
     setState(() {
-      this.allOffChainTxHistory = allOffChainTxHistory;
+      this.offChainTxHistory = offChainTxHistory;
     });
 
-    return allOffChainTxHistory;
+    //combine the two lists and return
+    return offChainTxHistory;
   }
 
   @override
@@ -162,17 +125,19 @@ class _ActivitiesState extends State<Activities> {
                             child: Scrollbar(
                               child: FutureBuilder(
                                 future: _getTransactions(),
-                                builder: (context,
-                                    AsyncSnapshot<
-                                            List<
-                                                Tuple5<Icon, String, String,
-                                                    DateTime, String>>>
-                                        snapshot) {
+                                builder: (
+                                  context,
+                                  AsyncSnapshot<
+                                          List<
+                                              Tuple5<Icon, String, String,
+                                                  DateTime, String>>>
+                                      snapshot,
+                                ) {
                                   List<Widget> children = [];
                                   if (snapshot.hasData) {
                                     if (_activityCardList.isEmpty) {
                                       _activityCardList = _buildActivityCards(
-                                          allOffChainTxHistory);
+                                          offChainTxHistory);
                                     }
                                     children = _activityCardList;
                                   } else if (snapshot.hasError) {
@@ -310,13 +275,13 @@ class _ActivitiesState extends State<Activities> {
             case 'Date Received':
               setState(() {
                 _activitySortOption = activitySortOptions.DateReceived;
-                _activityCardList = _buildActivityCards(allOffChainTxHistory);
+                _activityCardList = _buildActivityCards(offChainTxHistory);
               });
               break;
             case 'Sent Only':
               setState(() {
                 _activitySortOption = activitySortOptions.SentOnly;
-                _activityCardList = _buildActivityCards(allOffChainTxHistory
+                _activityCardList = _buildActivityCards(offChainTxHistory
                     .where((element) => element.item2.toLowerCase() == 'sent')
                     .toList());
               });
@@ -324,7 +289,7 @@ class _ActivitiesState extends State<Activities> {
             case 'Received Only':
               setState(() {
                 _activitySortOption = activitySortOptions.ReceivedOnly;
-                _activityCardList = _buildActivityCards(allOffChainTxHistory
+                _activityCardList = _buildActivityCards(offChainTxHistory
                     .where(
                         (element) => element.item2.toLowerCase() == 'received')
                     .toList());
@@ -379,5 +344,50 @@ class _ActivitiesState extends State<Activities> {
         ],
       )
     ];
+  }
+
+  _buildOffChainTxList() async {
+    List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
+        [];
+    LND api = LND();
+    Payments payments = await api.getPayments();
+    for (PaymentResponse payment in payments.payments) {
+      DateTime sentDateTime = Formatting.timestampNanoSecondsToDate(
+          int.parse(payment.creationTimeNanoSeconds));
+
+      allOffChainTxHistory.add(
+        Tuple5(
+            Icon(
+              Icons.receipt,
+              color: AppColors.white,
+            ),
+            'Sent',
+            'off-chain',
+            sentDateTime,
+            '${payment.valueSat} sats'),
+      );
+    }
+
+    Invoices invoices = await api.getInvoices();
+    for (Invoice invoice in invoices.invoices) {
+      DateTime receivedDateTime =
+          Formatting.timestampToDateTime(int.parse(invoice.settleDate));
+
+      if (invoice.settleDate != '0') {
+        allOffChainTxHistory.add(
+          Tuple5(
+              Icon(
+                Icons.send,
+                color: AppColors.white,
+              ),
+              'Received',
+              'off-chain',
+              receivedDateTime,
+              '${invoice.value} sats'),
+        );
+      }
+    }
+
+    return allOffChainTxHistory;
   }
 }
