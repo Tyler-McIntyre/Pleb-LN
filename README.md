@@ -55,9 +55,9 @@ File >> Open Folder >> Navigate to the cloned repo and select the folder
 ### Build the project dependencies 
 In the toolbar click... Terminal >> New Terminal and enter...
 ```
-NPM run build
+flutter pub get
 ```
-This will install the dependencies for the app
+This will fetch the dependencies listed in the pubspec.yaml
 
 ### Run the emulator
 Press
