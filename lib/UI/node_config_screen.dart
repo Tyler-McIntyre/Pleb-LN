@@ -292,7 +292,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       //* Use Tor
       //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
-        activeColor: Color(0xffF75C03),
+        activeColor: AppColors.orange,
         title: const Text(
           'Use Tor',
           style: TextStyle(

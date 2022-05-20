@@ -130,7 +130,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                             },
                             icon: const Icon(
                               Icons.settings,
-                              color: Color(0xffF3F3F4),
+                              color: AppColors.white,
                             ),
                           ),
                         ],
