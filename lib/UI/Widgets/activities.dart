@@ -376,7 +376,7 @@ class _ActivitiesState extends State<Activities> {
     Invoices invoices = await api.getInvoices();
     for (Invoice invoice in invoices.invoices) {
       DateTime receivedDateTime =
-          Formatting.timestampToDateTime(int.parse(invoice.settleDate));
+          Formatting.timestampToDateTime(int.parse(invoice.settleDate!));
 
       if (invoice.settleDate != '0') {
         allOffChainTxHistory.add(

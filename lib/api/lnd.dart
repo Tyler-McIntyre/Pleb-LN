@@ -45,7 +45,7 @@ class LND {
   //   return );
   // }
 
-  //TODO: parse the lightning payment response correctly, wrap in an annotated result class with a property of type paymentResponse
+  //TODO: parse the lightning payment response
   String hackOutThePaymentHash(String response) {
     RegExp reg1 = RegExp(r'("payment_hash":"[0-9a-fA-F]{64})');
     Match? firstMatch = reg1.firstMatch(response);

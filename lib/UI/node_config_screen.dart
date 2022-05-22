@@ -167,7 +167,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                 ),
               ],
               style: TextStyle(
-                color: AppColors.testColor,
+                color: AppColors.greySecondary,
                 fontSize: 21,
               ),
             ),
@@ -197,7 +197,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                 ),
               ],
               style: TextStyle(
-                color: AppColors.testColor,
+                color: AppColors.greySecondary,
                 fontSize: 21,
               ),
             ),
@@ -224,7 +224,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         decoration: const InputDecoration(
           label: Text(
             'Host',
-            style: TextStyle(color: AppColors.testColor),
+            style: TextStyle(color: AppColors.greySecondary),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -248,7 +248,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         decoration: const InputDecoration(
           label: Text(
             'REST Port',
-            style: TextStyle(color: AppColors.testColor),
+            style: TextStyle(color: AppColors.greySecondary),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -272,7 +272,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         decoration: const InputDecoration(
           label: Text(
             'Macaroon (Hex Format)',
-            style: TextStyle(color: AppColors.testColor),
+            style: TextStyle(color: AppColors.greySecondary),
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -292,7 +292,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       //* Use Tor
       //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
-        activeColor: AppColors.orange,
+        activeColor: AppColors.blue,
         title: const Text(
           'Use Tor',
           style: TextStyle(
@@ -408,7 +408,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 20),
                   ),
-                  backgroundColor: (AppColors.blueSecondary),
+                  backgroundColor: (AppColors.orange),
                 );
 
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -427,7 +427,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 20),
                   ),
-                  backgroundColor: (AppColors.blueSecondary),
+                  backgroundColor: (AppColors.red),
                 );
 
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -441,7 +441,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
-              color: AppColors.blue,
+              color: AppColors.orange,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(

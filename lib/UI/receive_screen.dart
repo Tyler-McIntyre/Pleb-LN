@@ -9,7 +9,9 @@ class ReceiveScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: AppColors.blue,
+      ),
       body: Stack(
         children: [
           ClipPath(

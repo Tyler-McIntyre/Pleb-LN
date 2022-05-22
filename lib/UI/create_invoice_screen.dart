@@ -1,6 +1,11 @@
+import 'package:firebolt/models/invoice.dart';
+import 'package:firebolt/models/invoice_request.dart';
 import 'package:flutter/material.dart';
+import 'package:numberpicker/numberpicker.dart';
+import '../api/lnd.dart';
 import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
+import 'invoice_screen.dart';
 
 class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({Key? key}) : super(key: key);
@@ -13,9 +18,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.red,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        backgroundColor: AppColors.blue,
         title: const Text('Create Invoice'),
         centerTitle: true,
       ),
@@ -33,12 +38,21 @@ class CreateInvoiceScreenForm extends StatefulWidget {
 }
 
 class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
-  static final _formKey = GlobalKey<FormState>();
-  static bool routeHintsIsSwitched = false;
-  static bool ampInvoiceIsSwitched = false;
+  final _formKey = GlobalKey<FormState>();
+  int _currentHourValue = 0;
+  int _currentMinutesValue = 0;
+  String _minutesLabel = 'Minutes';
+  String _hoursLabel = 'Hours';
+  bool _useDefaultExpiry = true;
   TextEditingController memoController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController expirationController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -48,7 +62,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           ClipPath(
             clipper: CurveClipper(),
             child: Container(
-              height: MediaQuery.of(context).size.height * .75,
+              height: MediaQuery.of(context).size.height * .70,
               color: AppColors.black,
               child: Center(
                 child: Padding(
@@ -65,6 +79,9 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                             controller: memoController,
                             cursorColor: AppColors.white,
                             decoration: const InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColors.orange)),
                               label: Text(
                                 'Memo',
                                 style: TextStyle(color: AppColors.white),
@@ -74,7 +91,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                               hintText: 'A Satoshi for your thoughts?',
                             ),
                             style: const TextStyle(
-                              color: AppColors.orange,
+                              color: AppColors.white,
                               fontSize: 20,
                             ),
                           ),
@@ -85,10 +102,22 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                           child: TextFormField(
                             controller: amountController,
                             cursorColor: AppColors.white,
-                            decoration: const InputDecoration(
-                              label: Text(
-                                'Amount (sats)',
-                                style: TextStyle(color: AppColors.white),
+                            decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: AppColors.orange)),
+                              label: Text.rich(
+                                TextSpan(
+                                  text: 'Amount ',
+                                  style: TextStyle(color: AppColors.white),
+                                  children: [
+                                    TextSpan(
+                                      text: '(sats)',
+                                      style: TextStyle(
+                                          color: AppColors.grey, fontSize: 17),
+                                    ),
+                                  ],
+                                ),
                               ),
                               border: UnderlineInputBorder(),
                               hintStyle: TextStyle(color: AppColors.grey),
@@ -101,71 +130,50 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                               return null;
                             },
                             style: const TextStyle(
-                              color: AppColors.orange,
+                              color: AppColors.white,
                               fontSize: 20,
                             ),
                           ),
                         ),
                         //*Expiration
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: expirationController,
-                            cursorColor: AppColors.white,
-                            decoration: const InputDecoration(
-                              label: Text(
-                                'Expiration (in seconds)',
-                                style: TextStyle(color: AppColors.white),
+                          padding: const EdgeInsets.only(top: 24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('Expiration',
+                                    style: TextStyle(
+                                        color: AppColors.white, fontSize: 20)),
                               ),
-                              border: UnderlineInputBorder(),
-                              hintStyle: TextStyle(color: AppColors.grey),
-                              hintText: '3600',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter an expiration';
-                              }
-                              return null;
-                            },
-                            style: const TextStyle(
-                              color: AppColors.orange,
-                              fontSize: 20,
-                            ),
+                              SwitchListTile(
+                                  title: Text.rich(
+                                    TextSpan(
+                                      text: 'Use default ',
+                                      children: [
+                                        TextSpan(
+                                            text: ' = 1 hour',
+                                            style: TextStyle(
+                                                color: AppColors.grey,
+                                                fontSize: 15))
+                                      ],
+                                      style: TextStyle(color: AppColors.white),
+                                    ),
+                                  ),
+                                  activeColor: AppColors.blue,
+                                  value: _useDefaultExpiry,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _useDefaultExpiry = value;
+                                    });
+                                  }),
+                              _useDefaultExpiry
+                                  ? SizedBox.shrink()
+                                  : _showExpirationNumberPicker(),
+                            ],
                           ),
                         ),
-                        SwitchListTile(
-                          title: const Text(
-                            'Include Route Hints',
-                            style: TextStyle(color: AppColors.white),
-                          ),
-                          value: routeHintsIsSwitched,
-                          onChanged: (bool value) {
-                            setState(() {
-                              routeHintsIsSwitched = value;
-                            });
-                          },
-                          secondary: const Icon(
-                            Icons.compare_arrows_sharp,
-                            color: AppColors.white,
-                          ),
-                        ),
-                        //* AMP Invoice switch
-                        SwitchListTile(
-                          title: const Text(
-                            'AMP Invoice',
-                            style: TextStyle(color: AppColors.white),
-                          ),
-                          value: ampInvoiceIsSwitched,
-                          onChanged: (bool value) {
-                            setState(() {
-                              ampInvoiceIsSwitched = value;
-                            });
-                          },
-                          secondary: const Icon(
-                            Icons.amp_stories,
-                            color: AppColors.white,
-                          ),
-                        )
                       ],
                     ),
                   ),
@@ -176,7 +184,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           Container(
             alignment: Alignment.topCenter,
             padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * .65,
+                top: MediaQuery.of(context).size.height * .63,
                 right: 20.0,
                 left: 20.0),
             child: SizedBox(
@@ -202,8 +210,8 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
               memoController.clear();
               amountController.clear();
               expirationController.clear();
-              routeHintsIsSwitched = false;
-              ampInvoiceIsSwitched = false;
+              _currentHourValue = 0;
+              _currentMinutesValue = 0;
             });
           },
           style: ElevatedButton.styleFrom(
@@ -241,16 +249,31 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              const snackBar = SnackBar(
-                content: Text(
-                  'Coming Soon -> Create Invoice!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
-                backgroundColor: (AppColors.blueSecondary),
-              );
+              if (!_useDefaultExpiry &&
+                  _currentHourValue == 0 &&
+                  _currentMinutesValue == 0) {
+                const snackBar = SnackBar(
+                  content: Text(
+                    'Invalid expiration',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  backgroundColor: (AppColors.red),
+                );
 
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              } else {
+                String paymentRequest = await _createInvoice();
+                if (paymentRequest.isNotEmpty) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => InvoiceScreen(
+                          paymentRequest: paymentRequest,
+                        ),
+                      ));
+                }
+              }
             }
           },
           style: ElevatedButton.styleFrom(
@@ -260,7 +283,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
-              color: AppColors.green,
+              color: AppColors.orange,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(
@@ -273,7 +296,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Icon(
-                Icons.create,
+                Icons.qr_code_scanner,
                 color: AppColors.white,
               ),
               Text(
@@ -287,5 +310,63 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
         ),
       ],
     );
+  }
+
+  Widget _showExpirationNumberPicker() {
+    //Hours
+    return Row(
+      children: [
+        NumberPicker(
+          value: _currentHourValue,
+          minValue: 0,
+          maxValue: 24,
+          textStyle: TextStyle(color: AppColors.white),
+          selectedTextStyle: TextStyle(color: AppColors.orange, fontSize: 25),
+          onChanged: (value) {
+            setState(() {
+              value == 1 ? _hoursLabel = 'Hour' : _hoursLabel = 'Hours';
+              _currentHourValue = value;
+            });
+          },
+        ),
+        Text(
+          _hoursLabel,
+          style: TextStyle(color: AppColors.white),
+        ),
+        //Minutes
+        NumberPicker(
+          value: _currentMinutesValue,
+          minValue: 0,
+          maxValue: 60,
+          textStyle: TextStyle(color: AppColors.white),
+          selectedTextStyle: TextStyle(color: AppColors.orange, fontSize: 25),
+          onChanged: (value) {
+            setState(() {
+              value == 1 ? _minutesLabel = 'Minute' : _minutesLabel = 'Minutes';
+              _currentMinutesValue = value;
+            });
+          },
+        ),
+        Text(
+          _minutesLabel,
+          style: TextStyle(color: AppColors.white),
+        )
+      ],
+    );
+  }
+
+  Future<String> _createInvoice() async {
+    String expirySeconds;
+    _useDefaultExpiry
+        ? expirySeconds = '3600'
+        : expirySeconds =
+            ((_currentHourValue * 3600) + (_currentMinutesValue * 60))
+                .toString();
+    InvoiceRequest invoiceRequest = InvoiceRequest(amountController.text,
+        memo: memoController.text, expiry: expirySeconds);
+
+    LND api = LND();
+    Invoice invoice = await api.createInvoice(invoiceRequest);
+    return invoice.paymentRequest;
   }
 }

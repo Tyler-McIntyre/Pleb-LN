@@ -20,7 +20,7 @@ class Invoice {
   String paymentRequest;
 
   @JsonKey(name: 'settle_date')
-  String settleDate;
+  String? settleDate;
 
   bool? settled;
 

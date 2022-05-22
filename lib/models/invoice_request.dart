@@ -10,7 +10,10 @@ class InvoiceRequest {
   String value;
   String? memo;
 
-  InvoiceRequest(this.value, {this.memo});
+  @JsonKey(name: 'expiry')
+  String? expiry;
+
+  InvoiceRequest(this.value, {this.memo, this.expiry = '3600'});
 
   factory InvoiceRequest.fromJson(Map<String, dynamic> json) =>
       _$InvoiceRequestFromJson(json);

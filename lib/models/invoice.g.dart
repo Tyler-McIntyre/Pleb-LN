@@ -11,7 +11,7 @@ Invoice _$InvoiceFromJson(Map<String, dynamic> json) => Invoice(
       json['r_hash'] as String,
       json['add_index'] as String,
       json['payment_addr'] as String,
-      json['settle_date'] as String,
+      json['settle_date'] as String?,
       memo: json['memo'] as String?,
       value: json['value'] as String?,
       settled: json['settled'] as bool?,

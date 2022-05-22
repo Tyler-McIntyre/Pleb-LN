@@ -1,9 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 part 'payment.g.dart';
 
-/// [InvoiceRequest] and [Invoice] are distinct models because different elements
-/// are optional depending on whether or not you are creating and receiving an
-/// invoice.  They can contain the same information.
 @JsonSerializable()
 class Payment {
   @JsonKey(name: 'payment_request')

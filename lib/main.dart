@@ -24,7 +24,7 @@ class _FireBoltState extends State<FireBolt> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.orange,
+        scaffoldBackgroundColor: AppColors.blue,
         colorScheme: ColorScheme(
           background: AppColors.black,
           onPrimary: AppColors.white,

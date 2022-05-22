@@ -43,6 +43,7 @@ dependencies:
   http: ^0.13.4
   intl: ^0.17.0
   font_awesome_flutter: ^10.1.0
+  numberpicker: ^2.1.1
 
 dev_dependencies:
   flutter_test:
@@ -74,8 +75,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/Firebolt-logos/Firebolt-logos-thumbnail.jpeg
-    - images/Firebolt-logos/Firebolt-logos_white_cropped.png
+    - images/Pleb-logos_black.png
+    - images/Pleb-logos_transparent.png
+    - images/Pleb-logos_white.png
+    - images/Pleb-logos.jpeg
+    - images/Pleb-logos_round.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
