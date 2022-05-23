@@ -1,5 +1,5 @@
 import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
-import 'package:firebolt/UI/home_screen.dart';
+import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -56,7 +56,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => HomeScreen(),
+              builder: (context) => DashboardScreen(),
             ),
           ),
         ),

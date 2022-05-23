@@ -1,6 +1,5 @@
 import 'dart:developer';
-
-import 'package:firebolt/UI/home_screen.dart';
+import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../util/app_colors.dart';
@@ -417,7 +416,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const HomeScreen(),
+                    builder: (context) => const DashboardScreen(),
                   ),
                 );
               } else {

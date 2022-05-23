@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
-import 'UI/home_screen.dart';
 import 'util/app_colors.dart';
 import 'util/my_http_overrides .dart';
 
@@ -39,7 +39,7 @@ class _FireBoltState extends State<FireBolt> {
           surface: AppColors.orange,
         ),
       ),
-      home: const HomeScreen(),
+      home: const DashboardScreen(),
     );
   }
 }
