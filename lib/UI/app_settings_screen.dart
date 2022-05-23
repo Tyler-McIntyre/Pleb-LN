@@ -48,40 +48,36 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
           child: Container(
             margin: const EdgeInsets.only(top: 10),
             width: MediaQuery.of(context).size.width / 1.15,
-            child: ListTileTheme(
-              tileColor: AppColors.blackSecondary,
-              textColor: AppColors.white,
-              iconColor: AppColors.white,
-              child: ListView.builder(
-                itemCount: listTileInfo.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Card(
-                        color: AppColors.white,
-                        child: ListTile(
-                          onTap: () {
-                            final snackBar = SnackBar(
-                              content: Text(
-                                'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              backgroundColor: (AppColors.blueSecondary),
-                            );
+            child: ListView.builder(
+              itemCount: listTileInfo.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    Card(
+                      child: ListTile(
+                        onTap: () {
+                          final snackBar = SnackBar(
+                            content: Text(
+                              'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            backgroundColor: (AppColors.blueSecondary),
+                          );
 
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          },
-                          leading: listTileInfo.keys.toList()[index],
-                          title: Text(listTileInfo.values.toList()[index]),
-                          trailing: const Icon(Icons.arrow_forward_ios),
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        },
+                        leading: listTileInfo.keys.toList()[index],
+                        title: Text(
+                          listTileInfo.values.toList()[index],
+                          style: TextStyle(fontSize: 25),
                         ),
+                        trailing: const Icon(Icons.arrow_forward_ios),
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

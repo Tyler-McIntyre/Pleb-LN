@@ -87,7 +87,8 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 32.0),
                               child: TextField(
-                                style: TextStyle(color: AppColors.white),
+                                style: TextStyle(
+                                    color: AppColors.white, fontSize: 22),
                                 readOnly: true,
                                 controller: _textController,
                                 decoration: InputDecoration(

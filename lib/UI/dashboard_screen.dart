@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../database/secure_storage.dart';
-import '../util/app_colors.dart';
 import 'Widgets/activities.dart';
 import 'Widgets/dashboard_header.dart';
 
@@ -52,9 +51,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child = Column(children: [
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
-                child: const Icon(
+                child: Icon(
                   Icons.error_outline,
-                  color: Colors.red,
+                  color: Theme.of(context).errorColor,
                   size: 40,
                 ),
               ),
@@ -62,7 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.only(top: 16),
                 child: Text(
                   'Error: ${snapshot.error}',
-                  style: TextStyle(color: AppColors.red),
+                  style: TextStyle(color: Theme.of(context).errorColor),
                   textAlign: TextAlign.center,
                 ),
               )

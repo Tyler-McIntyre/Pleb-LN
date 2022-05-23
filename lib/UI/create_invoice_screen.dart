@@ -154,11 +154,13 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                                       children: [
                                         TextSpan(
                                             text: ' = 1 hour',
-                                            style: TextStyle(
-                                                color: AppColors.grey,
-                                                fontSize: 15))
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .displaySmall)
                                       ],
-                                      style: TextStyle(color: AppColors.white),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displayMedium,
                                     ),
                                   ),
                                   activeColor: AppColors.blue,

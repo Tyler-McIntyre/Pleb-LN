@@ -26,12 +26,17 @@ class _FireBoltState extends State<FireBolt> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         textTheme: TextTheme(
-          titleLarge: TextStyle(color: AppColors.white, fontSize: 40),
+          titleLarge: TextStyle(color: AppColors.white, fontSize: 45),
           titleMedium: TextStyle(color: AppColors.white60, fontSize: 34),
           titleSmall: TextStyle(color: AppColors.white70, fontSize: 26),
+          displayLarge: TextStyle(color: AppColors.white, fontSize: 32),
           displayMedium: TextStyle(color: AppColors.grey, fontSize: 23),
           displaySmall: TextStyle(color: AppColors.grey, fontSize: 21),
         ),
+        listTileTheme: ListTileThemeData(
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            iconColor: AppColors.white),
         errorColor: AppColors.red,
         fontFamily: GoogleFonts.bebasNeue().fontFamily,
         scaffoldBackgroundColor: AppColors.blue,

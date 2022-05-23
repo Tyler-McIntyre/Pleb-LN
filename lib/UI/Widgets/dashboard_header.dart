@@ -66,10 +66,13 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         Text.rich(
           TextSpan(children: [
             WidgetSpan(
-              child: Icon(
-                Icons.currency_bitcoin,
-                color: AppColors.orange,
-                size: 43,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 7),
+                child: Icon(
+                  Icons.currency_bitcoin,
+                  color: AppColors.orange,
+                  size: 45,
+                ),
               ),
             ),
             TextSpan(text: '${(int.parse(totalBalance) / 10000000)}'),

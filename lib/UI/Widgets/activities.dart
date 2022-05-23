@@ -71,7 +71,10 @@ class _ActivitiesState extends State<Activities> {
                   automaticallyImplyLeading: false,
                   actions: _actionsButtonBar(),
                   backgroundColor: AppColors.black,
-                  title: const Text('Activity'),
+                  title: Text(
+                    'Activity',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
                   pinned: true,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
@@ -117,93 +120,87 @@ class _ActivitiesState extends State<Activities> {
                       itemExtent: 290,
                       delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
-                          return ListTileTheme(
-                            tileColor: AppColors.blackSecondary,
-                            textColor: AppColors.white,
-                            child: widget.nodeIsConfigured
-                                ? FutureBuilder(
-                                    future: _getTransactions(),
-                                    builder: (
-                                      context,
-                                      AsyncSnapshot<
-                                              List<
-                                                  Tuple5<Icon, String, String,
-                                                      DateTime, String>>>
-                                          snapshot,
-                                    ) {
-                                      List<Widget> children = [];
-                                      if (snapshot.hasData) {
-                                        if (_activityCardList.isEmpty) {
-                                          _activityCardList =
-                                              _buildActivityCards(
-                                                  offChainTxHistory);
-                                        }
-                                        children = _activityCardList;
-                                      } else if (snapshot.hasError) {
-                                        children = <Widget>[
-                                          Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                1.25,
-                                            child: Column(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8.0),
-                                                  child: const Icon(
-                                                    Icons.error_outline,
-                                                    color: Colors.red,
-                                                    size: 40,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 16),
-                                                  child: Text(
-                                                    'Error: ${snapshot.error}',
-                                                    style: TextStyle(
-                                                        color: AppColors.red),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          )
-                                        ];
-                                      } else {
-                                        children = <Widget>[
-                                          Column(
+                          return widget.nodeIsConfigured
+                              ? FutureBuilder(
+                                  future: _getTransactions(),
+                                  builder: (
+                                    context,
+                                    AsyncSnapshot<
+                                            List<
+                                                Tuple5<Icon, String, String,
+                                                    DateTime, String>>>
+                                        snapshot,
+                                  ) {
+                                    List<Widget> children = [];
+                                    if (snapshot.hasData) {
+                                      if (_activityCardList.isEmpty) {
+                                        _activityCardList = _buildActivityCards(
+                                            offChainTxHistory);
+                                      }
+                                      children = _activityCardList;
+                                    } else if (snapshot.hasError) {
+                                      children = <Widget>[
+                                        Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              1.25,
+                                          child: Column(
                                             children: [
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                    top: 50.0),
-                                                child: SizedBox(
-                                                  width: 60,
-                                                  height: 60,
-                                                  child:
-                                                      CircularProgressIndicator(),
+                                                    top: 8.0),
+                                                child: const Icon(
+                                                  Icons.error_outline,
+                                                  color: Colors.red,
+                                                  size: 40,
                                                 ),
                                               ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 16),
+                                                child: Text(
+                                                  'Error: ${snapshot.error}',
+                                                  style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .errorColor),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              )
                                             ],
                                           ),
-                                        ];
-                                      }
-                                      return MediaQuery.removePadding(
-                                          removeTop: true,
-                                          context: context,
-                                          child: Scrollbar(
-                                            child: ListView(
-                                              padding: EdgeInsets.all(0),
-                                              children: children,
+                                        )
+                                      ];
+                                    } else {
+                                      children = <Widget>[
+                                        Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 50.0),
+                                              child: SizedBox(
+                                                width: 60,
+                                                height: 60,
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
                                             ),
-                                          ));
-                                    },
-                                  )
-                                : SizedBox.shrink(),
-                          );
+                                          ],
+                                        ),
+                                      ];
+                                    }
+                                    return MediaQuery.removePadding(
+                                        removeTop: true,
+                                        context: context,
+                                        child: Scrollbar(
+                                          child: ListView(
+                                            padding: EdgeInsets.all(0),
+                                            children: children,
+                                          ),
+                                        ));
+                                  },
+                                )
+                              : SizedBox.shrink();
                         },
                         childCount: 1,
                       ),
