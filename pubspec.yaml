@@ -32,7 +32,6 @@ dependencies:
   money_formatter: ^0.0.3
   qr_flutter: ^4.0.0
   tuple: ^2.0.0
-  avatar_glow: ^2.0.2
   flutter_secure_storage: ^5.0.2
   flutter_barcode_scanner: ^2.0.0
   rename: ^2.0.1
@@ -53,7 +52,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "images/Firebolt-logos/android_launcher_icon.png"
+  image_path: "images/Pleb-logos-modified.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
