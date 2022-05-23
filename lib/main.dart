@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'util/app_colors.dart';
 import 'util/my_http_overrides .dart';
 
@@ -24,6 +25,15 @@ class _FireBoltState extends State<FireBolt> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textTheme: TextTheme(
+          titleLarge: TextStyle(color: AppColors.white, fontSize: 40),
+          titleMedium: TextStyle(color: AppColors.white60, fontSize: 34),
+          titleSmall: TextStyle(color: AppColors.white70, fontSize: 26),
+          displayMedium: TextStyle(color: AppColors.grey, fontSize: 23),
+          displaySmall: TextStyle(color: AppColors.grey, fontSize: 21),
+        ),
+        errorColor: AppColors.red,
+        fontFamily: GoogleFonts.bebasNeue().fontFamily,
         scaffoldBackgroundColor: AppColors.blue,
         colorScheme: ColorScheme(
           background: AppColors.black,
@@ -34,7 +44,7 @@ class _FireBoltState extends State<FireBolt> {
           onError: AppColors.orange,
           onSecondary: AppColors.black,
           onSurface: AppColors.white,
-          primary: AppColors.orange,
+          primary: AppColors.white,
           secondary: AppColors.redSecondary,
           surface: AppColors.orange,
         ),

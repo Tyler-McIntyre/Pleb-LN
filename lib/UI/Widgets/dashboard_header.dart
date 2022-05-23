@@ -57,14 +57,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
               ).output.withoutFractionDigits,
               children: [
                 TextSpan(
-                  text: 'sats',
-                  style: TextStyle(
-                    color: AppColors.white60,
-                    fontSize: 30,
-                  ),
-                ),
+                    text: 'sats',
+                    style: Theme.of(context).textTheme.titleMedium),
               ]),
-          style: TextStyle(color: AppColors.white, fontSize: 36),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         //balance in sats / 10000000
         Text.rich(
@@ -78,7 +74,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             ),
             TextSpan(text: '${(int.parse(totalBalance) / 10000000)}'),
           ]),
-          style: TextStyle(color: AppColors.white, fontSize: 36),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         //balance in bitcoin / the current exchange rate
         Text(
@@ -87,28 +83,23 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                       currentBtcExchangeRate))
               .output
               .symbolOnLeft),
-          style: TextStyle(color: AppColors.white, fontSize: 36),
+          style: Theme.of(context).textTheme.titleLarge,
         )
       ];
     } else {
       result = BlockchainBalance('0', null, null, null);
       balanceWidgets = [
         Text.rich(
-          TextSpan(
-              text: MoneyFormatter(
-                amount: int.parse(result.totalBalance).toDouble(),
-              ).output.withoutFractionDigits,
-              children: [
-                TextSpan(
-                  text: 'sats',
-                  style: TextStyle(
-                    color: AppColors.white60,
-                    fontSize: 30,
-                  ),
-                ),
-              ]),
-          style: TextStyle(color: AppColors.white, fontSize: 36),
-        ),
+            TextSpan(
+                text: MoneyFormatter(
+                  amount: int.parse(result.totalBalance).toDouble(),
+                ).output.withoutFractionDigits,
+                children: [
+                  TextSpan(
+                      text: 'sats',
+                      style: Theme.of(context).textTheme.titleMedium),
+                ]),
+            style: Theme.of(context).textTheme.titleLarge),
       ];
     }
 
@@ -134,13 +125,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     children: [
                       Column(
                         children: [
-                          Text(
-                            nicknameController.text,
-                            style: const TextStyle(
-                              color: AppColors.white70,
-                              fontSize: 22,
-                            ),
-                          ),
+                          Text(nicknameController.text,
+                              style: Theme.of(context).textTheme.titleSmall),
                         ],
                       ),
                       Expanded(
@@ -187,12 +173,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                   child: balanceWidgets[balanceWidgetIndex],
                                 ),
                                 widget.nodeIsConfigured
-                                    ? Text(
-                                        'Tap to convert',
-                                        style: TextStyle(
-                                            color: AppColors.grey,
-                                            fontSize: 19),
-                                      )
+                                    ? Text('Tap to convert',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .displayMedium)
                                     : SizedBox.shrink(),
                               ];
                             } else if (snapshot.hasError) {
@@ -211,8 +195,9 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                         padding: const EdgeInsets.only(top: 16),
                                         child: Text(
                                           'Error: ${snapshot.error}',
-                                          style:
-                                              TextStyle(color: AppColors.red),
+                                          style: TextStyle(
+                                              color:
+                                                  Theme.of(context).errorColor),
                                           textAlign: TextAlign.center,
                                         ),
                                       )
@@ -286,7 +271,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           fixedSize: const Size(100, 71),
           primary: AppColors.black,
           onPrimary: AppColors.white,
-          textStyle: const TextStyle(fontSize: 20),
+          textStyle: Theme.of(context).textTheme.displaySmall,
           side: const BorderSide(
             color: AppColors.green,
             width: 1.0,
@@ -306,9 +291,6 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             ),
             Text(
               'Send',
-              style: TextStyle(
-                color: AppColors.white,
-              ),
             ),
           ],
         ),
@@ -326,8 +308,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           elevation: 3,
           fixedSize: const Size(100, 71),
           primary: AppColors.black,
-          onPrimary: AppColors.white,
-          textStyle: const TextStyle(fontSize: 20),
+          textStyle: Theme.of(context).textTheme.displaySmall,
           side: const BorderSide(
             color: AppColors.blueSecondary,
             width: 1.0,
@@ -343,13 +324,9 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           children: const [
             Icon(
               Icons.receipt,
-              color: AppColors.white,
             ),
             Text(
               'Receive',
-              style: TextStyle(
-                color: AppColors.white,
-              ),
             )
           ],
         ),
@@ -367,8 +344,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           elevation: 3,
           fixedSize: const Size(100, 71),
           primary: AppColors.black,
-          onPrimary: AppColors.white,
-          textStyle: const TextStyle(fontSize: 20),
+          textStyle: Theme.of(context).textTheme.displaySmall,
           side: const BorderSide(color: AppColors.orange, width: 1.0),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
@@ -381,15 +357,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           children: const [
             Icon(
               Icons.computer,
-              color: AppColors.white,
+              color: Colors.white,
             ),
             Text(
               'Node',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
-              style: TextStyle(
-                color: AppColors.white,
-              ),
             )
           ],
         ),
