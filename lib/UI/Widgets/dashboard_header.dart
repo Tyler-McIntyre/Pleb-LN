@@ -10,7 +10,11 @@ import 'curve_clipper.dart';
 import '../node_config_screen.dart';
 
 class DashboardHeader extends StatefulWidget {
-  const DashboardHeader({Key? key}) : super(key: key);
+  const DashboardHeader({
+    required this.nodeIsConfigured,
+    Key? key,
+  }) : super(key: key);
+  final bool nodeIsConfigured;
 
   @override
   State<DashboardHeader> createState() => _DashboardHeaderState();
@@ -30,58 +34,83 @@ class _DashboardHeaderState extends State<DashboardHeader> {
   init() async {
     final String nickname = await SecureStorage.readValue('nickname') ?? '';
 
-    setState(() {
-      nicknameController.text = nickname;
-    });
+    if (widget.nodeIsConfigured == true) {
+      setState(() {
+        nicknameController.text = nickname;
+      });
+    }
   }
 
   Future<BlockchainBalance> _nodeBalance() async {
-    LND api = LND();
-    //TODO: Fetch the current exchange rate
-    double currentBtcExchangeRate = 40000;
-    BlockchainBalance result = await api.getBlockchainBalance();
-    String totalBalance = result.totalBalance;
-    balanceWidgets = [
-      Text.rich(
-        TextSpan(
-            text: MoneyFormatter(
-              amount: int.parse(totalBalance).toDouble(),
-            ).output.withoutFractionDigits,
-            children: [
-              TextSpan(
-                text: 'sats',
-                style: TextStyle(
-                  color: AppColors.white60,
-                  fontSize: 30,
+    BlockchainBalance result;
+    if (widget.nodeIsConfigured) {
+      LND api = LND();
+      //TODO: Fetch the current exchange rate
+      double currentBtcExchangeRate = 40000;
+      result = await api.getBlockchainBalance();
+      String totalBalance = result.totalBalance;
+      balanceWidgets = [
+        Text.rich(
+          TextSpan(
+              text: MoneyFormatter(
+                amount: int.parse(totalBalance).toDouble(),
+              ).output.withoutFractionDigits,
+              children: [
+                TextSpan(
+                  text: 'sats',
+                  style: TextStyle(
+                    color: AppColors.white60,
+                    fontSize: 30,
+                  ),
                 ),
+              ]),
+          style: TextStyle(color: AppColors.white, fontSize: 36),
+        ),
+        //balance in sats / 10000000
+        Text.rich(
+          TextSpan(children: [
+            WidgetSpan(
+              child: Icon(
+                Icons.currency_bitcoin,
+                color: AppColors.orange,
+                size: 43,
               ),
-            ]),
-        style: TextStyle(color: AppColors.white, fontSize: 36),
-      ),
-      //balance in sats / 10000000
-      Text.rich(
-        TextSpan(children: [
-          WidgetSpan(
-            child: Icon(
-              Icons.currency_bitcoin,
-              color: AppColors.orange,
-              size: 43,
             ),
-          ),
-          TextSpan(text: '${(int.parse(totalBalance) / 10000000)}'),
-        ]),
-        style: TextStyle(color: AppColors.white, fontSize: 36),
-      ),
-      //balance in bitcoin / the current exchange rate
-      Text(
-        (MoneyFormatter(
-                amount: ((int.parse(totalBalance) / 10000000) *
-                    currentBtcExchangeRate))
-            .output
-            .symbolOnLeft),
-        style: TextStyle(color: AppColors.white, fontSize: 36),
-      )
-    ];
+            TextSpan(text: '${(int.parse(totalBalance) / 10000000)}'),
+          ]),
+          style: TextStyle(color: AppColors.white, fontSize: 36),
+        ),
+        //balance in bitcoin / the current exchange rate
+        Text(
+          (MoneyFormatter(
+                  amount: ((int.parse(totalBalance) / 10000000) *
+                      currentBtcExchangeRate))
+              .output
+              .symbolOnLeft),
+          style: TextStyle(color: AppColors.white, fontSize: 36),
+        )
+      ];
+    } else {
+      result = BlockchainBalance('0', null, null, null);
+      balanceWidgets = [
+        Text.rich(
+          TextSpan(
+              text: MoneyFormatter(
+                amount: int.parse(result.totalBalance).toDouble(),
+              ).output.withoutFractionDigits,
+              children: [
+                TextSpan(
+                  text: 'sats',
+                  style: TextStyle(
+                    color: AppColors.white60,
+                    fontSize: 30,
+                  ),
+                ),
+              ]),
+          style: TextStyle(color: AppColors.white, fontSize: 36),
+        ),
+      ];
+    }
 
     return result;
   }
@@ -152,19 +181,19 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                 TextButton(
                                   onPressed: () {
                                     setState(() {
-                                      balanceWidgetIndex >=
-                                              balanceWidgets.length - 1
-                                          ? balanceWidgetIndex = 0
-                                          : balanceWidgetIndex += 1;
+                                      _changeBalanceWidget();
                                     });
                                   },
                                   child: balanceWidgets[balanceWidgetIndex],
                                 ),
-                                Text(
-                                  'Tap to convert',
-                                  style: TextStyle(
-                                      color: AppColors.grey, fontSize: 19),
-                                ),
+                                widget.nodeIsConfigured
+                                    ? Text(
+                                        'Tap to convert',
+                                        style: TextStyle(
+                                            color: AppColors.grey,
+                                            fontSize: 19),
+                                      )
+                                    : SizedBox.shrink(),
                               ];
                             } else if (snapshot.hasError) {
                               children = <Widget>[
@@ -366,5 +395,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
       )
     ];
+  }
+
+  void _changeBalanceWidget() {
+    balanceWidgetIndex >= balanceWidgets.length - 1
+        ? balanceWidgetIndex = 0
+        : balanceWidgetIndex += 1;
   }
 }

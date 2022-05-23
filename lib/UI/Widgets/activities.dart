@@ -11,7 +11,9 @@ import '../../util/app_colors.dart';
 enum activitySortOptions { DateReceived, SentOnly, ReceivedOnly }
 
 class Activities extends StatefulWidget {
-  const Activities({Key? key}) : super(key: key);
+  const Activities({Key? key, required this.nodeIsConfigured})
+      : super(key: key);
+  final bool nodeIsConfigured;
 
   @override
   State<Activities> createState() => _ActivitiesState();
@@ -19,7 +21,7 @@ class Activities extends StatefulWidget {
 
 class _ActivitiesState extends State<Activities> {
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
-  List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory = [];
+  late List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory;
   //TODO: create the onChainTxHistory list
   List<Widget> _activityCardList = [];
   final Map<String, Icon> _tabs = {
@@ -38,7 +40,7 @@ class _ActivitiesState extends State<Activities> {
     List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory =
         await _buildOffChainTxList();
 
-    //build the on chain tx list
+    //build the on chain UTXO luist
 
     //sort both by date
     offChainTxHistory.sort((a, b) {
@@ -118,77 +120,89 @@ class _ActivitiesState extends State<Activities> {
                           return ListTileTheme(
                             tileColor: AppColors.blackSecondary,
                             textColor: AppColors.white,
-                            child: FutureBuilder(
-                              future: _getTransactions(),
-                              builder: (
-                                context,
-                                AsyncSnapshot<
-                                        List<
-                                            Tuple5<Icon, String, String,
-                                                DateTime, String>>>
-                                    snapshot,
-                              ) {
-                                List<Widget> children = [];
-                                if (snapshot.hasData) {
-                                  if (_activityCardList.isEmpty) {
-                                    _activityCardList =
-                                        _buildActivityCards(offChainTxHistory);
-                                  }
-                                  children = _activityCardList;
-                                } else if (snapshot.hasError) {
-                                  children = <Widget>[
-                                    Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          1.25,
-                                      child: Column(
-                                        children: [
-                                          const Icon(
-                                            Icons.error_outline,
-                                            color: Colors.red,
-                                            size: 40,
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 16),
-                                            child: Text(
-                                              'Error: ${snapshot.error}',
-                                              style: TextStyle(
-                                                  color: AppColors.red),
-                                              textAlign: TextAlign.center,
+                            child: widget.nodeIsConfigured
+                                ? FutureBuilder(
+                                    future: _getTransactions(),
+                                    builder: (
+                                      context,
+                                      AsyncSnapshot<
+                                              List<
+                                                  Tuple5<Icon, String, String,
+                                                      DateTime, String>>>
+                                          snapshot,
+                                    ) {
+                                      List<Widget> children = [];
+                                      if (snapshot.hasData) {
+                                        if (_activityCardList.isEmpty) {
+                                          _activityCardList =
+                                              _buildActivityCards(
+                                                  offChainTxHistory);
+                                        }
+                                        children = _activityCardList;
+                                      } else if (snapshot.hasError) {
+                                        children = <Widget>[
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                1.25,
+                                            child: Column(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0),
+                                                  child: const Icon(
+                                                    Icons.error_outline,
+                                                    color: Colors.red,
+                                                    size: 40,
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 16),
+                                                  child: Text(
+                                                    'Error: ${snapshot.error}',
+                                                    style: TextStyle(
+                                                        color: AppColors.red),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                )
+                                              ],
                                             ),
                                           )
-                                        ],
-                                      ),
-                                    )
-                                  ];
-                                } else {
-                                  children = <Widget>[
-                                    Column(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 50.0),
-                                          child: SizedBox(
-                                            width: 60,
-                                            height: 60,
-                                            child: CircularProgressIndicator(),
+                                        ];
+                                      } else {
+                                        children = <Widget>[
+                                          Column(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 50.0),
+                                                child: SizedBox(
+                                                  width: 60,
+                                                  height: 60,
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ];
-                                }
-                                return MediaQuery.removePadding(
-                                    removeTop: true,
-                                    context: context,
-                                    child: Scrollbar(
-                                      child: ListView(
-                                        padding: EdgeInsets.all(0),
-                                        children: children,
-                                      ),
-                                    ));
-                              },
-                            ),
+                                        ];
+                                      }
+                                      return MediaQuery.removePadding(
+                                          removeTop: true,
+                                          context: context,
+                                          child: Scrollbar(
+                                            child: ListView(
+                                              padding: EdgeInsets.all(0),
+                                              children: children,
+                                            ),
+                                          ));
+                                    },
+                                  )
+                                : SizedBox.shrink(),
                           );
                         },
                         childCount: 1,
