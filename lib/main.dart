@@ -25,13 +25,24 @@ class _FireBoltState extends State<FireBolt> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textSelectionTheme:
+            TextSelectionThemeData(cursorColor: AppColors.white),
+        inputDecorationTheme: InputDecorationTheme(
+          focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: AppColors.orange)),
+          hintStyle: TextStyle(color: AppColors.grey, fontSize: 22),
+          labelStyle: TextStyle(color: AppColors.greySecondary, fontSize: 25),
+        ),
         textTheme: TextTheme(
           titleLarge: TextStyle(color: AppColors.white, fontSize: 45),
           titleMedium: TextStyle(color: AppColors.white60, fontSize: 34),
           titleSmall: TextStyle(color: AppColors.white70, fontSize: 26),
           displayLarge: TextStyle(color: AppColors.white, fontSize: 32),
-          displayMedium: TextStyle(color: AppColors.grey, fontSize: 23),
+          displayMedium:
+              TextStyle(color: AppColors.greySecondary, fontSize: 23),
           displaySmall: TextStyle(color: AppColors.grey, fontSize: 21),
+          headlineSmall: TextStyle(color: AppColors.grey, fontSize: 20),
+          bodyMedium: TextStyle(color: AppColors.white, fontSize: 22),
         ),
         listTileTheme: ListTileThemeData(
             tileColor: AppColors.blackSecondary,
@@ -41,17 +52,18 @@ class _FireBoltState extends State<FireBolt> {
         fontFamily: GoogleFonts.bebasNeue().fontFamily,
         scaffoldBackgroundColor: AppColors.blue,
         colorScheme: ColorScheme(
+          secondaryContainer: AppColors.greySecondary,
           background: AppColors.black,
           onPrimary: AppColors.white,
           brightness: Brightness.light,
-          error: AppColors.orange,
+          error: AppColors.red,
           onBackground: AppColors.black,
-          onError: AppColors.orange,
+          onError: AppColors.white,
           onSecondary: AppColors.black,
           onSurface: AppColors.white,
-          primary: AppColors.white,
+          primary: AppColors.blue,
           secondary: AppColors.redSecondary,
-          surface: AppColors.orange,
+          surface: AppColors.white,
         ),
       ),
       home: const DashboardScreen(),

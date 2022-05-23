@@ -232,14 +232,14 @@ class _ActivitiesState extends State<Activities> {
                 children: [
                   TextSpan(
                     text: tx.item2, //sent/received
-                    style: const TextStyle(color: AppColors.grey, fontSize: 15),
+                    style: const TextStyle(color: AppColors.grey, fontSize: 16),
                   ),
                   WidgetSpan(
                     child: Container(),
                   ),
                   TextSpan(
                     text: Formatting.dateTimeToShortDate(tx.item4), //date
-                    style: const TextStyle(fontSize: 15),
+                    style: const TextStyle(fontSize: 16),
                   ),
                   WidgetSpan(
                     child: Container(),
@@ -250,7 +250,7 @@ class _ActivitiesState extends State<Activities> {
             trailing: Text(
               tx.item5, //amount
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 color: (tx.item2 == 'Sent' ? AppColors.red : AppColors.green),
               ),
             ),

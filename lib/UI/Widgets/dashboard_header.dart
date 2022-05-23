@@ -287,10 +287,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(
               Icons.send,
-              color: AppColors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
             Text(
               'Send',
@@ -324,12 +324,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.receipt,
-            ),
+          children: [
+            Icon(Icons.receipt, color: Theme.of(context).colorScheme.onPrimary),
             Text(
               'Receive',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
             )
           ],
         ),
@@ -357,14 +356,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(
               Icons.computer,
               color: Colors.white,
             ),
-            Text(
-              'Node',
-            )
+            Text('Node',
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.onPrimary))
           ],
         ),
       )

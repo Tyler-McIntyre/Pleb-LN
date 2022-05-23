@@ -151,58 +151,40 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       //*Nickname (optional)
       TextFormField(
         controller: nicknameController,
-        cursorColor: AppColors.white,
         decoration: InputDecoration(
-          label: Text.rich(
-            TextSpan(
-              text: 'Nickname ',
-              children: [
-                TextSpan(
-                  text: '(Optional)',
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-              style: TextStyle(
-                color: AppColors.greySecondary,
-                fontSize: 21,
-              ),
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
+            label: Text.rich(
+              TextSpan(
+                  text: 'Nickname ',
+                  children: [
+                    TextSpan(
+                      text: '(Optional)',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ],
+                  style: Theme.of(context).inputDecorationTheme.labelStyle),
             ),
-          ),
-        ),
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 20,
-        ),
+            hintText: 'Nody_Montana'),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       //*Interface
       TextFormField(
         enabled: false,
         controller: nodeInterfaceController,
-        cursorColor: AppColors.white,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
+          focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
           label: Text.rich(
             TextSpan(
-              text: 'Node Interface ',
-              children: [
-                TextSpan(
-                  text: '(V0.1.0 supports LND only)',
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-              style: TextStyle(
-                color: AppColors.greySecondary,
-                fontSize: 21,
-              ),
-            ),
+                text: 'Node Interface ',
+                children: [
+                  TextSpan(
+                      text: '(V0.1.0 supports LND only)',
+                      style: Theme.of(context).textTheme.headlineSmall),
+                ],
+                style: Theme.of(context).inputDecorationTheme.labelStyle),
           ),
           border: UnderlineInputBorder(),
-          hintStyle: TextStyle(color: AppColors.grey),
+          hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
           hintText: 'Nody_Montana',
         ),
         validator: (value) {
@@ -211,22 +193,17 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           }
           return null;
         },
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 20,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       //*Host
       TextFormField(
         controller: hostController,
-        cursorColor: AppColors.white,
-        decoration: const InputDecoration(
-          label: Text(
-            'Host',
-            style: TextStyle(color: AppColors.greySecondary),
-          ),
+        decoration: InputDecoration(
+          focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
+          label: Text('Host',
+              style: Theme.of(context).inputDecorationTheme.labelStyle),
           border: UnderlineInputBorder(),
-          hintStyle: TextStyle(color: AppColors.grey),
+          hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
           hintText: 'https://...',
         ),
         validator: (value) {
@@ -235,19 +212,16 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           }
           return null;
         },
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 20,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       //*REST port
       TextFormField(
         controller: portController,
-        cursorColor: AppColors.white,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
+          focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
           label: Text(
             'REST Port',
-            style: TextStyle(color: AppColors.greySecondary),
+            style: Theme.of(context).inputDecorationTheme.labelStyle,
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
@@ -259,44 +233,41 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           }
           return null;
         },
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 20,
-        ),
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       //*Macaroon
       TextFormField(
-        controller: macaroonController,
-        cursorColor: AppColors.white,
-        decoration: const InputDecoration(
-          label: Text(
-            'Macaroon (Hex Format)',
-            style: TextStyle(color: AppColors.greySecondary),
+          controller: macaroonController,
+          decoration: InputDecoration(
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
+            label: Text.rich(TextSpan(
+              text: 'Macaroon ',
+              children: [
+                TextSpan(
+                  text: '(Hex Format)',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ],
+              style: Theme.of(context).inputDecorationTheme.labelStyle,
+            )),
+            border: UnderlineInputBorder(),
+            hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,
+            hintText: '020103...',
           ),
-          border: UnderlineInputBorder(),
-          hintStyle: TextStyle(color: AppColors.grey),
-          hintText: '020103...',
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter the macaroon in hex format';
-          }
-          return null;
-        },
-        style: const TextStyle(
-          color: AppColors.white,
-          fontSize: 20,
-        ),
-      ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter the macaroon in hex format';
+            }
+            return null;
+          },
+          style: Theme.of(context).textTheme.bodyMedium),
       //* Use Tor
       //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
         activeColor: AppColors.blue,
-        title: const Text(
+        title: Text(
           'Use Tor',
-          style: TextStyle(
-            color: AppColors.white,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         value: useTorIsSwitched,
         onChanged: (bool value) {
@@ -326,8 +297,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
             elevation: 3,
             fixedSize: const Size(100, 71),
             primary: AppColors.black,
-            onPrimary: AppColors.white,
-            textStyle: const TextStyle(fontSize: 20),
+            textStyle: Theme.of(context).textTheme.bodyMedium,
             side: const BorderSide(
               color: AppColors.green,
               width: 1.0,
@@ -340,14 +310,14 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.qr_code_scanner,
                 color: AppColors.white,
               ),
               Text(
                 'LNDConfig',
-                style: TextStyle(color: AppColors.white, fontSize: 17),
+                style: Theme.of(context).textTheme.bodyMedium,
               )
             ],
           ),
@@ -381,16 +351,14 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.restore,
                 color: AppColors.white,
               ),
               Text(
                 'Reset',
-                style: TextStyle(
-                  color: AppColors.white,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
@@ -401,11 +369,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               bool saveWasSuccessful = await saveUserSettings();
 
               if (saveWasSuccessful) {
-                const snackBar = SnackBar(
+                final snackBar = SnackBar(
                   content: Text(
                     'Node Saved!',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   backgroundColor: (AppColors.orange),
                 );
@@ -420,11 +388,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
                   ),
                 );
               } else {
-                const snackBar = SnackBar(
+                final snackBar = SnackBar(
                   content: Text(
                     'An error occured while trying to save the settings',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   backgroundColor: (AppColors.red),
                 );
@@ -451,16 +419,14 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.save,
                 color: AppColors.white,
               ),
               Text(
                 'Save',
-                style: TextStyle(
-                  color: AppColors.white,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
@@ -499,11 +465,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           connectionParams.port == '' ||
           connectionParams.macaroonHexFormat == '') {
         //Show the snackbar
-        const snackBar = SnackBar(
+        final snackBar = SnackBar(
           content: Text(
             'Error parsing the LNDConfig',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           backgroundColor: (AppColors.red),
         );

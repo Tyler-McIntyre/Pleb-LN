@@ -19,11 +19,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: AppColors.blue,
-        title: const Text('Create Invoice'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(),
       body: CreateInvoiceScreenForm(),
     );
   }
