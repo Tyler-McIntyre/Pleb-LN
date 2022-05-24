@@ -4,10 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../api/lnd.dart';
-import '../constants.dart';
-import '../models/payment.dart';
 import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
+import 'payment_splash_screen.dart';
 
 class SendScreen extends StatefulWidget {
   const SendScreen({Key? key}) : super(key: key);
@@ -18,7 +17,7 @@ class SendScreen extends StatefulWidget {
 
 class _SendScreenState extends State<SendScreen> {
   late String qrCode;
-  static final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   TextEditingController invoiceController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController memoController = TextEditingController();
@@ -242,34 +241,12 @@ class _SendScreenState extends State<SendScreen> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              LND api = LND();
-              Payment payment = Payment(invoiceController.text);
-              PaymentStatus status = await api.payLightningInvoice(payment);
-              if (status == PaymentStatus.successful) {
-                //Navigate to success screen on successful payment
-                final snackBar = SnackBar(
-                  content: Text(
-                    'Success!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  backgroundColor: (AppColors.orange),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              } else {
-                //TODO: add descriptive error message
-                final snackBar = SnackBar(
-                  content: Text(
-                    'An error occured while trying to make the payment',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  backgroundColor: (AppColors.red),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => PaymentSplashScreen(
+                            invoice: invoiceController.text,
+                          )));
             }
           },
           style: ElevatedButton.styleFrom(

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
 import 'package:http/src/response.dart';
-import '../constants.dart';
+import '../UI/Constants/payment_status.dart';
 import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
@@ -52,6 +52,7 @@ class LND {
         await rest.postRequest('/v2/router/send', data.toJson());
     int statusCode = response.statusCode;
     //TODO: add the status codes for in_flight, failed, and unknown
+    print(response.body);
     if (statusCode == 200) {
       return PaymentStatus.successful;
     } else {
