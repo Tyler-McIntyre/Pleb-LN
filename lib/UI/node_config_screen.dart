@@ -97,7 +97,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           ClipPath(
             clipper: CurveClipper(),
             child: Container(
-              height: MediaQuery.of(context).size.height * .73,
+              height: MediaQuery.of(context).size.height * .83,
               color: AppColors.black,
               child: Center(
                 child: Padding(
@@ -115,9 +115,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           Container(
             alignment: Alignment.topCenter,
             padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * .65,
-                right: 20.0,
-                left: 20.0),
+                top: MediaQuery.of(context).size.height * .75,
+                right: 5.0,
+                left: 5.0),
             child: SizedBox(
               height: 100.0,
               width: MediaQuery.of(context).size.width,
@@ -317,7 +317,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               ),
               Text(
                 'LNDConfig',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodySmall,
               )
             ],
           ),
@@ -358,7 +358,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               ),
               Text(
                 'Reset',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -426,7 +426,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               ),
               Text(
                 'Save',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),

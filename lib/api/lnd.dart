@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
-
+import 'package:http/src/response.dart';
+import '../constants.dart';
 import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
 import '../models/invoice_request.dart';
 import '../models/invoices.dart';
+import '../models/payment.dart';
 import '../models/payments.dart';
 import '../util/formatting.dart';
 import 'rest.dart';
@@ -13,56 +16,65 @@ import 'rest.dart';
 class LND {
   RestApi rest = RestApi();
   Future<ChannelBalance> getChannelsBalance() async {
-    String response = await rest.getRequest('/v1/balance/channels');
-    return ChannelBalance.fromJson(jsonDecode(response));
+    Response response = await rest.getRequest('/v1/balance/channels');
+    String textReponse = response.body;
+    return ChannelBalance.fromJson(jsonDecode(textReponse));
   }
 
   Future<BlockchainBalance> getBlockchainBalance() async {
-    String response = await rest.getRequest('/v1/balance/blockchain');
-    return BlockchainBalance.fromJson(jsonDecode(response));
+    Response response = await rest.getRequest('/v1/balance/blockchain');
+    String textReponse = response.body;
+    return BlockchainBalance.fromJson(jsonDecode(textReponse));
   }
 
   Future<Payments> getPayments() async {
-    String response = await rest.getRequest('/v1/payments');
-    return Payments.fromJson(jsonDecode(response));
+    Response response = await rest.getRequest('/v1/payments');
+    String textReponse = response.body;
+    return Payments.fromJson(jsonDecode(textReponse));
   }
 
   Future<Invoices> getInvoices() async {
-    String response = await rest
+    Response response = await rest
         .getRequest('/v1/invoices?reversed=true&num_max_invoices=100');
-    return Invoices.fromJson(jsonDecode(response));
+    String textReponse = response.body;
+
+    return Invoices.fromJson(jsonDecode(textReponse));
   }
 
   Future<Transactions> getTransactions() async {
-    String response = await rest.getRequest('/v1/transactions');
-    print(response);
-    return Transactions.fromJson(jsonDecode(response));
+    Response response = await rest.getRequest('/v1/transactions');
+    String textReponse = response.body;
+    return Transactions.fromJson(jsonDecode(textReponse));
   }
 
-  // Future<PaymentResponse> payLightningInvoice(Payment data) async {
-  //   String response = await rest.postRequest('/v2/router/send', data.toJson());
+  Future<PaymentStatus> payLightningInvoice(Payment data) async {
+    Response response =
+        await rest.postRequest('/v2/router/send', data.toJson());
+    int statusCode = response.statusCode;
+    //TODO: add the status codes for in_flight, failed, and unknown
+    if (statusCode == 200) {
+      return PaymentStatus.successful;
+    } else {
+      return PaymentStatus.failed;
+    }
+  }
 
-  //   return );
-  // }
-
-  //TODO: parse the lightning payment response
-  String hackOutThePaymentHash(String response) {
-    RegExp reg1 = RegExp(r'("payment_hash":"[0-9a-fA-F]{64})');
-    Match? firstMatch = reg1.firstMatch(response);
-    if (firstMatch == null) return '';
-    String firstMatchString =
-        response.substring(firstMatch.start, firstMatch.end);
-    return firstMatchString.substring(firstMatchString.length - 64);
+  Future<PaymentRequest> decodePaymentRequest(String invoice) async {
+    Response response = await rest.getRequest('/v1/payreq/$invoice');
+    String textReponse = response.body;
+    return PaymentRequest.fromJson(jsonDecode(textReponse));
   }
 
   Future<Invoice> createInvoice(InvoiceRequest data) async {
-    String response = await rest.postRequest('/v1/invoices', data.toJson());
-    return Invoice.fromJson(jsonDecode(response));
+    Response response = await rest.postRequest('/v1/invoices', data.toJson());
+    String textReponse = response.body;
+    return Invoice.fromJson(jsonDecode(textReponse));
   }
 
   Future<Invoice> getInvoice(String rHash) async {
     String hex = Formatting.base64ToHex(rHash);
-    String response = await rest.getRequest('/v1/invoice/$hex');
-    return Invoice.fromJson(jsonDecode(response));
+    Response response = await rest.getRequest('/v1/invoice/$hex');
+    String textReponse = response.body;
+    return Invoice.fromJson(jsonDecode(textReponse));
   }
 }

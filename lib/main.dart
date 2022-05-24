@@ -31,7 +31,7 @@ class _FireBoltState extends State<FireBolt> {
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.orange)),
           hintStyle: TextStyle(color: AppColors.grey, fontSize: 22),
-          labelStyle: TextStyle(color: AppColors.greySecondary, fontSize: 25),
+          labelStyle: TextStyle(color: AppColors.greySecondary, fontSize: 35),
         ),
         textTheme: TextTheme(
           titleLarge: TextStyle(color: AppColors.white, fontSize: 45),
@@ -42,7 +42,8 @@ class _FireBoltState extends State<FireBolt> {
               TextStyle(color: AppColors.greySecondary, fontSize: 23),
           displaySmall: TextStyle(color: AppColors.grey, fontSize: 21),
           headlineSmall: TextStyle(color: AppColors.grey, fontSize: 20),
-          bodyMedium: TextStyle(color: AppColors.white, fontSize: 22),
+          bodyMedium: TextStyle(color: AppColors.white, fontSize: 26),
+          bodySmall: TextStyle(color: AppColors.white, fontSize: 22),
         ),
         listTileTheme: ListTileThemeData(
             tileColor: AppColors.blackSecondary,

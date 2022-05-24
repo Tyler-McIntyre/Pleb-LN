@@ -3,12 +3,13 @@ import 'package:firebolt/database/secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class RestApi {
-  Future<String> getRequest(String route) => _request(route, 'get', null);
+  Future<http.Response> getRequest(String route) =>
+      _request(route, 'get', null);
 
-  Future<String> postRequest(String route, dynamic data) =>
+  Future<http.Response> postRequest(String route, dynamic data) =>
       _request(route, 'post', data);
 
-  Future<String> _request(
+  Future<http.Response> _request(
     String route,
     String method,
     Map<String, dynamic>? data,
@@ -41,7 +42,7 @@ class RestApi {
     return '$baseUrl$route';
   }
 
-  Future<String> _restReq(
+  Future<http.Response> _restReq(
     Map<String, String> headers,
     String url,
     String method,
@@ -64,6 +65,6 @@ class RestApi {
       );
     }
 
-    return response.body;
+    return response;
   }
 }

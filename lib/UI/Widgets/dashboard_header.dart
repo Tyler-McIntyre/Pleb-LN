@@ -1,4 +1,5 @@
 import 'package:firebolt/UI/receive_screen.dart';
+import 'package:firebolt/UI/send_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:firebolt/api/lnd.dart';
 import 'package:flutter/material.dart';
@@ -258,16 +259,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     return [
       TextButton(
         onPressed: () {
-          const snackBar = SnackBar(
-            content: Text(
-              'Coming Soon -> Send an invoice.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20),
-            ),
-            backgroundColor: (AppColors.blueSecondary),
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SendScreen(),
+              ));
         },
         style: ElevatedButton.styleFrom(
           elevation: 3,
