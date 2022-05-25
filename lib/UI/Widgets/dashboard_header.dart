@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
 import '../../util/app_colors.dart';
-import '../app_settings_screen.dart';
 import 'curve_clipper.dart';
 import '../node_config_screen.dart';
 
@@ -113,8 +112,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     return result;
   }
 
-  RangeValues balanceContainerRanges = RangeValues(.28, .90);
-  RangeValues buttonContainerRanges = RangeValues(.23, .85);
+  RangeValues balanceContainerRanges = RangeValues(.23, .77);
+  RangeValues buttonContainerRanges = RangeValues(.18, .72);
   int containerAnimationSpeed = 400;
   @override
   Widget build(BuildContext context) {
@@ -130,112 +129,77 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                     balanceContainerRanges.end,
             color: AppColors.black,
             duration: Duration(milliseconds: containerAnimationSpeed),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 30, horizontal: 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Column(
-                        children: [
-                          Text(nicknameController.text,
-                              style: Theme.of(context).textTheme.titleSmall),
-                        ],
-                      ),
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const AppSettingsScreen(),
-                                ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.settings,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        ],
-                      ))
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FutureBuilder<BlockchainBalance>(
-                          future: _nodeBalance(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<BlockchainBalance> snapshot) {
-                            List<Widget> children;
-                            if (snapshot.hasData) {
-                              children = [
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _changeBalanceWidget();
-                                    });
-                                  },
-                                  child: balanceWidgets[balanceWidgetIndex],
-                                ),
-                              ];
-                            } else if (snapshot.hasError) {
-                              children = <Widget>[
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.25,
-                                  child: Column(
-                                    children: [
-                                      const Icon(
-                                        Icons.error_outline,
-                                        color: Colors.red,
-                                        size: 40,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 16),
-                                        child: Text(
-                                          'Error: ${snapshot.error}',
-                                          style: TextStyle(
-                                              color:
-                                                  Theme.of(context).errorColor),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                )
-                              ];
-                            } else {
-                              children = const <Widget>[
-                                SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ];
-                            }
-                            return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: children,
-                              ),
-                            );
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FutureBuilder<BlockchainBalance>(
+                  future: _nodeBalance(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<BlockchainBalance> snapshot) {
+                    List<Widget> children;
+                    if (snapshot.hasData) {
+                      children = [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _changeBalanceWidget();
+                            });
                           },
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                nicknameController.text,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                              balanceWidgets[balanceWidgetIndex],
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                      ];
+                    } else if (snapshot.hasError) {
+                      children = <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width / 1.25,
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: Text(
+                                  'Error: ${snapshot.error}',
+                                  style: TextStyle(
+                                      color: Theme.of(context).errorColor),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ];
+                    } else {
+                      children = const <Widget>[
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ];
+                    }
+                    return SizedBox(
+                      height: 135,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: children,
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),

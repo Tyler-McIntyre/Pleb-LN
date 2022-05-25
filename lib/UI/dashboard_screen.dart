@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../database/secure_storage.dart';
 import 'Widgets/activities.dart';
 import 'Widgets/dashboard_header.dart';
+import 'app_settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -41,6 +42,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: Image.asset(
+          'images/Pleb-logos_white.png',
+          scale: 20,
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AppSettingsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.settings,
+              color: AppColors.white,
+            ),
+          ),
+        ],
+      ),
       body: FutureBuilder(
         future: _nodeIsConfigured(),
         builder: (context, snapshot) {
