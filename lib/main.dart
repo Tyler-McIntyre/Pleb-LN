@@ -47,6 +47,7 @@ class _FireBoltState extends State<FireBolt> {
           bodySmall: TextStyle(color: AppColors.white, fontSize: 22),
         ),
         listTileTheme: ListTileThemeData(
+            style: ListTileStyle.list,
             tileColor: AppColors.blackSecondary,
             textColor: AppColors.white,
             iconColor: AppColors.white),

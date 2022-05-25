@@ -41,7 +41,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           if (snapshot.hasData) {
             child = Column(
               children: [
-                DashboardHeader(nodeIsConfigured: nodeIsConfigured),
+                Center(
+                    child: DashboardHeader(nodeIsConfigured: nodeIsConfigured)),
                 Expanded(
                   child: Activities(nodeIsConfigured: nodeIsConfigured),
                 )

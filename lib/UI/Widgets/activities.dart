@@ -1,6 +1,7 @@
 import 'package:firebolt/models/payment_response.dart';
 import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
+import 'package:money_formatter/money_formatter.dart';
 import 'package:tuple/tuple.dart';
 import '../../api/lnd.dart';
 import '../../models/invoice.dart';
@@ -232,14 +233,14 @@ class _ActivitiesState extends State<Activities> {
                 children: [
                   TextSpan(
                     text: tx.item2, //sent/received
-                    style: const TextStyle(color: AppColors.grey, fontSize: 16),
+                    style: const TextStyle(color: AppColors.grey, fontSize: 17),
                   ),
                   WidgetSpan(
                     child: Container(),
                   ),
                   TextSpan(
                     text: Formatting.dateTimeToShortDate(tx.item4), //date
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 18),
                   ),
                   WidgetSpan(
                     child: Container(),
@@ -248,9 +249,11 @@ class _ActivitiesState extends State<Activities> {
               ),
             ),
             trailing: Text(
-              tx.item5, //amount
+              '${MoneyFormatter(
+                amount: int.parse(tx.item5).toDouble(), //amount
+              ).output.withoutFractionDigits} sats',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 19,
                 color: (tx.item2 == 'Sent' ? AppColors.red : AppColors.green),
               ),
             ),
@@ -273,7 +276,7 @@ class _ActivitiesState extends State<Activities> {
         icon: const Icon(Icons.filter_alt),
         onSelected: (String result) {
           switch (result) {
-            case 'Date Received':
+            case 'Date':
               setState(() {
                 _activitySortOption = activitySortOptions.DateReceived;
                 _activityCardList = _buildActivityCards(offChainTxHistory);
@@ -301,7 +304,7 @@ class _ActivitiesState extends State<Activities> {
         },
         itemBuilder: (BuildContext context) => [
           PopupMenuItem<String>(
-            value: 'Date Received',
+            value: 'Date',
             child: ListTile(
               leading: Radio<activitySortOptions>(
                 fillColor: MaterialStateProperty.all(AppColors.white),
@@ -311,7 +314,7 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Date Received'),
+              title: Text('Date'),
             ),
           ),
           PopupMenuItem<String>(
@@ -365,7 +368,7 @@ class _ActivitiesState extends State<Activities> {
             'Sent',
             'off-chain',
             sentDateTime,
-            '${payment.valueSat} sats'),
+            payment.valueSat),
       );
     }
 
@@ -384,7 +387,7 @@ class _ActivitiesState extends State<Activities> {
               'Received',
               'off-chain',
               receivedDateTime,
-              '${invoice.value} sats'),
+              invoice.value.toString()),
         );
       }
     }
