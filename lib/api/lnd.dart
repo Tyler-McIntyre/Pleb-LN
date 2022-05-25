@@ -51,12 +51,13 @@ class LND {
     Response response =
         await rest.postRequest('/v2/router/send', data.toJson());
     int statusCode = response.statusCode;
-    //TODO: add the status codes for in_flight, failed, and unknown
-    print(response.body);
-    if (statusCode == 200) {
-      return PaymentStatus.successful;
-    } else {
-      return PaymentStatus.failed;
+    switch (statusCode) {
+      case 200:
+        return PaymentStatus.successful;
+      case 409:
+        return PaymentStatus.invoice_already_paid;
+      default:
+        return PaymentStatus.unknown;
     }
   }
 

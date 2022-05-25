@@ -294,7 +294,7 @@ class _ActivitiesState extends State<Activities> {
                 _activityCardList = _buildActivityCards(offChainTxHistory);
               });
               break;
-            case 'Sent Only':
+            case 'Sent':
               setState(() {
                 _activitySortOption = activitySortOptions.SentOnly;
                 _activityCardList = _buildActivityCards(offChainTxHistory
@@ -302,7 +302,7 @@ class _ActivitiesState extends State<Activities> {
                     .toList());
               });
               break;
-            case 'Received Only':
+            case 'Received':
               setState(() {
                 _activitySortOption = activitySortOptions.ReceivedOnly;
                 _activityCardList = _buildActivityCards(offChainTxHistory
@@ -330,7 +330,7 @@ class _ActivitiesState extends State<Activities> {
             ),
           ),
           PopupMenuItem<String>(
-            value: 'Sent Only',
+            value: 'Sent',
             child: ListTile(
               leading: Radio<activitySortOptions>(
                 fillColor: MaterialStateProperty.all(AppColors.white),
@@ -340,11 +340,11 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Sent Only'),
+              title: Text('Sent'),
             ),
           ),
           PopupMenuItem<String>(
-            value: 'Received Only',
+            value: 'Received',
             child: ListTile(
               leading: Radio<activitySortOptions>(
                 fillColor: MaterialStateProperty.all(AppColors.white),
@@ -354,7 +354,7 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Received Only'),
+              title: Text('Received'),
             ),
           ),
         ],

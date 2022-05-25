@@ -42,6 +42,7 @@ class _FireBoltState extends State<FireBolt> {
               TextStyle(color: AppColors.greySecondary, fontSize: 23),
           displaySmall: TextStyle(color: AppColors.grey, fontSize: 21),
           headlineSmall: TextStyle(color: AppColors.grey, fontSize: 20),
+          bodyLarge: TextStyle(color: AppColors.white, fontSize: 36),
           bodyMedium: TextStyle(color: AppColors.white, fontSize: 26),
           bodySmall: TextStyle(color: AppColors.white, fontSize: 22),
         ),
