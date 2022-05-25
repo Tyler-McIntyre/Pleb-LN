@@ -115,7 +115,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
 
   RangeValues balanceContainerRanges = RangeValues(.28, .90);
   RangeValues buttonContainerRanges = RangeValues(.23, .85);
-  int containerAnimationSpeed = 400; //400
+  int containerAnimationSpeed = 400;
   @override
   Widget build(BuildContext context) {
     return Stack(
