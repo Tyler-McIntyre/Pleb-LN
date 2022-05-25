@@ -119,7 +119,7 @@ class _ActivitiesState extends State<Activities> {
                   SliverPadding(
                     padding: const EdgeInsets.only(top: 0),
                     sliver: SliverFixedExtentList(
-                      itemExtent: 290,
+                      itemExtent: 350,
                       delegate: SliverChildBuilderDelegate(
                         (BuildContext context, int index) {
                           return widget.nodeIsConfigured

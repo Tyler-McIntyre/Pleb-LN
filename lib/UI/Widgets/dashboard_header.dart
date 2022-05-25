@@ -117,7 +117,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         ClipPath(
           clipper: CurveClipper(),
           child: Container(
-            height: MediaQuery.of(context).size.height * .35,
+            height: MediaQuery.of(context).size.height * .28,
             color: AppColors.black,
             child: Padding(
               padding:
@@ -176,12 +176,6 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                   },
                                   child: balanceWidgets[balanceWidgetIndex],
                                 ),
-                                widget.nodeIsConfigured
-                                    ? Text('Tap to convert',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .displayMedium)
-                                    : SizedBox.shrink(),
                               ];
                             } else if (snapshot.hasError) {
                               children = <Widget>[
@@ -237,11 +231,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         Container(
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * .28,
+              top: MediaQuery.of(context).size.height * .23,
               right: 20.0,
               left: 20.0),
           child: SizedBox(
-            height: 100.0,
+            height: 65.0,
             width: MediaQuery.of(context).size.width,
             child: SizedBox(
               child: Row(
