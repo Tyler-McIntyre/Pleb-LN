@@ -1,3 +1,4 @@
+import 'package:firebolt/UI/create_invoice_screen.dart';
 import 'package:firebolt/UI/receive_screen.dart';
 import 'package:firebolt/UI/send_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
@@ -293,7 +294,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ReceiveScreen(),
+              builder: (context) => const CreateInvoiceScreen(),
             ),
           );
         },
