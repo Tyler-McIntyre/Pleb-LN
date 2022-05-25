@@ -60,21 +60,22 @@ class _ActivitiesState extends State<Activities> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: _tabs.length,
-      child: Scaffold(
-        backgroundColor: AppColors.black,
-        body: NestedScrollView(
+      child: Container(
+        color: AppColors.black,
+        child: NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle:
                     NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
+                  primary: false,
                   automaticallyImplyLeading: false,
                   actions: _actionsButtonBar(),
                   backgroundColor: AppColors.black,
                   title: Text(
                     'Activity',
-                    style: Theme.of(context).textTheme.displayLarge,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   pinned: true,
                   forceElevated: innerBoxIsScrolled,
@@ -314,7 +315,10 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Date'),
+              title: Text(
+                'Date',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
           PopupMenuItem<String>(
@@ -328,7 +332,10 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Sent'),
+              title: Text(
+                'Sent',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
           PopupMenuItem<String>(
@@ -342,7 +349,10 @@ class _ActivitiesState extends State<Activities> {
               ),
               tileColor: AppColors.blackSecondary,
               textColor: AppColors.white,
-              title: Text('Received'),
+              title: Text(
+                'Received',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
         ],
