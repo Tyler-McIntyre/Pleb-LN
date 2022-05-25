@@ -1,6 +1,8 @@
+import 'package:firebolt/UI/widgets/activities.dart';
+import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../database/secure_storage.dart';
-import 'Widgets/activities.dart';
 import 'Widgets/dashboard_header.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -12,6 +14,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late bool nodeIsConfigured;
+  bool _isExpanded = false;
+  Icon caretIcon = Icon(FontAwesomeIcons.caretUp);
   @override
   void initState() {
     init();
@@ -40,12 +44,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
           late Widget child;
           if (snapshot.hasData) {
             child = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(
-                    child: DashboardHeader(nodeIsConfigured: nodeIsConfigured)),
-                Expanded(
-                  child: Activities(nodeIsConfigured: nodeIsConfigured),
-                )
+                DashboardHeader(
+                  nodeIsConfigured: nodeIsConfigured,
+                ),
+                Expanded(child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AnimatedContainer(
+                          curve: Curves.decelerate,
+                          height: _isExpanded
+                              ? constraints.biggest.longestSide
+                              : 50,
+                          duration: const Duration(
+                            milliseconds: 500,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: _isExpanded
+                                        ? Icon(FontAwesomeIcons.caretDown)
+                                        : Icon(FontAwesomeIcons.caretUp),
+                                    color: AppColors.white,
+                                    onPressed: () {
+                                      setState(() {
+                                        _isExpanded = !_isExpanded;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: Activities(
+                                    nodeIsConfigured: nodeIsConfigured),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ))
               ],
             );
           } else if (snapshot.hasError) {
@@ -75,9 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
           }
 
-          return Center(
-            child: child,
-          );
+          return child;
         },
       ),
     );
