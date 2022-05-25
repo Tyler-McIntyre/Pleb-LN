@@ -264,21 +264,6 @@ class _ActivitiesState extends State<Activities> {
 
   _actionsButtonBar() {
     return [
-      IconButton(
-        onPressed: () {
-          const snackBar = SnackBar(
-            content: Text(
-              'Coming Soon -> Open a channel.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20),
-            ),
-            backgroundColor: (AppColors.blueSecondary),
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        },
-        icon: const Icon(Icons.qr_code_scanner),
-      ),
       PopupMenuButton<String>(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
