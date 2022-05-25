@@ -49,48 +49,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 DashboardHeader(
                   nodeIsConfigured: nodeIsConfigured,
                 ),
-                Expanded(child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AnimatedContainer(
-                          curve: Curves.decelerate,
-                          height: _isExpanded
-                              ? constraints.biggest.longestSide
-                              : 50,
-                          duration: const Duration(
-                            milliseconds: 500,
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          AnimatedContainer(
+                            curve: Curves.decelerate,
+                            height: _isExpanded
+                                ? constraints.biggest.longestSide
+                                : 50,
+                            duration: const Duration(
+                              milliseconds: 500,
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      padding: EdgeInsets.zero,
+                                      alignment: Alignment.center,
+                                      icon: _isExpanded
+                                          ? Icon(FontAwesomeIcons.caretDown)
+                                          : Icon(FontAwesomeIcons.caretUp),
+                                      color: AppColors.white,
+                                      onPressed: () {
+                                        setState(() {
+                                          _isExpanded = !_isExpanded;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                _isExpanded
+                                    ? Expanded(
+                                        child: Activities(
+                                            nodeIsConfigured: nodeIsConfigured),
+                                      )
+                                    : SizedBox.shrink()
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    icon: _isExpanded
-                                        ? Icon(FontAwesomeIcons.caretDown)
-                                        : Icon(FontAwesomeIcons.caretUp),
-                                    color: AppColors.white,
-                                    onPressed: () {
-                                      setState(() {
-                                        _isExpanded = !_isExpanded;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Expanded(
-                                child: Activities(
-                                    nodeIsConfigured: nodeIsConfigured),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ))
+                        ],
+                      );
+                    },
+                  ),
+                )
               ],
             );
           } else if (snapshot.hasError) {

@@ -1,5 +1,4 @@
 import 'package:firebolt/UI/create_invoice_screen.dart';
-import 'package:firebolt/UI/receive_screen.dart';
 import 'package:firebolt/UI/send_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:firebolt/api/lnd.dart';

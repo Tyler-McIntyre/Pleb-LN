@@ -29,10 +29,12 @@ class _ActivitiesState extends State<Activities> {
     'Off-Chain': const Icon(
       Icons.bolt,
       color: AppColors.yellow,
+      size: 25,
     ),
     'On-Chain': const Icon(
       Icons.currency_bitcoin,
       color: AppColors.orange,
+      size: 25,
     ),
   };
 
@@ -83,8 +85,11 @@ class _ActivitiesState extends State<Activities> {
                     tabs: _tabs.entries
                         .map(
                           (tab) => Tab(
-                            text: tab.key,
                             icon: tab.value,
+                            child: Text(
+                              tab.key,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
                           ),
                         )
                         .toList(),
