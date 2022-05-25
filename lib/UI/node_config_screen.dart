@@ -369,17 +369,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               bool saveWasSuccessful = await saveUserSettings();
 
               if (saveWasSuccessful) {
-                final snackBar = SnackBar(
-                  content: Text(
-                    'Node Saved!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  backgroundColor: (AppColors.orange),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
+                /* TODO:
+                Attempt to make a valid connection,
+                if we are unable to make a successful connection
+                display an error to the user with more details
+                */
                 //Navigate home
                 Navigator.pushReplacement(
                   context,

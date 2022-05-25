@@ -3,6 +3,7 @@ import 'package:firebolt/UI/send_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:firebolt/api/lnd.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
 import '../../util/app_colors.dart';
@@ -13,9 +14,11 @@ import '../node_config_screen.dart';
 class DashboardHeader extends StatefulWidget {
   const DashboardHeader({
     required this.nodeIsConfigured,
+    required this.isExpanded,
     Key? key,
   }) : super(key: key);
   final bool nodeIsConfigured;
+  final bool isExpanded;
 
   @override
   State<DashboardHeader> createState() => _DashboardHeaderState();
@@ -110,15 +113,23 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     return result;
   }
 
+  RangeValues balanceContainerRanges = RangeValues(.28, .90);
+  RangeValues buttonContainerRanges = RangeValues(.23, .85);
+  int containerAnimationSpeed = 400; //400
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         ClipPath(
           clipper: CurveClipper(),
-          child: Container(
-            height: MediaQuery.of(context).size.height * .28,
+          child: AnimatedContainer(
+            height: widget.isExpanded
+                ? MediaQuery.of(context).size.height *
+                    balanceContainerRanges.start
+                : MediaQuery.of(context).size.height *
+                    balanceContainerRanges.end,
             color: AppColors.black,
+            duration: Duration(milliseconds: containerAnimationSpeed),
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 30, horizontal: 10.0),
@@ -228,12 +239,17 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             ),
           ),
         ),
-        Container(
+        AnimatedContainer(
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * .23,
+              top: widget.isExpanded
+                  ? MediaQuery.of(context).size.height *
+                      buttonContainerRanges.start
+                  : MediaQuery.of(context).size.height *
+                      buttonContainerRanges.end,
               right: 20.0,
               left: 20.0),
+          duration: Duration(milliseconds: containerAnimationSpeed),
           child: SizedBox(
             height: 65.0,
             width: MediaQuery.of(context).size.width,
@@ -279,11 +295,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.send,
+              Icons.qr_code_scanner,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
             Text(
-              'Send',
+              'Pay',
             ),
           ],
         ),
@@ -315,7 +331,8 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt, color: Theme.of(context).colorScheme.onPrimary),
+            Icon(Icons.receipt_outlined,
+                color: Theme.of(context).colorScheme.onPrimary),
             Text(
               'Receive',
               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
@@ -348,7 +365,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.computer,
+              FontAwesomeIcons.raspberryPi,
               color: Colors.white,
             ),
             Text('Node',

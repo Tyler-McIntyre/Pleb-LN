@@ -1,8 +1,8 @@
-import 'package:firebolt/UI/widgets/activities.dart';
 import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../database/secure_storage.dart';
+import 'Widgets/activities.dart';
 import 'Widgets/dashboard_header.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -35,6 +35,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return await SecureStorage.readValue('isConfigured') ?? 'false';
   }
 
+  int containerTransitionSpeedCollapse = 400;
+  int containerTransitionSpeedExpand = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,23 +49,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DashboardHeader(
-                  nodeIsConfigured: nodeIsConfigured,
+                Expanded(
+                  flex: _isExpanded ? 0 : 1,
+                  child: DashboardHeader(
+                    nodeIsConfigured: nodeIsConfigured,
+                    isExpanded: _isExpanded,
+                  ),
                 ),
                 Expanded(
+                  flex: _isExpanded ? 1 : 0,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           AnimatedContainer(
-                            curve: Curves.decelerate,
-                            height: _isExpanded
-                                ? constraints.biggest.longestSide
-                                : 50,
-                            duration: const Duration(
-                              milliseconds: 500,
-                            ),
+                            height: _isExpanded ? constraints.maxHeight : 50,
+                            duration: _isExpanded
+                                ? Duration(
+                                    milliseconds:
+                                        containerTransitionSpeedExpand)
+                                : Duration(
+                                    milliseconds:
+                                        containerTransitionSpeedCollapse,
+                                  ),
                             child: Column(
                               children: [
                                 Row(
