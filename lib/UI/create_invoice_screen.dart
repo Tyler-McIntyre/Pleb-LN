@@ -74,13 +74,15 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                           child: TextFormField(
                             controller: memoController,
                             cursorColor: AppColors.white,
-                            decoration: const InputDecoration(
-                              focusedBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: AppColors.orange)),
+                            decoration: InputDecoration(
+                              focusedBorder: Theme.of(context)
+                                  .inputDecorationTheme
+                                  .focusedBorder,
                               label: Text(
                                 'Memo',
-                                style: TextStyle(color: AppColors.white),
+                                style: Theme.of(context)
+                                    .inputDecorationTheme
+                                    .labelStyle,
                               ),
                               border: UnderlineInputBorder(),
                               hintStyle: TextStyle(color: AppColors.grey),
@@ -99,19 +101,21 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                             controller: amountController,
                             cursorColor: AppColors.white,
                             decoration: InputDecoration(
-                              focusedBorder: UnderlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: AppColors.orange)),
+                              focusedBorder: Theme.of(context)
+                                  .inputDecorationTheme
+                                  .focusedBorder,
                               label: Text.rich(
                                 TextSpan(
                                   text: 'Amount ',
-                                  style: TextStyle(color: AppColors.white),
+                                  style: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .labelStyle,
                                   children: [
                                     TextSpan(
-                                      text: '(sats)',
-                                      style: TextStyle(
-                                          color: AppColors.grey, fontSize: 17),
-                                    ),
+                                        text: '(sats)',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall),
                                   ],
                                 ),
                               ),
@@ -140,8 +144,8 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text('Expiration',
-                                    style: TextStyle(
-                                        color: AppColors.white, fontSize: 20)),
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall),
                               ),
                               SwitchListTile(
                                   title: Text.rich(
@@ -230,16 +234,14 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.restore,
                 color: AppColors.white,
               ),
               Text(
                 'Reset',
-                style: TextStyle(
-                  color: AppColors.white,
-                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -292,17 +294,12 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.qr_code_scanner,
                 color: AppColors.white,
               ),
-              Text(
-                'Create',
-                style: TextStyle(
-                  color: AppColors.white,
-                ),
-              ),
+              Text('Create', style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
         ),
