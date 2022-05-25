@@ -52,7 +52,7 @@ class ReceiveScreen extends StatelessWidget {
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.create,
                               color: AppColors.white,
@@ -60,9 +60,7 @@ class ReceiveScreen extends StatelessWidget {
                             Text(
                               'Create invoice',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AppColors.white,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
                         ),
@@ -98,17 +96,13 @@ class ReceiveScreen extends StatelessWidget {
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.bolt,
                               color: AppColors.white,
                             ),
-                            Text(
-                              'LNURL',
-                              style: TextStyle(
-                                color: AppColors.white,
-                              ),
-                            )
+                            Text('LNURL',
+                                style: Theme.of(context).textTheme.bodySmall)
                           ],
                         ),
                       ),
