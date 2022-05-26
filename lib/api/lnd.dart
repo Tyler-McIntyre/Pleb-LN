@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebolt/models/channels.dart';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
 import 'package:firebolt/models/utxos_request.dart';
@@ -19,41 +20,48 @@ class LND {
   RestApi rest = RestApi();
   Future<ChannelBalance> getChannelsBalance() async {
     Response response = await rest.getRequest('/v1/balance/channels');
-    String textReponse = response.body;
-    return ChannelBalance.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return ChannelBalance.fromJson(jsonDecode(responseBody));
   }
 
   Future<BlockchainBalance> getBlockchainBalance() async {
     Response response = await rest.getRequest('/v1/balance/blockchain');
-    String textReponse = response.body;
-    return BlockchainBalance.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return BlockchainBalance.fromJson(jsonDecode(responseBody));
   }
 
   Future<UTXOS> getUnspentUTXOS(UTXOSRequest params) async {
     Response response =
         await rest.postRequest('/v2/wallet/utxos', params.toJson());
-    String textReponse = response.body;
-    return UTXOS.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return UTXOS.fromJson(jsonDecode(responseBody));
   }
 
   Future<Payments> getPayments() async {
     Response response = await rest.getRequest('/v1/payments');
-    String textReponse = response.body;
-    return Payments.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return Payments.fromJson(jsonDecode(responseBody));
   }
 
   Future<Invoices> getInvoices() async {
     Response response = await rest
         .getRequest('/v1/invoices?reversed=true&num_max_invoices=100');
-    String textReponse = response.body;
+    String responseBody = response.body;
 
-    return Invoices.fromJson(jsonDecode(textReponse));
+    return Invoices.fromJson(jsonDecode(responseBody));
+  }
+
+  Future<Channels> getChannels() async {
+    Response response = await rest.getRequest('/v1/channels');
+    String responseBody = response.body;
+
+    return Channels.fromJson(jsonDecode(responseBody));
   }
 
   Future<Transactions> getTransactions() async {
     Response response = await rest.getRequest('/v1/transactions');
-    String textReponse = response.body;
-    return Transactions.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return Transactions.fromJson(jsonDecode(responseBody));
   }
 
   Future<PaymentStatus> payLightningInvoice(Payment data) async {
@@ -72,20 +80,20 @@ class LND {
 
   Future<PaymentRequest> decodePaymentRequest(String invoice) async {
     Response response = await rest.getRequest('/v1/payreq/$invoice');
-    String textReponse = response.body;
-    return PaymentRequest.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return PaymentRequest.fromJson(jsonDecode(responseBody));
   }
 
   Future<Invoice> createInvoice(InvoiceRequest data) async {
     Response response = await rest.postRequest('/v1/invoices', data.toJson());
-    String textReponse = response.body;
-    return Invoice.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return Invoice.fromJson(jsonDecode(responseBody));
   }
 
   Future<Invoice> getInvoice(String rHash) async {
     String hex = Formatting.base64ToHex(rHash);
     Response response = await rest.getRequest('/v1/invoice/$hex');
-    String textReponse = response.body;
-    return Invoice.fromJson(jsonDecode(textReponse));
+    String responseBody = response.body;
+    return Invoice.fromJson(jsonDecode(responseBody));
   }
 }

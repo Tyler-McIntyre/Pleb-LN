@@ -1,19 +1,15 @@
-import 'package:firebolt/UI/constants/utxo_status.dart';
-import 'package:firebolt/models/payment_response.dart';
-import 'package:firebolt/models/utxo.dart';
-import 'package:firebolt/models/utxos.dart';
-import 'package:firebolt/models/utxos_request.dart';
+import 'package:firebolt/UI/constants/channel_type.dart';
+import 'package:firebolt/models/channels.dart';
 import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
-import 'package:tuple/tuple.dart';
 import '../../api/lnd.dart';
-import '../../models/invoice.dart';
+import '../../models/channel.dart';
 import '../../models/invoices.dart';
 import '../../models/payments.dart';
 import '../../util/app_colors.dart';
-
-enum activitySortOptions { DateReceived, SentOnly, ReceivedOnly }
+import '../constants/transfer_type.dart';
+import '../constants/tx_sort_type.dart';
 
 class Activities extends StatefulWidget {
   const Activities({Key? key, required this.nodeIsConfigured})
@@ -25,19 +21,17 @@ class Activities extends StatefulWidget {
 }
 
 class _ActivitiesState extends State<Activities> {
-  activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
-  late List<Tuple4<Icon, String, DateTime, String>> txHistory;
-  late List<Tuple4<Icon, UTXOStatus, String, String>> utxos;
-  List<Widget> _activityCardList = [];
-  late Future<List<Tuple4<Icon, String, DateTime, String>>> _balanceDetails;
+  TxSortType _txSortType = TxSortType.DateReceived;
+  late Future<List<Tx>> _transactions;
+  late Future<Channels> _channels;
   final Map<String, Icon> _tabs = {
     'Transactions': const Icon(
       Icons.bolt,
       color: AppColors.yellow,
       size: 25,
     ),
-    'UTXOS': const Icon(
-      Icons.currency_bitcoin,
+    'Channels': const Icon(
+      Icons.network_check_outlined,
       color: AppColors.orange,
       size: 25,
     ),
@@ -45,28 +39,66 @@ class _ActivitiesState extends State<Activities> {
 
   @override
   void initState() {
-    _balanceDetails = _getBalanceDetails();
+    _transactions = _getTransactions(_txSortType);
+    _channels = _getChannels();
     super.initState();
   }
 
-  Future<List<Tuple4<Icon, String, DateTime, String>>>
-      _getBalanceDetails() async {
-    List<Tuple4<Icon, String, DateTime, String>> txHistory =
-        await _buildOffChainTxList();
-
-    //build the on chain UTXO luist
-    utxos = await _buildUTXOList();
-    //sort both by date
-    txHistory.sort((a, b) {
-      return b.item4.compareTo(a.item4);
+  Future<List<Tx>> _getTransactions(TxSortType sortOption) async {
+    LND api = LND();
+    Payments payments = await api.getPayments();
+    Invoices invoices = await api.getInvoices();
+    List<Tx> txList = [];
+    payments.payments.forEach((payment) {
+      txList.add(
+        Tx(
+            payment.valueSat,
+            Formatting.timestampNanoSecondsToDate(
+              int.parse(payment.creationTimeNanoSeconds),
+            ),
+            TransferType.sent),
+      );
     });
 
-    setState(() {
-      this.txHistory = txHistory;
+    invoices.invoices.forEach((payment) {
+      if (payment.settled == true &&
+          payment.value!.isNotEmpty &&
+          payment.settleDate!.isNotEmpty) {
+        txList.add(
+          Tx(
+              payment.value as String,
+              Formatting.timestampToDateTime(
+                int.parse(payment.settleDate!),
+              ),
+              TransferType.received),
+        );
+      }
     });
 
-    //combine the two lists and return
-    return txHistory;
+    switch (sortOption) {
+      case TxSortType.DateReceived:
+        txList.sort((a, b) {
+          return b.dateTime.compareTo(a.dateTime);
+        });
+        break;
+      case TxSortType.Sent:
+        txList =
+            txList.where((tx) => tx.transferType == TransferType.sent).toList();
+        break;
+      case TxSortType.Received:
+        txList = txList
+            .where((tx) => tx.transferType == TransferType.received)
+            .toList();
+        break;
+    }
+
+    return txList;
+  }
+
+  Future<Channels> _getChannels() async {
+    LND api = LND();
+    Channels channels = await api.getChannels();
+    return channels;
   }
 
   @override
@@ -110,152 +142,248 @@ class _ActivitiesState extends State<Activities> {
             ];
           },
           body: TabBarView(
-            children: _tabViews(),
+            children: [
+              _transactionsTabView(_tabs.entries.first),
+              _channelsTabView(_tabs.entries.last)
+            ],
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _tabViews() {
-    return _tabs.entries.map(
-      (tab) {
-        return SafeArea(
-          top: false,
-          bottom: false,
-          child: Builder(
-            builder: (BuildContext context) {
-              return CustomScrollView(
-                key: PageStorageKey<String>(tab.key),
-                slivers: <Widget>[
-                  SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                        context),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.only(top: 0),
-                    sliver: SliverFixedExtentList(
-                      itemExtent: 350,
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          return widget.nodeIsConfigured
-                              ? FutureBuilder(
-                                  future: _balanceDetails,
-                                  builder: (
-                                    context,
-                                    AsyncSnapshot<
-                                            List<
-                                                Tuple4<Icon, String, DateTime,
-                                                    String>>>
-                                        snapshot,
-                                  ) {
-                                    List<Widget> children = [];
-                                    if (snapshot.hasData) {
-                                      if (_activityCardList.isEmpty) {
-                                        _activityCardList =
-                                            _buildActivityCards(txHistory);
-                                      }
-                                      children = _activityCardList;
-                                    } else if (snapshot.hasError) {
-                                      children = <Widget>[
-                                        Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              1.25,
-                                          child: Column(
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 8.0),
-                                                child: const Icon(
-                                                  Icons.error_outline,
-                                                  color: Colors.red,
-                                                  size: 40,
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 16),
-                                                child: Text(
-                                                  'Error: ${snapshot.error}',
-                                                  style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .errorColor),
-                                                  textAlign: TextAlign.center,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                      ];
-                                    } else {
-                                      children = <Widget>[
-                                        Column(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 50.0),
-                                              child: SizedBox(
-                                                width: 60,
-                                                height: 60,
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              ),
+  Widget _transactionsTabView(MapEntry<String, Icon> tab) {
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Builder(
+        builder: (BuildContext context) {
+          return CustomScrollView(
+            key: PageStorageKey<String>(tab.key),
+            slivers: <Widget>[
+              SliverOverlapInjector(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 0),
+                sliver: SliverFixedExtentList(
+                  itemExtent: 300,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return widget.nodeIsConfigured
+                          ? FutureBuilder(
+                              future: _transactions,
+                              builder: (
+                                context,
+                                AsyncSnapshot<List<Tx>> snapshot,
+                              ) {
+                                List<Widget> children = [];
+                                if (snapshot.hasData) {
+                                  children = _buildTxListTiles(snapshot.data!);
+                                } else if (snapshot.hasError) {
+                                  children = <Widget>[
+                                    Container(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.25,
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 8.0),
+                                            child: const Icon(
+                                              Icons.error_outline,
+                                              color: Colors.red,
+                                              size: 40,
                                             ),
-                                          ],
-                                        ),
-                                      ];
-                                    }
-                                    return MediaQuery.removePadding(
-                                        removeTop: true,
-                                        context: context,
-                                        child: Scrollbar(
-                                          child: ListView(
-                                            padding: EdgeInsets.all(0),
-                                            children: children,
                                           ),
-                                        ));
-                                  },
-                                )
-                              : SizedBox.shrink();
-                        },
-                        childCount: 1,
-                      ),
-                    ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 16),
+                                            child: Text(
+                                              'Error: ${snapshot.error}',
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .errorColor),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ];
+                                } else {
+                                  children = <Widget>[
+                                    Column(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 50.0),
+                                          child: SizedBox(
+                                            width: 60,
+                                            height: 60,
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ];
+                                }
+                                return MediaQuery.removePadding(
+                                    removeTop: true,
+                                    context: context,
+                                    child: Scrollbar(
+                                      child: ListView(
+                                        padding: EdgeInsets.all(0),
+                                        children: children,
+                                      ),
+                                    ));
+                              },
+                            )
+                          : SizedBox.shrink();
+                    },
+                    childCount: 1,
                   ),
-                ],
-              );
-            },
-          ),
-        );
-      },
-    ).toList();
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
-  _buildActivityCards(List<Tuple4<Icon, String, DateTime, String>> txHistory) {
-    List<Card> txCardList = [];
+  Widget _channelsTabView(MapEntry<String, Icon> tab) {
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Builder(
+        builder: (BuildContext context) {
+          return CustomScrollView(
+            key: PageStorageKey<String>(tab.key),
+            slivers: <Widget>[
+              SliverOverlapInjector(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 0),
+                sliver: SliverFixedExtentList(
+                  itemExtent: 300,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return widget.nodeIsConfigured
+                          ? FutureBuilder(
+                              future: _channels,
+                              builder: (
+                                context,
+                                AsyncSnapshot<Channels> snapshot,
+                              ) {
+                                List<Widget> children = [];
+                                if (snapshot.hasData) {
+                                  children = _buildChannelListTiles(
+                                      snapshot.data!.channels);
+                                } else if (snapshot.hasError) {
+                                  children = <Widget>[
+                                    Container(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.25,
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 8.0),
+                                            child: const Icon(
+                                              Icons.error_outline,
+                                              color: Colors.red,
+                                              size: 40,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 16),
+                                            child: Text(
+                                              'Error: ${snapshot.error}',
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .errorColor),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ];
+                                } else {
+                                  children = <Widget>[
+                                    Column(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 50.0),
+                                          child: SizedBox(
+                                            width: 60,
+                                            height: 60,
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ];
+                                }
+                                return MediaQuery.removePadding(
+                                    removeTop: true,
+                                    context: context,
+                                    child: Scrollbar(
+                                      child: ListView(
+                                        padding: EdgeInsets.all(0),
+                                        children: children,
+                                      ),
+                                    ));
+                              },
+                            )
+                          : SizedBox.shrink();
+                    },
+                    childCount: 1,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
-    for (Tuple4<Icon, String, DateTime, String> tx in txHistory) {
-      txCardList.add(
+  _buildTxListTiles(List<Tx> txList) {
+    List<Card> txListTiles = [];
+
+    Icon sentIcon = Icon(Icons.send);
+    Icon receivedIcon = Icon(Icons.receipt);
+
+    for (Tx tx in txList) {
+      bool isSentTx = tx.transferType == TransferType.sent ? true : false;
+
+      txListTiles.add(
         Card(
           color: AppColors.blueGrey,
           child: ListTile(
+            // onTap: (){}, //TODO: navigate to transaction details page
             style: ListTileStyle.list,
-            leading: tx.item1, //Icon
+            leading: isSentTx ? sentIcon : receivedIcon,
             title: Text.rich(
               TextSpan(
                 text: null,
                 children: [
                   TextSpan(
-                    text: tx.item2, //sent/received
+                    text: tx.transferType.name,
                     style: const TextStyle(color: AppColors.grey, fontSize: 17),
                   ),
                   WidgetSpan(
                     child: Container(),
                   ),
                   TextSpan(
-                    text: Formatting.dateTimeToShortDate(tx.item3), //date
+                    text: Formatting.dateTimeToShortDate(tx.dateTime),
                     style: const TextStyle(fontSize: 18),
                   ),
                   WidgetSpan(
@@ -266,11 +394,13 @@ class _ActivitiesState extends State<Activities> {
             ),
             trailing: Text(
               '${MoneyFormatter(
-                amount: int.parse(tx.item4).toDouble(), //amount
+                amount: int.parse(tx.amount).toDouble(), //amount
               ).output.withoutFractionDigits} sats',
               style: TextStyle(
                 fontSize: 19,
-                color: (tx.item2 == 'Sent' ? AppColors.red : AppColors.green),
+                color: (tx.transferType == TransferType.sent
+                    ? AppColors.red
+                    : AppColors.green),
               ),
             ),
           ),
@@ -278,171 +408,208 @@ class _ActivitiesState extends State<Activities> {
       );
     }
 
-    return txCardList;
+    return txListTiles;
+  }
+
+  _buildChannelListTiles(List<Channel> channels) {
+    List<Card> channelListTiles = [];
+    Icon activeIcon;
+    Icon inactiveIcon;
+
+    for (Channel channel in channels) {
+      bool isActive = channel.active ? true : false;
+
+      if (!channel.private) {
+        activeIcon = Icon(
+          Icons.public,
+          color: AppColors.green,
+        );
+        inactiveIcon = Icon(
+          Icons.public,
+          color: AppColors.red,
+        );
+      } else {
+        activeIcon = Icon(
+          Icons.private_connectivity,
+          color: AppColors.green,
+        );
+        inactiveIcon = Icon(
+          Icons.private_connectivity,
+          color: AppColors.red,
+        );
+      }
+
+      channelListTiles.add(
+        Card(
+          color: AppColors.blueGrey,
+          child: ListTile(
+            // onTap: (){}, //TODO: navigate to channel details page
+            style: ListTileStyle.list,
+            leading: isActive ? activeIcon : inactiveIcon,
+            title: Text.rich(
+              TextSpan(
+                text: null,
+                children: [
+                  TextSpan(
+                    text: channel.private
+                        ? ChannelType.private.name
+                        : ChannelType.public.name,
+                    style: const TextStyle(color: AppColors.grey, fontSize: 17),
+                  ),
+                  WidgetSpan(
+                    child: Container(),
+                  ),
+                  TextSpan(
+                    text: channel.chanId,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  WidgetSpan(
+                    child: Container(),
+                  ),
+                ],
+              ),
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Capacity',
+                  style: TextStyle(color: AppColors.grey, fontSize: 16),
+                ),
+                Text.rich(
+                  TextSpan(
+                      text: channel.capacity,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      children: [
+                        TextSpan(
+                          text: 'sats',
+                          style: TextStyle(
+                            color: AppColors.grey,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return channelListTiles;
   }
 
   _actionsButtonBar() {
     return [
-      PopupMenuButton<String>(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          side: const BorderSide(color: AppColors.orange),
-        ),
-        color: AppColors.blackSecondary,
-        icon: const Icon(Icons.filter_alt),
-        onSelected: (String result) {
-          switch (result) {
-            case 'Date':
-              setState(() {
-                _activitySortOption = activitySortOptions.DateReceived;
-                _activityCardList = _buildActivityCards(txHistory);
-              });
-              break;
-            case 'Sent':
-              setState(() {
-                _activitySortOption = activitySortOptions.SentOnly;
-                _activityCardList = _buildActivityCards(txHistory
-                    .where((element) => element.item2.toLowerCase() == 'sent')
-                    .toList());
-              });
-              break;
-            case 'Received':
-              setState(() {
-                _activitySortOption = activitySortOptions.ReceivedOnly;
-                _activityCardList = _buildActivityCards(txHistory
-                    .where(
-                        (element) => element.item2.toLowerCase() == 'received')
-                    .toList());
-              });
-              break;
-            default:
-          }
+      IconButton(
+        icon: Icon(Icons.connect_without_contact),
+        onPressed: () {
+          final snackBar = SnackBar(
+            content: Text(
+              'Coming Soon -> Open a channel!',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20),
+            ),
+            backgroundColor: (AppColors.blueSecondary),
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         },
-        itemBuilder: (BuildContext context) => [
-          PopupMenuItem<String>(
-            value: 'Date',
-            child: ListTile(
-              leading: Radio<activitySortOptions>(
-                fillColor: MaterialStateProperty.all(AppColors.white),
-                value: activitySortOptions.DateReceived,
-                groupValue: _activitySortOption,
-                onChanged: null,
-              ),
-              tileColor: AppColors.blackSecondary,
-              textColor: AppColors.white,
-              title: Text(
-                'Date',
-                style: Theme.of(context).textTheme.bodySmall,
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: PopupMenuButton<String>(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            side: const BorderSide(color: AppColors.orange),
+          ),
+          color: AppColors.blackSecondary,
+          icon: const Icon(Icons.filter_alt),
+          onSelected: (String result) {
+            switch (result) {
+              case 'Date':
+                setState(() {
+                  _txSortType = TxSortType.DateReceived;
+                  _transactions = _getTransactions(_txSortType);
+                });
+                break;
+              case 'Sent':
+                setState(() {
+                  _txSortType = TxSortType.Sent;
+                  _transactions = _getTransactions(_txSortType);
+                });
+                break;
+              case 'Received':
+                setState(() {
+                  _txSortType = TxSortType.Received;
+                  _transactions = _getTransactions(_txSortType);
+                });
+                break;
+              default:
+            }
+          },
+          itemBuilder: (BuildContext context) => [
+            PopupMenuItem<String>(
+              value: 'Date',
+              child: ListTile(
+                leading: Radio<TxSortType>(
+                  fillColor: MaterialStateProperty.all(AppColors.white),
+                  value: TxSortType.DateReceived,
+                  groupValue: _txSortType,
+                  onChanged: null,
+                ),
+                tileColor: AppColors.blackSecondary,
+                textColor: AppColors.white,
+                title: Text(
+                  'Date',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ),
-          ),
-          PopupMenuItem<String>(
-            value: 'Sent',
-            child: ListTile(
-              leading: Radio<activitySortOptions>(
-                fillColor: MaterialStateProperty.all(AppColors.white),
-                value: activitySortOptions.SentOnly,
-                groupValue: _activitySortOption,
-                onChanged: null,
-              ),
-              tileColor: AppColors.blackSecondary,
-              textColor: AppColors.white,
-              title: Text(
-                'Sent',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: 'Received',
-            child: ListTile(
-              leading: Radio<activitySortOptions>(
-                fillColor: MaterialStateProperty.all(AppColors.white),
-                value: activitySortOptions.ReceivedOnly,
-                groupValue: _activitySortOption,
-                onChanged: null,
-              ),
-              tileColor: AppColors.blackSecondary,
-              textColor: AppColors.white,
-              title: Text(
-                'Received',
-                style: Theme.of(context).textTheme.bodySmall,
+            PopupMenuItem<String>(
+              value: 'Sent',
+              child: ListTile(
+                leading: Radio<TxSortType>(
+                  fillColor: MaterialStateProperty.all(AppColors.white),
+                  value: TxSortType.Sent,
+                  groupValue: _txSortType,
+                  onChanged: null,
+                ),
+                tileColor: AppColors.blackSecondary,
+                textColor: AppColors.white,
+                title: Text(
+                  'Sent',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ),
-          ),
-        ],
+            PopupMenuItem<String>(
+              value: 'Received',
+              child: ListTile(
+                leading: Radio<TxSortType>(
+                  fillColor: MaterialStateProperty.all(AppColors.white),
+                  value: TxSortType.Received,
+                  groupValue: _txSortType,
+                  onChanged: null,
+                ),
+                tileColor: AppColors.blackSecondary,
+                textColor: AppColors.white,
+                title: Text(
+                  'Received',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ),
+          ],
+        ),
       )
     ];
   }
+}
 
-  Future<List<Tuple4<Icon, String, DateTime, String>>>
-      _buildOffChainTxList() async {
-    List<Tuple4<Icon, String, DateTime, String>> alltxHistory = [];
-    LND api = LND();
-    Payments payments = await api.getPayments();
-    for (PaymentResponse payment in payments.payments) {
-      DateTime sentDateTime = Formatting.timestampNanoSecondsToDate(
-          int.parse(payment.creationTimeNanoSeconds));
-
-      alltxHistory.add(
-        Tuple4(
-            Icon(
-              Icons.send,
-              color: AppColors.white,
-            ),
-            'Sent',
-            sentDateTime,
-            payment.valueSat),
-      );
-    }
-
-    Invoices invoices = await api.getInvoices();
-    for (Invoice invoice in invoices.invoices) {
-      DateTime receivedDateTime =
-          Formatting.timestampToDateTime(int.parse(invoice.settleDate!));
-
-      if (invoice.settleDate != '0') {
-        alltxHistory.add(
-          Tuple4(
-              Icon(
-                Icons.receipt,
-                color: AppColors.white,
-              ),
-              'Received',
-              receivedDateTime,
-              invoice.value.toString()),
-        );
-      }
-    }
-
-    return alltxHistory;
-  }
-
-  Future<List<Tuple4<Icon, UTXOStatus, String, String>>>
-      _buildUTXOList() async {
-    List<Tuple4<Icon, UTXOStatus, String, String>> utxoList = [];
-
-    //* Currently we have no good way to test UTXO's with polar
-    LND api = LND();
-    UTXOSRequest params = UTXOSRequest(0, 1000, null, false);
-    UTXOS response = await api.getUnspentUTXOS(params);
-
-    for (UTXO utxo in response.utxos) {
-      bool balanceIsConfirmed =
-          int.parse(utxo.confirmations) >= 1 ? true : false;
-      utxoList.add(
-        Tuple4(
-          Icon(
-            Icons.receipt,
-            color: AppColors.white,
-          ),
-          balanceIsConfirmed ? UTXOStatus.confirmed : UTXOStatus.unconfirmed,
-          '${utxo.confirmations} confirmations',
-          utxo.amountSat,
-        ),
-      );
-    }
-
-    return utxoList;
-  }
+class Tx {
+  String amount;
+  DateTime dateTime;
+  TransferType transferType;
+  Tx(this.amount, this.dateTime, this.transferType);
 }
