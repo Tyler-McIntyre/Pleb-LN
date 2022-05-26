@@ -8,14 +8,14 @@ import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
 import 'payment_splash_screen.dart';
 
-class SendScreen extends StatefulWidget {
-  const SendScreen({Key? key}) : super(key: key);
+class PayScreen extends StatefulWidget {
+  const PayScreen({Key? key}) : super(key: key);
 
   @override
-  State<SendScreen> createState() => _SendScreenState();
+  State<PayScreen> createState() => _PayScreenState();
 }
 
-class _SendScreenState extends State<SendScreen> {
+class _PayScreenState extends State<PayScreen> {
   late String qrCode;
   final _formKey = GlobalKey<FormState>();
   TextEditingController invoiceController = TextEditingController();

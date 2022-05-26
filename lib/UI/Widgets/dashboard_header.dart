@@ -1,5 +1,5 @@
 import 'package:firebolt/UI/create_invoice_screen.dart';
-import 'package:firebolt/UI/send_screen.dart';
+import 'package:firebolt/UI/pay_screen.dart';
 import 'package:firebolt/models/blockchain_balance.dart';
 import 'package:firebolt/api/lnd.dart';
 import 'package:flutter/material.dart';
@@ -236,7 +236,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const SendScreen(),
+                builder: (context) => const PayScreen(),
               ));
         },
         style: ElevatedButton.styleFrom(
