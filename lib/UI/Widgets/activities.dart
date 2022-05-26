@@ -23,15 +23,14 @@ class Activities extends StatefulWidget {
 class _ActivitiesState extends State<Activities> {
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
   late List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory;
-  //TODO: create the onChainTxHistory list
   List<Widget> _activityCardList = [];
   final Map<String, Icon> _tabs = {
-    'Off-Chain': const Icon(
+    'Transactions': const Icon(
       Icons.bolt,
       color: AppColors.yellow,
       size: 25,
     ),
-    'On-Chain': const Icon(
+    'UTXOS': const Icon(
       Icons.currency_bitcoin,
       color: AppColors.orange,
       size: 25,

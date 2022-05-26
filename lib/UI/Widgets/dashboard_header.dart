@@ -146,7 +146,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                             });
                           },
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               nicknameController.text.isNotEmpty
                                   ? Text(
