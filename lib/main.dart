@@ -31,7 +31,7 @@ class _FireBoltState extends State<FireBolt> {
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.orange)),
           hintStyle: TextStyle(color: AppColors.grey, fontSize: 22),
-          labelStyle: TextStyle(color: AppColors.greySecondary, fontSize: 35),
+          labelStyle: TextStyle(color: AppColors.greySecondary, fontSize: 30),
         ),
         textTheme: TextTheme(
           labelSmall: TextStyle(color: AppColors.white, fontSize: 18),

@@ -314,7 +314,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
         NumberPicker(
           value: _currentHourValue,
           minValue: 0,
-          maxValue: 24,
+          maxValue: 72,
           textStyle: TextStyle(color: AppColors.white),
           selectedTextStyle: TextStyle(color: AppColors.orange, fontSize: 25),
           onChanged: (value) {

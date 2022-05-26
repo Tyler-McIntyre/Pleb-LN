@@ -20,18 +20,7 @@ class _NodeConfigScreenState extends State<NodeConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniStartDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: FloatingActionButton(
-            backgroundColor: AppColors.black,
-            foregroundColor: AppColors.white,
-            child: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.maybePop(
-                  context,
-                )),
-      ),
+      appBar: AppBar(),
       resizeToAvoidBottomInset: false,
       body: NodeConfigForm(),
     );
@@ -101,7 +90,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               color: AppColors.black,
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 60),
+                  padding: const EdgeInsets.only(top: 20),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width / 1.1,
                     child: Column(
