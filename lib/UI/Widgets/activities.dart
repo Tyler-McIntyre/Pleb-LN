@@ -1,4 +1,8 @@
+import 'package:firebolt/UI/constants/utxo_status.dart';
 import 'package:firebolt/models/payment_response.dart';
+import 'package:firebolt/models/utxo.dart';
+import 'package:firebolt/models/utxos.dart';
+import 'package:firebolt/models/utxos_request.dart';
 import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
@@ -22,8 +26,10 @@ class Activities extends StatefulWidget {
 
 class _ActivitiesState extends State<Activities> {
   activitySortOptions? _activitySortOption = activitySortOptions.DateReceived;
-  late List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory;
+  late List<Tuple4<Icon, String, DateTime, String>> txHistory;
+  late List<Tuple4<Icon, UTXOStatus, String, String>> utxos;
   List<Widget> _activityCardList = [];
+  late Future<List<Tuple4<Icon, String, DateTime, String>>> _balanceDetails;
   final Map<String, Icon> _tabs = {
     'Transactions': const Icon(
       Icons.bolt,
@@ -37,24 +43,30 @@ class _ActivitiesState extends State<Activities> {
     ),
   };
 
-  Future<List<Tuple5<Icon, String, String, DateTime, String>>>
-      _getTransactions() async {
-    List<Tuple5<Icon, String, String, DateTime, String>> offChainTxHistory =
+  @override
+  void initState() {
+    _balanceDetails = _getBalanceDetails();
+    super.initState();
+  }
+
+  Future<List<Tuple4<Icon, String, DateTime, String>>>
+      _getBalanceDetails() async {
+    List<Tuple4<Icon, String, DateTime, String>> txHistory =
         await _buildOffChainTxList();
 
     //build the on chain UTXO luist
-
+    utxos = await _buildUTXOList();
     //sort both by date
-    offChainTxHistory.sort((a, b) {
+    txHistory.sort((a, b) {
       return b.item4.compareTo(a.item4);
     });
 
     setState(() {
-      this.offChainTxHistory = offChainTxHistory;
+      this.txHistory = txHistory;
     });
 
     //combine the two lists and return
-    return offChainTxHistory;
+    return txHistory;
   }
 
   @override
@@ -75,7 +87,7 @@ class _ActivitiesState extends State<Activities> {
                   actions: _actionsButtonBar(),
                   backgroundColor: AppColors.black,
                   title: Text(
-                    'Activity',
+                    'Balance info',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   pinned: true,
@@ -105,7 +117,7 @@ class _ActivitiesState extends State<Activities> {
     );
   }
 
-  _tabViews() {
+  List<Widget> _tabViews() {
     return _tabs.entries.map(
       (tab) {
         return SafeArea(
@@ -128,20 +140,20 @@ class _ActivitiesState extends State<Activities> {
                         (BuildContext context, int index) {
                           return widget.nodeIsConfigured
                               ? FutureBuilder(
-                                  future: _getTransactions(),
+                                  future: _balanceDetails,
                                   builder: (
                                     context,
                                     AsyncSnapshot<
                                             List<
-                                                Tuple5<Icon, String, String,
-                                                    DateTime, String>>>
+                                                Tuple4<Icon, String, DateTime,
+                                                    String>>>
                                         snapshot,
                                   ) {
                                     List<Widget> children = [];
                                     if (snapshot.hasData) {
                                       if (_activityCardList.isEmpty) {
-                                        _activityCardList = _buildActivityCards(
-                                            offChainTxHistory);
+                                        _activityCardList =
+                                            _buildActivityCards(txHistory);
                                       }
                                       children = _activityCardList;
                                     } else if (snapshot.hasError) {
@@ -221,11 +233,10 @@ class _ActivitiesState extends State<Activities> {
     ).toList();
   }
 
-  _buildActivityCards(
-      List<Tuple5<Icon, String, String, DateTime, String>> txHistory) {
+  _buildActivityCards(List<Tuple4<Icon, String, DateTime, String>> txHistory) {
     List<Card> txCardList = [];
 
-    for (Tuple5<Icon, String, String, DateTime, String> tx in txHistory) {
+    for (Tuple4<Icon, String, DateTime, String> tx in txHistory) {
       txCardList.add(
         Card(
           color: AppColors.blueGrey,
@@ -244,7 +255,7 @@ class _ActivitiesState extends State<Activities> {
                     child: Container(),
                   ),
                   TextSpan(
-                    text: Formatting.dateTimeToShortDate(tx.item4), //date
+                    text: Formatting.dateTimeToShortDate(tx.item3), //date
                     style: const TextStyle(fontSize: 18),
                   ),
                   WidgetSpan(
@@ -255,7 +266,7 @@ class _ActivitiesState extends State<Activities> {
             ),
             trailing: Text(
               '${MoneyFormatter(
-                amount: int.parse(tx.item5).toDouble(), //amount
+                amount: int.parse(tx.item4).toDouble(), //amount
               ).output.withoutFractionDigits} sats',
               style: TextStyle(
                 fontSize: 19,
@@ -284,13 +295,13 @@ class _ActivitiesState extends State<Activities> {
             case 'Date':
               setState(() {
                 _activitySortOption = activitySortOptions.DateReceived;
-                _activityCardList = _buildActivityCards(offChainTxHistory);
+                _activityCardList = _buildActivityCards(txHistory);
               });
               break;
             case 'Sent':
               setState(() {
                 _activitySortOption = activitySortOptions.SentOnly;
-                _activityCardList = _buildActivityCards(offChainTxHistory
+                _activityCardList = _buildActivityCards(txHistory
                     .where((element) => element.item2.toLowerCase() == 'sent')
                     .toList());
               });
@@ -298,7 +309,7 @@ class _ActivitiesState extends State<Activities> {
             case 'Received':
               setState(() {
                 _activitySortOption = activitySortOptions.ReceivedOnly;
-                _activityCardList = _buildActivityCards(offChainTxHistory
+                _activityCardList = _buildActivityCards(txHistory
                     .where(
                         (element) => element.item2.toLowerCase() == 'received')
                     .toList());
@@ -364,23 +375,22 @@ class _ActivitiesState extends State<Activities> {
     ];
   }
 
-  _buildOffChainTxList() async {
-    List<Tuple5<Icon, String, String, DateTime, String>> allOffChainTxHistory =
-        [];
+  Future<List<Tuple4<Icon, String, DateTime, String>>>
+      _buildOffChainTxList() async {
+    List<Tuple4<Icon, String, DateTime, String>> alltxHistory = [];
     LND api = LND();
     Payments payments = await api.getPayments();
     for (PaymentResponse payment in payments.payments) {
       DateTime sentDateTime = Formatting.timestampNanoSecondsToDate(
           int.parse(payment.creationTimeNanoSeconds));
 
-      allOffChainTxHistory.add(
-        Tuple5(
+      alltxHistory.add(
+        Tuple4(
             Icon(
               Icons.send,
               color: AppColors.white,
             ),
             'Sent',
-            'off-chain',
             sentDateTime,
             payment.valueSat),
       );
@@ -392,20 +402,47 @@ class _ActivitiesState extends State<Activities> {
           Formatting.timestampToDateTime(int.parse(invoice.settleDate!));
 
       if (invoice.settleDate != '0') {
-        allOffChainTxHistory.add(
-          Tuple5(
+        alltxHistory.add(
+          Tuple4(
               Icon(
                 Icons.receipt,
                 color: AppColors.white,
               ),
               'Received',
-              'off-chain',
               receivedDateTime,
               invoice.value.toString()),
         );
       }
     }
 
-    return allOffChainTxHistory;
+    return alltxHistory;
+  }
+
+  Future<List<Tuple4<Icon, UTXOStatus, String, String>>>
+      _buildUTXOList() async {
+    List<Tuple4<Icon, UTXOStatus, String, String>> utxoList = [];
+
+    //* Currently we have no good way to test UTXO's with polar
+    LND api = LND();
+    UTXOSRequest params = UTXOSRequest(0, 1000, null, false);
+    UTXOS response = await api.getUnspentUTXOS(params);
+
+    for (UTXO utxo in response.utxos) {
+      bool balanceIsConfirmed =
+          int.parse(utxo.confirmations) >= 1 ? true : false;
+      utxoList.add(
+        Tuple4(
+          Icon(
+            Icons.receipt,
+            color: AppColors.white,
+          ),
+          balanceIsConfirmed ? UTXOStatus.confirmed : UTXOStatus.unconfirmed,
+          '${utxo.confirmations} confirmations',
+          utxo.amountSat,
+        ),
+      );
+    }
+
+    return utxoList;
   }
 }

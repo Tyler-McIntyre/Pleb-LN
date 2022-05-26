@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
+import 'package:firebolt/models/utxos_request.dart';
 import 'package:http/src/response.dart';
 import '../UI/Constants/payment_status.dart';
 import '../models/blockchain_balance.dart';
@@ -10,6 +11,7 @@ import '../models/invoice_request.dart';
 import '../models/invoices.dart';
 import '../models/payment.dart';
 import '../models/payments.dart';
+import '../models/utxos.dart';
 import '../util/formatting.dart';
 import 'rest.dart';
 
@@ -25,6 +27,13 @@ class LND {
     Response response = await rest.getRequest('/v1/balance/blockchain');
     String textReponse = response.body;
     return BlockchainBalance.fromJson(jsonDecode(textReponse));
+  }
+
+  Future<UTXOS> getUnspentUTXOS(UTXOSRequest params) async {
+    Response response =
+        await rest.postRequest('/v2/wallet/utxos', params.toJson());
+    String textReponse = response.body;
+    return UTXOS.fromJson(jsonDecode(textReponse));
   }
 
   Future<Payments> getPayments() async {

@@ -1,0 +1,1 @@
+enum UTXOStatus { confirmed, unconfirmed }
