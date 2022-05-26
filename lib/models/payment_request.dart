@@ -12,9 +12,11 @@ class PaymentRequest {
   String description;
   @JsonKey(name: 'num_msat')
   String num_msat;
+  @JsonKey(name: 'timestamp')
+  String timestamp;
 
-  PaymentRequest(
-      this.num_satoshis, this.expiry, this.description, this.num_msat);
+  PaymentRequest(this.num_satoshis, this.expiry, this.description,
+      this.num_msat, this.timestamp);
 
   factory PaymentRequest.fromJson(Map<String, dynamic> json) =>
       _$PaymentRequestFromJson(json);

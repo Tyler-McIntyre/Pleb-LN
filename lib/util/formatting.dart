@@ -31,4 +31,23 @@ class Formatting {
   static String dateTimeToShortDate(DateTime date) {
     return formatter.format(date);
   }
+
+  static Duration getDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    int twoDigitMinutes =
+        int.parse(twoDigits(duration.inMinutes.remainder(60)));
+    int twoDigitSeconds =
+        int.parse(twoDigits(duration.inSeconds.remainder(60)));
+    return Duration(
+        hours: duration.inHours,
+        minutes: twoDigitMinutes,
+        seconds: twoDigitSeconds);
+  }
+
+  static DateTime getExpirationDate(int timestamp, int expiryInSeconds) {
+    DateTime formattedTimestamp = Formatting.timestampToDateTime(timestamp);
+    DateTime expirationDate =
+        formattedTimestamp.add(Duration(seconds: expiryInSeconds));
+    return expirationDate.toLocal();
+  }
 }

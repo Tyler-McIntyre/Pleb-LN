@@ -5,6 +5,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../api/lnd.dart';
 import '../util/app_colors.dart';
+import '../util/formatting.dart';
 import 'Widgets/curve_clipper.dart';
 import 'payment_splash_screen.dart';
 
@@ -301,13 +302,18 @@ class _PayScreenState extends State<PayScreen> {
   void _setConfigFormFields(PaymentRequest paymentRequest, String invoice) {
     String amount = paymentRequest.num_satoshis;
 
+    int timestamp = int.parse(paymentRequest.timestamp);
+    int expiryInSeconds = int.parse(paymentRequest.expiry);
+    DateTime expirationDate =
+        Formatting.getExpirationDate(timestamp, expiryInSeconds);
+
     setState(() {
       invoiceController.text = invoice;
       amountController.text = '${MoneyFormatter(
         amount: int.parse(amount).toDouble(),
       ).output.withoutFractionDigits}';
       memoController.text = paymentRequest.description;
-      expiryController.text = paymentRequest.expiry;
+      expiryController.text = expirationDate.toString();
     });
   }
 
