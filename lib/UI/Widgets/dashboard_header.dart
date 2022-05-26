@@ -146,12 +146,21 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                             });
                           },
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                nicknameController.text,
-                                style: Theme.of(context).textTheme.titleSmall,
-                              ),
+                              nicknameController.text.isNotEmpty
+                                  ? Text(
+                                      nicknameController.text,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    )
+                                  : Text(
+                                      'Confirmed balance',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall,
+                                    ),
                               balanceWidgets[balanceWidgetIndex],
                             ],
                           ),
