@@ -30,55 +30,41 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.black,
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniStartDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: FloatingActionButton(
-            backgroundColor: AppColors.black,
-            foregroundColor: AppColors.white,
-            child: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.maybePop(
-                  context,
-                )),
-      ),
+      appBar: AppBar(),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Container(
-            margin: const EdgeInsets.only(top: 10),
-            width: MediaQuery.of(context).size.width / 1.15,
-            child: ListView.builder(
-              itemCount: listTileInfo.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Card(
-                      child: ListTile(
-                        onTap: () {
-                          final snackBar = SnackBar(
-                            content: Text(
-                              'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            backgroundColor: (AppColors.blueSecondary),
-                          );
+        child: Container(
+          margin: const EdgeInsets.only(top: 10),
+          width: MediaQuery.of(context).size.width / 1.15,
+          child: ListView.builder(
+            itemCount: listTileInfo.length,
+            itemBuilder: (context, index) {
+              return Column(
+                children: [
+                  Card(
+                    child: ListTile(
+                      onTap: () {
+                        final snackBar = SnackBar(
+                          content: Text(
+                            'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          backgroundColor: (AppColors.blueSecondary),
+                        );
 
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        },
-                        leading: listTileInfo.keys.toList()[index],
-                        title: Text(
-                          listTileInfo.values.toList()[index],
-                          style: TextStyle(fontSize: 25),
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios),
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      },
+                      leading: listTileInfo.keys.toList()[index],
+                      title: Text(
+                        listTileInfo.values.toList()[index],
+                        style: TextStyle(fontSize: 25),
                       ),
+                      trailing: const Icon(Icons.arrow_forward_ios),
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
