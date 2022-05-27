@@ -6,8 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../api/lnd.dart';
+import '../constants/payment_status.dart';
 import '../models/payment.dart';
-import 'Constants/payment_status.dart';
 import 'dashboard_screen.dart';
 
 class PaymentSplashScreen extends StatefulWidget {

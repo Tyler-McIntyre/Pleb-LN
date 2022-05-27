@@ -45,6 +45,7 @@ dependencies:
   numberpicker: ^2.1.1
   google_fonts: ^3.0.1
   page_transition: ^2.0.5
+  convert: ^3.0.1
 
 dev_dependencies:
   flutter_test:

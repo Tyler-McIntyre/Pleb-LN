@@ -15,6 +15,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late bool nodeIsConfigured;
+  late Future<bool> _init;
   bool _isExpanded = false;
   Icon caretIcon = Icon(FontAwesomeIcons.caretUp);
   @override
@@ -24,16 +25,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   init() async {
-    String nodeIsConfigured = await _nodeIsConfigured();
+    _init = _nodeIsConfigured();
+  }
+
+  Future<bool> _nodeIsConfigured() async {
+    String result = await SecureStorage.readValue('isConfigured') ?? 'false';
     setState(() {
-      nodeIsConfigured == 'true'
+      result == 'true'
           ? this.nodeIsConfigured = true
           : this.nodeIsConfigured = false;
     });
-  }
-
-  Future<String> _nodeIsConfigured() async {
-    return await SecureStorage.readValue('isConfigured') ?? 'false';
+    return true;
   }
 
   int containerTransitionSpeedCollapse = 400;
@@ -65,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: FutureBuilder(
-        future: _nodeIsConfigured(),
+        future: _init,
         builder: (context, snapshot) {
           late Widget child;
           if (snapshot.hasData) {

@@ -1,15 +1,16 @@
-import 'package:firebolt/UI/constants/channel_type.dart';
 import 'package:firebolt/models/channels.dart';
 import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../api/lnd.dart';
+import '../../constants/channel_type.dart';
+import '../../constants/transfer_type.dart';
+import '../../constants/tx_sort_type.dart';
 import '../../models/channel.dart';
 import '../../models/invoices.dart';
 import '../../models/payments.dart';
 import '../../util/app_colors.dart';
-import '../constants/transfer_type.dart';
-import '../constants/tx_sort_type.dart';
+import '../open_channel_screen.dart';
 
 class Activities extends StatefulWidget {
   const Activities({Key? key, required this.nodeIsConfigured})
@@ -504,16 +505,12 @@ class _ActivitiesState extends State<Activities> {
       IconButton(
         icon: Icon(Icons.connect_without_contact),
         onPressed: () {
-          final snackBar = SnackBar(
-            content: Text(
-              'Coming Soon -> Open a channel!',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 20),
-            ),
-            backgroundColor: (AppColors.blueSecondary),
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          //TODO: redirect to OpenChannel screen
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OpenChannelScreen(),
+              ));
         },
       ),
       Padding(

@@ -1,28 +1,28 @@
-import 'package:firebolt/models/payment_request.dart';
+import 'package:convert/convert.dart';
+import 'package:firebolt/models/open_channel.dart';
+import 'package:firebolt/models/open_channel_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:money_formatter/money_formatter.dart';
 import '../api/lnd.dart';
 import '../util/app_colors.dart';
-import '../util/formatting.dart';
 import 'Widgets/curve_clipper.dart';
-import 'payment_splash_screen.dart';
 
-class PayScreen extends StatefulWidget {
-  const PayScreen({Key? key}) : super(key: key);
+class OpenChannelScreen extends StatefulWidget {
+  const OpenChannelScreen({Key? key}) : super(key: key);
 
   @override
-  State<PayScreen> createState() => _PayScreenState();
+  State<OpenChannelScreen> createState() => _OpenChannelScreenState();
 }
 
-class _PayScreenState extends State<PayScreen> {
+class _OpenChannelScreenState extends State<OpenChannelScreen> {
   late String qrCode;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController invoiceController = TextEditingController();
-  TextEditingController amountController = TextEditingController();
-  TextEditingController memoController = TextEditingController();
-  TextEditingController expiryController = TextEditingController();
+  TextEditingController nodePubkeyController = TextEditingController();
+  TextEditingController fundingAmountController = TextEditingController();
+  TextEditingController channelFeeController = TextEditingController();
+  bool _useDefaultChannelFee = true;
+  bool _privateChannel = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +44,12 @@ class _PayScreenState extends State<PayScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Enter the Lightning invoice you\'d like to pay',
-                            style: Theme.of(context).textTheme.displaySmall,
-                            textAlign: TextAlign.center,
-                          ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 10, 0, 30.0),
                             child: TextFormField(
-                              controller: invoiceController,
+                              controller: nodePubkeyController,
                               decoration: InputDecoration(
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -65,71 +61,84 @@ class _PayScreenState extends State<PayScreen> {
                                           await Clipboard.getData(
                                               Clipboard.kTextPlain);
                                       if (clipboardData!.text!.isNotEmpty) {
-                                        String invoice = clipboardData.text!;
-                                        PaymentRequest payReq =
-                                            await _decodePaymentRequest(
-                                                invoice);
-                                        _setConfigFormFields(payReq, invoice);
+                                        String nodePubkey = clipboardData.text!;
+
+                                        _setConfigFormFields(nodePubkey);
                                       }
                                     },
                                   ),
                                   focusedBorder: Theme.of(context)
                                       .inputDecorationTheme
                                       .focusedBorder,
-                                  label: Text('Invoice',
+                                  label: Text('Node pubkey',
                                       style: Theme.of(context)
                                           .inputDecorationTheme
                                           .labelStyle),
-                                  hintText: 'lnbc20m1pvjl...'),
+                                  hintText: '03f0ba19fd88e...'),
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
-                          //Memo
+                          //Funding Amount
                           TextFormField(
-                            controller: amountController,
+                            controller: fundingAmountController,
                             decoration: InputDecoration(
                               focusedBorder: Theme.of(context)
                                   .inputDecorationTheme
                                   .focusedBorder,
-                              label: Text('Amount',
+                              label: Text('Funding Amount',
                                   style: Theme.of(context)
                                       .inputDecorationTheme
                                       .labelStyle),
                             ),
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
+                          //Channel Fee
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 30.0),
-                            child: TextFormField(
-                              enabled: false,
-                              controller: memoController,
-                              decoration: InputDecoration(
-                                  focusedBorder: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder,
-                                  label: Text('Memo',
+                            padding: const EdgeInsets.fromLTRB(0, 30, 0, 8),
+                            child: SwitchListTile(
+                              onChanged: ((value) {
+                                setState(() {
+                                  _useDefaultChannelFee = value;
+                                });
+                              }),
+                              value: _useDefaultChannelFee,
+                              title: Text(
+                                'Channel fee',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              subtitle: _useDefaultChannelFee
+                                  ? Text(
+                                      'Default = 0 sats per vbyte',
                                       style: Theme.of(context)
-                                          .inputDecorationTheme
-                                          .labelStyle),
-                                  hintText: 'lnbc20m1pvjl...'),
+                                          .textTheme
+                                          .displaySmall,
+                                    )
+                                  : TextFormField(
+                                      controller: channelFeeController,
+                                      decoration: InputDecoration(
+                                          focusedBorder: Theme.of(context)
+                                              .inputDecorationTheme
+                                              .focusedBorder,
+                                          hintText: '...'),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                            ),
+                          ),
+                          //Channel Fee
+                          SwitchListTile(
+                            onChanged: ((value) {
+                              setState(() {
+                                _privateChannel = value;
+                              });
+                            }),
+                            value: _privateChannel,
+                            title: Text(
+                              'Private channel',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
-                          //Expiry
-                          TextFormField(
-                            enabled: false,
-                            controller: expiryController,
-                            decoration: InputDecoration(
-                                focusedBorder: Theme.of(context)
-                                    .inputDecorationTheme
-                                    .focusedBorder,
-                                label: Text('Expires',
-                                    style: Theme.of(context)
-                                        .inputDecorationTheme
-                                        .labelStyle),
-                                hintText: 'lnbc20m1pvjl...'),
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          )
                         ],
                       ),
                     ),
@@ -164,9 +173,8 @@ class _PayScreenState extends State<PayScreen> {
         TextButton(
           onPressed: () async {
             await scanQrCode();
-            String invoice = qrCode;
-            PaymentRequest payReq = await _decodePaymentRequest(invoice);
-            _setConfigFormFields(payReq, invoice);
+            String nodePubKey = qrCode;
+            _setConfigFormFields(nodePubKey);
           },
           style: ElevatedButton.styleFrom(
             elevation: 3,
@@ -201,10 +209,11 @@ class _PayScreenState extends State<PayScreen> {
           onPressed: () {
             setState(() {
               //TODO: reset all fields
-              invoiceController.text = '';
-              amountController.text = '';
-              memoController.text = '';
-              expiryController.text = '';
+              nodePubkeyController.text = '';
+              fundingAmountController.text = '';
+              channelFeeController.text = '';
+              _useDefaultChannelFee = true;
+              _privateChannel = false;
             });
           },
           style: ElevatedButton.styleFrom(
@@ -240,12 +249,8 @@ class _PayScreenState extends State<PayScreen> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PaymentSplashScreen(
-                            invoice: invoiceController.text,
-                          )));
+              //? Should we either navigate to success splash screen or display error within form?
+              _openChannel();
             }
           },
           style: ElevatedButton.styleFrom(
@@ -268,11 +273,11 @@ class _PayScreenState extends State<PayScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.send,
+                Icons.open_in_browser,
                 color: AppColors.white,
               ),
               Text(
-                'Send',
+                'Open',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -297,27 +302,21 @@ class _PayScreenState extends State<PayScreen> {
     }
   }
 
-  void _setConfigFormFields(PaymentRequest paymentRequest, String invoice) {
-    String amount = paymentRequest.num_satoshis;
-
-    int timestamp = int.parse(paymentRequest.timestamp);
-    int expiryInSeconds = int.parse(paymentRequest.expiry);
-    DateTime expirationDate =
-        Formatting.getExpirationDate(timestamp, expiryInSeconds);
-
+  void _setConfigFormFields(String nodePubkey) {
     setState(() {
-      invoiceController.text = invoice;
-      amountController.text = '${MoneyFormatter(
-        amount: int.parse(amount).toDouble(),
-      ).output.withoutFractionDigits}';
-      memoController.text = paymentRequest.description;
-      expiryController.text = expirationDate.toString();
+      nodePubkeyController.text = nodePubkey;
     });
   }
 
-  Future<PaymentRequest> _decodePaymentRequest(String qrCodeRawData) async {
+  Future<OpenChannelResponse> _openChannel() async {
+    //open channel
     LND api = LND();
-    PaymentRequest payReq = await api.decodePaymentRequest(qrCodeRawData);
-    return payReq;
+    OpenChannel params = OpenChannel(
+      _privateChannel,
+      fundingAmountController.text,
+      hex.decode(nodePubkeyController.text),
+      satPerVbyte: _useDefaultChannelFee ? '0' : channelFeeController.text,
+    );
+    return await api.openChannel(params);
   }
 }

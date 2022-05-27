@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:firebolt/models/channels.dart';
+import 'package:firebolt/models/open_channel_response.dart';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
 import 'package:firebolt/models/utxos_request.dart';
 import 'package:http/src/response.dart';
-import '../UI/Constants/payment_status.dart';
+import '../constants/payment_status.dart';
 import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
 import '../models/invoice_request.dart';
 import '../models/invoices.dart';
+import '../models/open_channel.dart';
 import '../models/payment.dart';
 import '../models/payments.dart';
 import '../models/utxos.dart';
@@ -56,6 +58,19 @@ class LND {
     String responseBody = response.body;
 
     return Channels.fromJson(jsonDecode(responseBody));
+  }
+
+  Future<OpenChannelResponse> openChannel(OpenChannel params) async {
+    // List<int> bytes = utf8.encode(params.nodePubkey);
+    // String base64Str = base64.encode(bytes);
+    // params.nodePubkey = base64Str;
+    // print(base64Str);
+    Response response = await rest.postRequest('/v1/channels', params.toJson());
+    print(response);
+    String responseBody = response.body;
+    print(response.body);
+
+    return OpenChannelResponse.fromJson(jsonDecode(responseBody));
   }
 
   Future<Transactions> getTransactions() async {
