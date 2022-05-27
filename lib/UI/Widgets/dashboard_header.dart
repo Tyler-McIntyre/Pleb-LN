@@ -156,7 +156,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                           .titleSmall,
                                     )
                                   : Text(
-                                      'Confirmed balance',
+                                      'balance',
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleSmall,
