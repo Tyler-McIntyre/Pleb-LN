@@ -61,14 +61,8 @@ class LND {
   }
 
   Future<OpenChannelResponse> openChannel(OpenChannel params) async {
-    // List<int> bytes = utf8.encode(params.nodePubkey);
-    // String base64Str = base64.encode(bytes);
-    // params.nodePubkey = base64Str;
-    // print(base64Str);
     Response response = await rest.postRequest('/v1/channels', params.toJson());
-    print(response);
     String responseBody = response.body;
-    print(response.body);
 
     return OpenChannelResponse.fromJson(jsonDecode(responseBody));
   }
