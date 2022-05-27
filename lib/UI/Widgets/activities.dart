@@ -1,11 +1,14 @@
+import 'package:firebolt/constants/channel_sort_type.dart';
 import 'package:firebolt/models/channels.dart';
 import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../api/lnd.dart';
+import '../../constants/channel_status.dart';
 import '../../constants/channel_type.dart';
 import '../../constants/transfer_type.dart';
 import '../../constants/tx_sort_type.dart';
+import '../../database/secure_storage.dart';
 import '../../models/channel.dart';
 import '../../models/invoices.dart';
 import '../../models/payments.dart';
@@ -23,8 +26,11 @@ class Activities extends StatefulWidget {
 
 class _ActivitiesState extends State<Activities> {
   TxSortType _txSortType = TxSortType.DateReceived;
+  ChannelSortType _channelSortType = ChannelSortType.Id;
+  bool _isTxTab = true;
+
   late Future<List<Tx>> _transactions;
-  late Future<Channels> _channels;
+  late Future<List<ChannelDetail>> _channels;
   final Map<String, Icon> _tabs = {
     'Transactions': const Icon(
       Icons.bolt,
@@ -41,11 +47,11 @@ class _ActivitiesState extends State<Activities> {
   @override
   void initState() {
     _transactions = _getTransactions(_txSortType);
-    _channels = _getChannels();
+    _channels = _getChannels(_channelSortType);
     super.initState();
   }
 
-  Future<List<Tx>> _getTransactions(TxSortType sortOption) async {
+  Future<List<Tx>> _getTransactions(TxSortType sortType) async {
     LND api = LND();
     Payments payments = await api.getPayments();
     Invoices invoices = await api.getInvoices();
@@ -76,7 +82,7 @@ class _ActivitiesState extends State<Activities> {
       }
     });
 
-    switch (sortOption) {
+    switch (sortType) {
       case TxSortType.DateReceived:
         txList.sort((a, b) {
           return b.dateTime.compareTo(a.dateTime);
@@ -96,10 +102,57 @@ class _ActivitiesState extends State<Activities> {
     return txList;
   }
 
-  Future<Channels> _getChannels() async {
+  Future<List<ChannelDetail>> _getChannels(ChannelSortType sortType) async {
     LND api = LND();
     Channels channels = await api.getChannels();
-    return channels;
+    List<ChannelDetail> channelDetailList = [];
+
+    for (Channel channel in channels.channels) {
+      String alias = await SecureStorage.readValue(channel.chanId) ?? '';
+      channelDetailList.add(
+        ChannelDetail(
+          channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
+          channel.private ? ChannelType.private : ChannelType.public,
+          int.parse(channel.capacity),
+          channel.chanId,
+          alias.isNotEmpty ? alias : channel.chanId,
+        ),
+      );
+    }
+
+    switch (sortType) {
+      case ChannelSortType.Inactive:
+        channelDetailList = channelDetailList
+            .where((tx) => tx.channelStatus == ChannelStatus.Inactive)
+            .toList();
+        break;
+      case ChannelSortType.Active:
+        channelDetailList = channelDetailList
+            .where((tx) => tx.channelStatus == ChannelStatus.Active)
+            .toList();
+        break;
+      case ChannelSortType.Capacity:
+        channelDetailList.sort((a, b) {
+          return b.capacity.compareTo(a.capacity);
+        });
+        break;
+      case ChannelSortType.Private:
+        channelDetailList = channelDetailList
+            .where((tx) => tx.channelType == ChannelType.private)
+            .toList();
+        break;
+      case ChannelSortType.Public:
+        channelDetailList = channelDetailList
+            .where((tx) => tx.channelType == ChannelType.public)
+            .toList();
+        break;
+      case ChannelSortType.Id:
+        channelDetailList.sort((a, b) {
+          return b.alias.compareTo(a.alias);
+        });
+        break;
+    }
+    return channelDetailList;
   }
 
   @override
@@ -126,6 +179,11 @@ class _ActivitiesState extends State<Activities> {
                   pinned: true,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
+                    onTap: (tabIndex) {
+                      setState(() {
+                        tabIndex == 0 ? _isTxTab = true : _isTxTab = false;
+                      });
+                    },
                     tabs: _tabs.entries
                         .map(
                           (tab) => Tab(
@@ -278,12 +336,12 @@ class _ActivitiesState extends State<Activities> {
                               future: _channels,
                               builder: (
                                 context,
-                                AsyncSnapshot<Channels> snapshot,
+                                AsyncSnapshot<List<ChannelDetail>> snapshot,
                               ) {
                                 List<Widget> children = [];
                                 if (snapshot.hasData) {
-                                  children = _buildChannelListTiles(
-                                      snapshot.data!.channels);
+                                  children =
+                                      _buildChannelListTiles(snapshot.data!);
                                 } else if (snapshot.hasError) {
                                   children = <Widget>[
                                     Container(
@@ -412,15 +470,18 @@ class _ActivitiesState extends State<Activities> {
     return txListTiles;
   }
 
-  _buildChannelListTiles(List<Channel> channels) {
+  _buildChannelListTiles(List<ChannelDetail> channelDetails) {
     List<Card> channelListTiles = [];
     Icon activeIcon;
     Icon inactiveIcon;
 
-    for (Channel channel in channels) {
-      bool isActive = channel.active ? true : false;
+    for (ChannelDetail channel in channelDetails) {
+      bool isActive =
+          channel.channelStatus == ChannelStatus.Active ? true : false;
+      bool isPrivate =
+          channel.channelType == ChannelType.private ? true : false;
 
-      if (!channel.private) {
+      if (!isPrivate) {
         activeIcon = Icon(
           Icons.public,
           color: AppColors.green,
@@ -452,9 +513,7 @@ class _ActivitiesState extends State<Activities> {
                 text: null,
                 children: [
                   TextSpan(
-                    text: channel.private
-                        ? ChannelType.private.name
-                        : ChannelType.public.name,
+                    text: channel.channelType.name,
                     style: const TextStyle(color: AppColors.grey, fontSize: 17),
                   ),
                   WidgetSpan(
@@ -479,7 +538,7 @@ class _ActivitiesState extends State<Activities> {
                 ),
                 Text.rich(
                   TextSpan(
-                      text: channel.capacity,
+                      text: channel.capacity.toString(),
                       style: Theme.of(context).textTheme.bodySmall,
                       children: [
                         TextSpan(
@@ -514,93 +573,252 @@ class _ActivitiesState extends State<Activities> {
         },
       ),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: PopupMenuButton<String>(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: const BorderSide(color: AppColors.orange),
-          ),
-          color: AppColors.blackSecondary,
-          icon: const Icon(Icons.filter_alt),
-          onSelected: (String result) {
-            switch (result) {
-              case 'Date':
-                setState(() {
-                  _txSortType = TxSortType.DateReceived;
-                  _transactions = _getTransactions(_txSortType);
-                });
-                break;
-              case 'Sent':
-                setState(() {
-                  _txSortType = TxSortType.Sent;
-                  _transactions = _getTransactions(_txSortType);
-                });
-                break;
-              case 'Received':
-                setState(() {
-                  _txSortType = TxSortType.Received;
-                  _transactions = _getTransactions(_txSortType);
-                });
-                break;
-              default:
-            }
-          },
-          itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'Date',
-              child: ListTile(
-                leading: Radio<TxSortType>(
-                  fillColor: MaterialStateProperty.all(AppColors.white),
-                  value: TxSortType.DateReceived,
-                  groupValue: _txSortType,
-                  onChanged: null,
-                ),
-                tileColor: AppColors.blackSecondary,
-                textColor: AppColors.white,
-                title: Text(
-                  'Date',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'Sent',
-              child: ListTile(
-                leading: Radio<TxSortType>(
-                  fillColor: MaterialStateProperty.all(AppColors.white),
-                  value: TxSortType.Sent,
-                  groupValue: _txSortType,
-                  onChanged: null,
-                ),
-                tileColor: AppColors.blackSecondary,
-                textColor: AppColors.white,
-                title: Text(
-                  'Sent',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'Received',
-              child: ListTile(
-                leading: Radio<TxSortType>(
-                  fillColor: MaterialStateProperty.all(AppColors.white),
-                  value: TxSortType.Received,
-                  groupValue: _txSortType,
-                  onChanged: null,
-                ),
-                tileColor: AppColors.blackSecondary,
-                textColor: AppColors.white,
-                title: Text(
-                  'Received',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ),
-          ],
-        ),
-      )
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: _isTxTab ? _transactionFilterButton() : _channelFilterButton())
     ];
+  }
+
+  Widget _transactionFilterButton() {
+    return PopupMenuButton<String>(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: const BorderSide(color: AppColors.orange),
+      ),
+      color: AppColors.blackSecondary,
+      icon: const Icon(Icons.filter_alt),
+      onSelected: (String result) {
+        switch (result) {
+          case 'Date':
+            setState(() {
+              _txSortType = TxSortType.DateReceived;
+              _transactions = _getTransactions(_txSortType);
+            });
+            break;
+          case 'Sent':
+            setState(() {
+              _txSortType = TxSortType.Sent;
+              _transactions = _getTransactions(_txSortType);
+            });
+            break;
+          case 'Received':
+            setState(() {
+              _txSortType = TxSortType.Received;
+              _transactions = _getTransactions(_txSortType);
+            });
+            break;
+          default:
+        }
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem<String>(
+          value: 'Date',
+          child: ListTile(
+            leading: Radio<TxSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: TxSortType.DateReceived,
+              groupValue: _txSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Date',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Sent',
+          child: ListTile(
+            leading: Radio<TxSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: TxSortType.Sent,
+              groupValue: _txSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Sent',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Received',
+          child: ListTile(
+            leading: Radio<TxSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: TxSortType.Received,
+              groupValue: _txSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Received',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _channelFilterButton() {
+    return PopupMenuButton<String>(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: const BorderSide(color: AppColors.orange),
+      ),
+      color: AppColors.blackSecondary,
+      icon: const Icon(Icons.filter_alt),
+      onSelected: (String result) {
+        switch (result) {
+          case 'Inactive':
+            setState(() {
+              _channelSortType = ChannelSortType.Inactive;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          case 'Active':
+            setState(() {
+              _channelSortType = ChannelSortType.Active;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          case 'Capacity':
+            setState(() {
+              _channelSortType = ChannelSortType.Capacity;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          case 'Private':
+            setState(() {
+              _channelSortType = ChannelSortType.Private;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          case 'Public':
+            setState(() {
+              _channelSortType = ChannelSortType.Public;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          case 'Id':
+            setState(() {
+              _channelSortType = ChannelSortType.Id;
+              _channels = _getChannels(_channelSortType);
+            });
+            break;
+          default:
+        }
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem<String>(
+          value: 'Inactive',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Inactive,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Inactive',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Active',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Active,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Active',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Capacity',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Capacity,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Capacity',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Private',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Private,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Private',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Public',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Public,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Public',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'Id',
+          child: ListTile(
+            leading: Radio<ChannelSortType>(
+              fillColor: MaterialStateProperty.all(AppColors.white),
+              value: ChannelSortType.Id,
+              groupValue: _channelSortType,
+              onChanged: null,
+            ),
+            tileColor: AppColors.blackSecondary,
+            textColor: AppColors.white,
+            title: Text(
+              'Id',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -609,4 +827,20 @@ class Tx {
   DateTime dateTime;
   TransferType transferType;
   Tx(this.amount, this.dateTime, this.transferType);
+}
+
+class ChannelDetail {
+  ChannelStatus channelStatus;
+  ChannelType channelType;
+  int capacity;
+  String chanId;
+  String alias;
+
+  ChannelDetail(
+    this.channelStatus,
+    this.channelType,
+    this.capacity,
+    this.chanId,
+    this.alias,
+  );
 }
