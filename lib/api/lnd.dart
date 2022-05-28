@@ -92,7 +92,6 @@ class LND {
       OpenChannelStream params) async {
     Response response =
         await rest.postRequest('/v1/channels/stream', params.toJson());
-    print(response.body);
     String responseBody = response.body;
 
     return OpenChannelStreamResponse.fromJson(jsonDecode(responseBody));
