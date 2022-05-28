@@ -9,7 +9,9 @@ import '../../constants/channel_type.dart';
 import '../../constants/transfer_type.dart';
 import '../../constants/tx_sort_type.dart';
 import '../../database/secure_storage.dart';
+import '../../models/Transaction_detail.dart';
 import '../../models/channel.dart';
+import '../../models/channel_detail.dart';
 import '../../models/invoices.dart';
 import '../../models/payments.dart';
 import '../../util/app_colors.dart';
@@ -29,7 +31,7 @@ class _ActivitiesState extends State<Activities> {
   ChannelSortType _channelSortType = ChannelSortType.Id;
   bool _isTxTab = true;
 
-  late Future<List<Tx>> _transactions;
+  late Future<List<TransactionDetail>> _transactions;
   late Future<List<ChannelDetail>> _channels;
   final Map<String, Icon> _tabs = {
     'Transactions': const Icon(
@@ -51,14 +53,14 @@ class _ActivitiesState extends State<Activities> {
     super.initState();
   }
 
-  Future<List<Tx>> _getTransactions(TxSortType sortType) async {
+  Future<List<TransactionDetail>> _getTransactions(TxSortType sortType) async {
     LND api = LND();
     Payments payments = await api.getPayments();
     Invoices invoices = await api.getInvoices();
-    List<Tx> txList = [];
+    List<TransactionDetail> txList = [];
     payments.payments.forEach((payment) {
       txList.add(
-        Tx(
+        TransactionDetail(
             payment.valueSat,
             Formatting.timestampNanoSecondsToDate(
               int.parse(payment.creationTimeNanoSeconds),
@@ -72,7 +74,7 @@ class _ActivitiesState extends State<Activities> {
           payment.value!.isNotEmpty &&
           payment.settleDate!.isNotEmpty) {
         txList.add(
-          Tx(
+          TransactionDetail(
               payment.value as String,
               Formatting.timestampToDateTime(
                 int.parse(payment.settleDate!),
@@ -89,12 +91,15 @@ class _ActivitiesState extends State<Activities> {
         });
         break;
       case TxSortType.Sent:
-        txList =
-            txList.where((tx) => tx.transferType == TransferType.sent).toList();
+        txList = txList
+            .where((TransactionDetail) =>
+                TransactionDetail.transferType == TransferType.sent)
+            .toList();
         break;
       case TxSortType.Received:
         txList = txList
-            .where((tx) => tx.transferType == TransferType.received)
+            .where((TransactionDetail) =>
+                TransactionDetail.transferType == TransferType.received)
             .toList();
         break;
     }
@@ -123,12 +128,14 @@ class _ActivitiesState extends State<Activities> {
     switch (sortType) {
       case ChannelSortType.Inactive:
         channelDetailList = channelDetailList
-            .where((tx) => tx.channelStatus == ChannelStatus.Inactive)
+            .where((TransactionDetail) =>
+                TransactionDetail.channelStatus == ChannelStatus.Inactive)
             .toList();
         break;
       case ChannelSortType.Active:
         channelDetailList = channelDetailList
-            .where((tx) => tx.channelStatus == ChannelStatus.Active)
+            .where((TransactionDetail) =>
+                TransactionDetail.channelStatus == ChannelStatus.Active)
             .toList();
         break;
       case ChannelSortType.Capacity:
@@ -138,12 +145,14 @@ class _ActivitiesState extends State<Activities> {
         break;
       case ChannelSortType.Private:
         channelDetailList = channelDetailList
-            .where((tx) => tx.channelType == ChannelType.private)
+            .where((TransactionDetail) =>
+                TransactionDetail.channelType == ChannelType.private)
             .toList();
         break;
       case ChannelSortType.Public:
         channelDetailList = channelDetailList
-            .where((tx) => tx.channelType == ChannelType.public)
+            .where((TransactionDetail) =>
+                TransactionDetail.channelType == ChannelType.public)
             .toList();
         break;
       case ChannelSortType.Id:
@@ -235,7 +244,7 @@ class _ActivitiesState extends State<Activities> {
                               future: _transactions,
                               builder: (
                                 context,
-                                AsyncSnapshot<List<Tx>> snapshot,
+                                AsyncSnapshot<List<TransactionDetail>> snapshot,
                               ) {
                                 List<Widget> children = [];
                                 if (snapshot.hasData) {
@@ -414,14 +423,15 @@ class _ActivitiesState extends State<Activities> {
     );
   }
 
-  _buildTxListTiles(List<Tx> txList) {
+  _buildTxListTiles(List<TransactionDetail> txList) {
     List<Card> txListTiles = [];
 
     Icon sentIcon = Icon(Icons.send);
     Icon receivedIcon = Icon(Icons.receipt);
 
-    for (Tx tx in txList) {
-      bool isSentTx = tx.transferType == TransferType.sent ? true : false;
+    for (TransactionDetail TransactionDetail in txList) {
+      bool isSentTx =
+          TransactionDetail.transferType == TransferType.sent ? true : false;
 
       txListTiles.add(
         Card(
@@ -435,14 +445,15 @@ class _ActivitiesState extends State<Activities> {
                 text: null,
                 children: [
                   TextSpan(
-                    text: tx.transferType.name,
+                    text: TransactionDetail.transferType.name,
                     style: const TextStyle(color: AppColors.grey, fontSize: 17),
                   ),
                   WidgetSpan(
                     child: Container(),
                   ),
                   TextSpan(
-                    text: Formatting.dateTimeToShortDate(tx.dateTime),
+                    text: Formatting.dateTimeToShortDate(
+                        TransactionDetail.dateTime),
                     style: const TextStyle(fontSize: 18),
                   ),
                   WidgetSpan(
@@ -453,11 +464,11 @@ class _ActivitiesState extends State<Activities> {
             ),
             trailing: Text(
               '${MoneyFormatter(
-                amount: int.parse(tx.amount).toDouble(), //amount
+                amount: int.parse(TransactionDetail.amount).toDouble(), //amount
               ).output.withoutFractionDigits} sats',
               style: TextStyle(
                 fontSize: 19,
-                color: (tx.transferType == TransferType.sent
+                color: (TransactionDetail.transferType == TransferType.sent
                     ? AppColors.red
                     : AppColors.green),
               ),
@@ -820,27 +831,4 @@ class _ActivitiesState extends State<Activities> {
       ],
     );
   }
-}
-
-class Tx {
-  String amount;
-  DateTime dateTime;
-  TransferType transferType;
-  Tx(this.amount, this.dateTime, this.transferType);
-}
-
-class ChannelDetail {
-  ChannelStatus channelStatus;
-  ChannelType channelType;
-  int capacity;
-  String chanId;
-  String alias;
-
-  ChannelDetail(
-    this.channelStatus,
-    this.channelType,
-    this.capacity,
-    this.chanId,
-    this.alias,
-  );
 }
