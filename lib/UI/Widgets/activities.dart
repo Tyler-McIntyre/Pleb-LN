@@ -1,20 +1,21 @@
-import 'package:firebolt/constants/channel_sort_type.dart';
-import 'package:firebolt/models/channels.dart';
-import 'package:firebolt/util/formatting.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
+
 import '../../api/lnd.dart';
+import '../../constants/channel_sort_type.dart';
 import '../../constants/channel_status.dart';
 import '../../constants/channel_type.dart';
 import '../../constants/transfer_type.dart';
 import '../../constants/tx_sort_type.dart';
 import '../../database/secure_storage.dart';
-import '../../models/Transaction_detail.dart';
+import '../../models/transaction_detail.dart';
 import '../../models/channel.dart';
 import '../../models/channel_detail.dart';
+import '../../models/channels.dart';
 import '../../models/invoices.dart';
 import '../../models/payments.dart';
 import '../../util/app_colors.dart';
+import '../../util/formatting.dart';
 import '../open_channel_screen.dart';
 
 class Activities extends StatefulWidget {
@@ -429,9 +430,9 @@ class _ActivitiesState extends State<Activities> {
     Icon sentIcon = Icon(Icons.send);
     Icon receivedIcon = Icon(Icons.receipt);
 
-    for (TransactionDetail TransactionDetail in txList) {
+    for (TransactionDetail transactionDetail in txList) {
       bool isSentTx =
-          TransactionDetail.transferType == TransferType.sent ? true : false;
+          transactionDetail.transferType == TransferType.sent ? true : false;
 
       txListTiles.add(
         Card(
@@ -445,7 +446,7 @@ class _ActivitiesState extends State<Activities> {
                 text: null,
                 children: [
                   TextSpan(
-                    text: TransactionDetail.transferType.name,
+                    text: transactionDetail.transferType.name,
                     style: const TextStyle(color: AppColors.grey, fontSize: 17),
                   ),
                   WidgetSpan(
@@ -453,7 +454,7 @@ class _ActivitiesState extends State<Activities> {
                   ),
                   TextSpan(
                     text: Formatting.dateTimeToShortDate(
-                        TransactionDetail.dateTime),
+                        transactionDetail.dateTime),
                     style: const TextStyle(fontSize: 18),
                   ),
                   WidgetSpan(
@@ -464,11 +465,11 @@ class _ActivitiesState extends State<Activities> {
             ),
             trailing: Text(
               '${MoneyFormatter(
-                amount: int.parse(TransactionDetail.amount).toDouble(), //amount
+                amount: int.parse(transactionDetail.amount).toDouble(), //amount
               ).output.withoutFractionDigits} sats',
               style: TextStyle(
                 fontSize: 19,
-                color: (TransactionDetail.transferType == TransferType.sent
+                color: (transactionDetail.transferType == TransferType.sent
                     ? AppColors.red
                     : AppColors.green),
               ),
