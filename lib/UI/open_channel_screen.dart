@@ -225,12 +225,17 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
 
   Future<OpenChannelResponse> _openChannel() async {
     LND api = LND();
+    int minConfs = 3;
+    if (!_useDefaultMinConf) {
+      minConfs = int.parse(minConfsController.text);
+    }
     OpenChannel params = OpenChannel(
       _privateChannel,
       fundingAmountController.text,
       hex.decode(nodePubkeyController.text),
       satPerVbyte: _useDefaultChannelFee ? '0' : channelFeeController.text,
-      minConfs: _useDefaultMinConf ? 3 : int.parse(minConfsController.text),
+      spendUnconfirmed: minConfs == 0 ? true : false,
+      minConfs: minConfs,
     );
     return await api.openChannel(params);
   }
