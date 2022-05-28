@@ -230,7 +230,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
       fundingAmountController.text,
       hex.decode(nodePubkeyController.text),
       satPerVbyte: _useDefaultChannelFee ? '0' : channelFeeController.text,
-      minConfs: int.parse(minConfsController.text),
+      minConfs: _useDefaultMinConf ? 3 : int.parse(minConfsController.text),
     );
     return await api.openChannel(params);
   }
