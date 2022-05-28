@@ -1,23 +1,23 @@
 import 'package:json_annotation/json_annotation.dart';
-part 'open_channel_response.g.dart';
+part 'channel_point.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class OpenChannelResponse {
+class ChannelPoint {
   @JsonKey(name: 'funding_txid_bytes')
-  String fundingTxidBytes;
+  List<int> fundingTxidBytes;
   @JsonKey(name: 'funding_txid_str')
   String fundingTxidStr;
   @JsonKey(name: 'output_index')
   int outputIndex;
 
-  OpenChannelResponse(
+  ChannelPoint(
     this.fundingTxidBytes,
     this.fundingTxidStr,
     this.outputIndex,
   );
 
-  factory OpenChannelResponse.fromJson(Map<String, dynamic> json) =>
-      _$OpenChannelResponseFromJson(json);
+  factory ChannelPoint.fromJson(Map<String, dynamic> json) =>
+      _$ChannelPointFromJson(json);
 
-  Map<String, dynamic> toJson() => _$OpenChannelResponseToJson(this);
+  Map<String, dynamic> toJson() => _$ChannelPointToJson(this);
 }

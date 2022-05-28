@@ -1,20 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'open_channel_response.dart';
+part of 'channel_point.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-OpenChannelResponse _$OpenChannelResponseFromJson(Map<String, dynamic> json) =>
-    OpenChannelResponse(
-      json['funding_txid_bytes'] as String,
+ChannelPoint _$ChannelPointFromJson(Map<String, dynamic> json) => ChannelPoint(
+      (json['funding_txid_bytes'] as List<dynamic>)
+          .map((e) => e as int)
+          .toList(),
       json['funding_txid_str'] as String,
       json['output_index'] as int,
     );
 
-Map<String, dynamic> _$OpenChannelResponseToJson(
-        OpenChannelResponse instance) =>
+Map<String, dynamic> _$ChannelPointToJson(ChannelPoint instance) =>
     <String, dynamic>{
       'funding_txid_bytes': instance.fundingTxidBytes,
       'funding_txid_str': instance.fundingTxidStr,

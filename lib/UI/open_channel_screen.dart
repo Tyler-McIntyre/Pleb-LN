@@ -1,10 +1,10 @@
 import 'package:convert/convert.dart';
-import 'package:firebolt/models/open_channel.dart';
-import 'package:firebolt/models/open_channel_response.dart';
+import 'package:firebolt/models/open_channel_stream_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import '../api/lnd.dart';
+import '../models/open_channel_stream.dart';
 import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
 import 'widgets/info_dialog.dart';
@@ -223,21 +223,22 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     });
   }
 
-  Future<OpenChannelResponse> _openChannel() async {
+  Future<OpenChannelStreamResponse> _openChannel() async {
     LND api = LND();
     int minConfs = 3;
     if (!_useDefaultMinConf) {
       minConfs = int.parse(minConfsController.text);
     }
-    OpenChannel params = OpenChannel(
+    OpenChannelStream params = OpenChannelStream(
       _privateChannel,
       fundingAmountController.text,
       hex.decode(nodePubkeyController.text),
-      satPerVbyte: _useDefaultChannelFee ? '0' : channelFeeController.text,
-      spendUnconfirmed: minConfs == 0 ? true : false,
-      minConfs: minConfs,
+      minConfs,
+      _useDefaultChannelFee ? '0' : channelFeeController.text,
+      minConfs == 0 ? true : false,
     );
-    return await api.openChannel(params);
+    var result = await api.openChannelStream(params);
+    return result;
   }
 
   _openChannelForm() {
@@ -258,7 +259,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
             label: Text.rich(
               TextSpan(
-                  text: 'Node alias',
+                  text: 'alias',
                   children: [
                     TextSpan(
                         text: ' (Optional)',

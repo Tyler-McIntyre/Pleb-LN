@@ -6,7 +6,7 @@ enum DialogType { OpenChannelNodeAlias, ChannelFee, MinimumConfirmations }
 class InfoDialog {
   Map<DialogType, String> blurbs = {
     DialogType.OpenChannelNodeAlias:
-        'Assign this node a nickname for organizational purposes. If a nickname is not specified then the channel ID will be listed on the dashboard instead. This is saved locally so if you delete the application from your phone, this information will be lost.',
+        'Assign this channel an alias for organizational purposes. If an alias is not specified then the channel ID will be listed on the dashboard instead. This is saved locally so if you delete the application from your phone, this information will be lost.',
     DialogType.ChannelFee:
         'A manual fee rate set in sat/vbyte that should be used when crafting the funding transaction.',
     DialogType.MinimumConfirmations:

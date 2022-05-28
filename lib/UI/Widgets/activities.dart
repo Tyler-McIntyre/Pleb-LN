@@ -55,6 +55,8 @@ class _ActivitiesState extends State<Activities> {
 
   Future<List<TransactionDetail>> _getTransactions(TxSortType sortType) async {
     LND api = LND();
+
+    //TODO: run these in parallel
     Payments payments = await api.getPayments();
     Invoices invoices = await api.getInvoices();
     List<TransactionDetail> txList = [];
@@ -109,9 +111,10 @@ class _ActivitiesState extends State<Activities> {
 
   Future<List<ChannelDetail>> _getChannels(ChannelSortType sortType) async {
     LND api = LND();
+    //TODO: run these in parallel
     Channels channels = await api.getChannels();
+
     List<ChannelDetail> channelDetailList = [];
-    await api.getPendingChannels();
 
     for (Channel channel in channels.channels) {
       String alias = await SecureStorage.readValue(channel.chanId) ?? '';

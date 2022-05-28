@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:firebolt/models/channels.dart';
-import 'package:firebolt/models/open_channel_response.dart';
+import 'package:firebolt/models/channel_point.dart';
+import 'package:firebolt/models/open_channel_stream.dart';
+import 'package:firebolt/models/open_channel_stream_response.dart';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
 import 'package:firebolt/models/utxos_request.dart';
 import 'package:http/src/response.dart';
 import '../constants/payment_status.dart';
+import '../models/accept_open_channel.dart';
+import '../models/accept_open_channel_response.dart';
 import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/invoice.dart';
@@ -68,11 +72,30 @@ class LND {
     return PendingChannels.fromJson(jsonDecode(responseBody));
   }
 
-  Future<OpenChannelResponse> openChannel(OpenChannel params) async {
+  Future<ChannelPoint> openChannel(OpenChannel params) async {
     Response response = await rest.postRequest('/v1/channels', params.toJson());
     String responseBody = response.body;
 
-    return OpenChannelResponse.fromJson(jsonDecode(responseBody));
+    return ChannelPoint.fromJson(jsonDecode(responseBody));
+  }
+
+  Future<AcceptOpenChannelResponse> acceptOpenChannel(
+      AcceptOpenChannel params) async {
+    Response response =
+        await rest.postRequest('/v1/channels/acceptor', params.toJson());
+    String responseBody = response.body;
+
+    return AcceptOpenChannelResponse.fromJson(jsonDecode(responseBody));
+  }
+
+  Future<OpenChannelStreamResponse> openChannelStream(
+      OpenChannelStream params) async {
+    Response response =
+        await rest.postRequest('/v1/channels/stream', params.toJson());
+    print(response.body);
+    String responseBody = response.body;
+
+    return OpenChannelStreamResponse.fromJson(jsonDecode(responseBody));
   }
 
   Future<Transactions> getTransactions() async {
