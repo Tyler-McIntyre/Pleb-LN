@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
-
 import '../../api/lnd.dart';
 import '../../constants/channel_sort_type.dart';
 import '../../constants/channel_status.dart';
@@ -112,6 +111,7 @@ class _ActivitiesState extends State<Activities> {
     LND api = LND();
     Channels channels = await api.getChannels();
     List<ChannelDetail> channelDetailList = [];
+    await api.getPendingChannels();
 
     for (Channel channel in channels.channels) {
       String alias = await SecureStorage.readValue(channel.chanId) ?? '';

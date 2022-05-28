@@ -14,6 +14,7 @@ import '../models/invoices.dart';
 import '../models/open_channel.dart';
 import '../models/payment.dart';
 import '../models/payments.dart';
+import '../models/pending_channels.dart';
 import '../models/utxos.dart';
 import '../util/formatting.dart';
 import 'rest.dart';
@@ -58,6 +59,13 @@ class LND {
     String responseBody = response.body;
 
     return Channels.fromJson(jsonDecode(responseBody));
+  }
+
+  Future<PendingChannels> getPendingChannels() async {
+    Response response = await rest.getRequest('/v1/channels/pending');
+    String responseBody = response.body;
+
+    return PendingChannels.fromJson(jsonDecode(responseBody));
   }
 
   Future<OpenChannelResponse> openChannel(OpenChannel params) async {

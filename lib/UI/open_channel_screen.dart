@@ -23,7 +23,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   TextEditingController fundingAmountController = TextEditingController();
   TextEditingController channelFeeController = TextEditingController();
   TextEditingController minConfsController = TextEditingController();
-  TextEditingController nodeAliasController = TextEditingController();
+  TextEditingController channelAliasController = TextEditingController();
   bool _useDefaultChannelFee = true;
   bool _privateChannel = false;
   bool _useDefaultMinConf = true;
@@ -121,7 +121,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           onPressed: () {
             setState(() {
               //TODO: reset all fields
-              nodeAliasController.text = '';
+              channelAliasController.text = '';
               nodePubkeyController.text = '';
               fundingAmountController.text = '';
               channelFeeController.text = '';
@@ -243,7 +243,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   _openChannelForm() {
     return [
       TextFormField(
-        controller: nodeAliasController,
+        controller: channelAliasController,
         decoration: InputDecoration(
             suffixIcon: IconButton(
               icon: Icon(
