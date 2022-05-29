@@ -17,6 +17,8 @@ class PendingChannel {
   String localChanReserveSat;
   @JsonKey(name: 'remote_chan_reserve_sat')
   String remoteChanReserveSat;
+  @JsonKey(name: 'private')
+  bool? private;
   // @JsonKey(name: 'initiator')
   // Initiator initiator;
   // @JsonKey(name: 'commitment_type')
@@ -25,21 +27,19 @@ class PendingChannel {
   // String numForwardingPackages;
   // @JsonKey(name: 'chan_status_flags')
   // String chanStatusFlags;
-  // @JsonKey(name: 'private')
-  // bool private;
 
   PendingChannel(
-    this.remoteNodePub,
-    this.channelPoint,
-    this.capacity,
-    this.localBalance,
-    this.remoteBalance,
-    this.localChanReserveSat,
-    this.remoteChanReserveSat,
-    // this.numForwardingPackages,
-    // this.chanStatusFlags,
-    // this.private,
-  );
+      this.remoteNodePub,
+      this.channelPoint,
+      this.capacity,
+      this.localBalance,
+      this.remoteBalance,
+      this.localChanReserveSat,
+      this.remoteChanReserveSat,
+      this.private
+      // this.numForwardingPackages,
+      // this.chanStatusFlags,
+      );
 
   factory PendingChannel.fromJson(Map<String, dynamic> json) =>
       _$PendingChannelFromJson(json);

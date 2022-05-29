@@ -1,5 +1,5 @@
 import 'package:convert/convert.dart';
-import 'package:firebolt/models/open_channel_stream_response.dart';
+import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -23,7 +23,6 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   TextEditingController fundingAmountController = TextEditingController();
   TextEditingController channelFeeController = TextEditingController();
   TextEditingController minConfsController = TextEditingController();
-  TextEditingController channelAliasController = TextEditingController();
   bool _useDefaultChannelFee = true;
   bool _privateChannel = false;
   bool _useDefaultMinConf = true;
@@ -121,7 +120,6 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           onPressed: () {
             setState(() {
               //TODO: reset all fields
-              channelAliasController.text = '';
               nodePubkeyController.text = '';
               fundingAmountController.text = '';
               channelFeeController.text = '';
@@ -165,7 +163,23 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               //? Should we either navigate to success splash screen or display error within form?
-              await _openChannel();
+              int minConfs = 3;
+              if (!_useDefaultMinConf) {
+                minConfs = int.parse(minConfsController.text);
+              }
+              OpenChannelStream params = OpenChannelStream(
+                _privateChannel,
+                fundingAmountController.text,
+                // hex.decode(nodePubkeyController.text),
+                hex.decode(
+                    '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b'), //for testing
+                minConfs,
+                _useDefaultChannelFee ? '0' : channelFeeController.text,
+                minConfs == 0 ? true : false,
+              );
+              _openChannel(params);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => DashboardScreen()));
             }
           },
           style: ElevatedButton.styleFrom(
@@ -223,53 +237,8 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     });
   }
 
-  Future<OpenChannelStreamResponse> _openChannel() async {
-    LND api = LND();
-    int minConfs = 3;
-    if (!_useDefaultMinConf) {
-      minConfs = int.parse(minConfsController.text);
-    }
-    OpenChannelStream params = OpenChannelStream(
-      _privateChannel,
-      fundingAmountController.text,
-      hex.decode(nodePubkeyController.text),
-      minConfs,
-      _useDefaultChannelFee ? '0' : channelFeeController.text,
-      minConfs == 0 ? true : false,
-    );
-    var result = await api.openChannelStream(params);
-    return result;
-  }
-
   _openChannelForm() {
     return [
-      TextFormField(
-        controller: channelAliasController,
-        decoration: InputDecoration(
-            suffixIcon: IconButton(
-              icon: Icon(
-                Icons.info_outline,
-                color: AppColors.blue,
-              ),
-              onPressed: () async {
-                String body = dialog.blurbs[DialogType.OpenChannelNodeAlias]!;
-                await dialog.showMyDialog(body, context);
-              },
-            ),
-            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-            label: Text.rich(
-              TextSpan(
-                  text: 'alias',
-                  children: [
-                    TextSpan(
-                        text: ' (Optional)',
-                        style: Theme.of(context).textTheme.displaySmall),
-                  ],
-                  style: Theme.of(context).inputDecorationTheme.labelStyle),
-            ),
-            hintText: 'My neighbor...'),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
       TextFormField(
         controller: nodePubkeyController,
         decoration: InputDecoration(
@@ -408,5 +377,12 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         ),
       ),
     ];
+  }
+
+  void _openChannel(
+    OpenChannelStream params,
+  ) async {
+    LND api = LND();
+    await api.openChannelStream(params);
   }
 }

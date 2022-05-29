@@ -15,6 +15,7 @@ PendingChannel _$PendingChannelFromJson(Map<String, dynamic> json) =>
       json['remote_balance'] as String,
       json['local_chan_reserve_sat'] as String,
       json['remote_chan_reserve_sat'] as String,
+      json['private'] as bool?,
     );
 
 Map<String, dynamic> _$PendingChannelToJson(PendingChannel instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$PendingChannelToJson(PendingChannel instance) =>
       'remote_balance': instance.remoteBalance,
       'local_chan_reserve_sat': instance.localChanReserveSat,
       'remote_chan_reserve_sat': instance.remoteChanReserveSat,
+      'private': instance.private,
     };

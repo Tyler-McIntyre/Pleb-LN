@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:firebolt/models/channels.dart';
 import 'package:firebolt/models/channel_point.dart';
+import 'package:firebolt/models/open_channel_stream_result.dart';
 import 'package:firebolt/models/open_channel_stream.dart';
-import 'package:firebolt/models/open_channel_stream_response.dart';
 import 'package:firebolt/models/payment_request.dart';
 import 'package:firebolt/models/transactions.dart';
 import 'package:firebolt/models/utxos_request.dart';
@@ -88,13 +88,17 @@ class LND {
     return AcceptOpenChannelResponse.fromJson(jsonDecode(responseBody));
   }
 
-  Future<OpenChannelStreamResponse> openChannelStream(
+  Future<OpenChannelStreamResult> openChannelStream(
       OpenChannelStream params) async {
     Response response =
         await rest.postRequest('/v1/channels/stream', params.toJson());
-    String responseBody = response.body;
-
-    return OpenChannelStreamResponse.fromJson(jsonDecode(responseBody));
+    /*
+        The stream will return multiple responses, one for pending and another
+        once the the tx has been funded. We don't need to do anything with the
+        response at this point other than verify we got a success response.
+        TODO: if we receive an error, return it to the user, otherwise return successfully
+        */
+    return OpenChannelStreamResult.fromJson(jsonDecode(response.body));
   }
 
   Future<Transactions> getTransactions() async {

@@ -22,7 +22,6 @@ class PaymentSplashScreen extends StatefulWidget {
 class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -81,7 +80,7 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
           PaymentStatus? status = snapshot.data;
           switch (status) {
             case (PaymentStatus.successful):
-              message = PaymentStatus.successful.toString();
+              message = PaymentStatus.successful.name;
               success = true;
               break;
             case (PaymentStatus.invoice_already_paid):

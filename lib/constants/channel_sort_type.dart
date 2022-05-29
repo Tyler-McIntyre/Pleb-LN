@@ -1,1 +1,9 @@
-enum ChannelSortType { Inactive, Active, Capacity, Private, Public, Id }
+enum ChannelSortType {
+  Pending,
+  Inactive,
+  Active,
+  Capacity,
+  Private,
+  Public,
+  Id
+}
