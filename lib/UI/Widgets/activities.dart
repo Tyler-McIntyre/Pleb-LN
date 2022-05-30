@@ -1,6 +1,8 @@
+import 'package:firebolt/UI/channel_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../api/lnd.dart';
+import '../../constants/channel_list_tile_icon.dart';
 import '../../constants/channel_sort_type.dart';
 import '../../constants/channel_status.dart';
 import '../../constants/channel_type.dart';
@@ -18,14 +20,6 @@ import '../../models/payments.dart';
 import '../../util/app_colors.dart';
 import '../../util/formatting.dart';
 import '../open_channel_screen.dart';
-
-enum ListTileIcon {
-  private_active,
-  private_inactive,
-  public_active,
-  public_inactive,
-  pending
-}
 
 class Activities extends StatefulWidget {
   const Activities({Key? key, required this.nodeIsConfigured})
@@ -129,41 +123,39 @@ class _ActivitiesState extends State<Activities> {
         in pendingChannels.pendingOpenChannels) {
       channelDetailList.add(
         ChannelDetail(
-          ChannelStatus.Pending,
-          pendingChannel.channel.private ?? true
-              ? ChannelType.private
-              : ChannelType.public,
-          int.parse(pendingChannel.channel.capacity),
-          '',
-          pendingChannel.channel.remoteNodePub,
-        ),
+            ChannelStatus.Pending,
+            pendingChannel.channel.private ?? true
+                ? ChannelType.private
+                : ChannelType.public,
+            int.parse(pendingChannel.channel.capacity),
+            '',
+            pendingChannel.channel.remoteNodePub,
+            pendingChannel: pendingChannel),
       );
     }
 
     for (Channel channel in channels.channels) {
-      String alias = await SecureStorage.readValue(channel.chanId) ?? '';
+      String channelLabel = await SecureStorage.readValue(channel.chanId) ?? '';
       channelDetailList.add(
         ChannelDetail(
-          channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
-          channel.private ? ChannelType.private : ChannelType.public,
-          int.parse(channel.capacity),
-          channel.chanId,
-          alias.isNotEmpty ? alias : channel.chanId,
-        ),
+            channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
+            channel.private ? ChannelType.private : ChannelType.public,
+            int.parse(channel.capacity),
+            channel.chanId,
+            channelLabel.isNotEmpty ? channelLabel : channel.chanId,
+            channel: channel),
       );
     }
 
     switch (sortType) {
       case ChannelSortType.Inactive:
         channelDetailList = channelDetailList
-            .where((TransactionDetail) =>
-                TransactionDetail.channelStatus == ChannelStatus.Inactive)
+            .where((channel) => channel.channelStatus == ChannelStatus.Inactive)
             .toList();
         break;
       case ChannelSortType.Active:
         channelDetailList = channelDetailList
-            .where((TransactionDetail) =>
-                TransactionDetail.channelStatus == ChannelStatus.Active)
+            .where((channel) => channel.channelStatus == ChannelStatus.Active)
             .toList();
         break;
       case ChannelSortType.Capacity:
@@ -173,25 +165,24 @@ class _ActivitiesState extends State<Activities> {
         break;
       case ChannelSortType.Private:
         channelDetailList = channelDetailList
-            .where((TransactionDetail) =>
-                TransactionDetail.channelType == ChannelType.private)
+            .where((channel) =>
+                channel.channelType == ChannelType.private &&
+                channel.channelStatus != ChannelStatus.Pending)
             .toList();
         break;
       case ChannelSortType.Public:
         channelDetailList = channelDetailList
-            .where((TransactionDetail) =>
-                TransactionDetail.channelType == ChannelType.public)
+            .where((channel) => channel.channelType == ChannelType.public)
             .toList();
         break;
       case ChannelSortType.Id:
         channelDetailList.sort((a, b) {
-          return b.alias.compareTo(a.alias);
+          return b.label.compareTo(a.label);
         });
         break;
       case ChannelSortType.Pending:
         channelDetailList = channelDetailList
-            .where((TransactionDetail) =>
-                TransactionDetail.channelStatus == ChannelStatus.Pending)
+            .where((channel) => channel.channelStatus == ChannelStatus.Pending)
             .toList();
         break;
     }
@@ -519,35 +510,21 @@ class _ActivitiesState extends State<Activities> {
     List<Card> channelListTiles = [];
 
     for (ChannelDetail channel in channelDetails) {
-      bool isActive =
-          channel.channelStatus == ChannelStatus.Active ? true : false;
-      bool isPrivate =
-          channel.channelType == ChannelType.private ? true : false;
+      Icon? channelIcon = getChannelStatusIcon(channel);
 
-      ListTileIcon listtileIcon;
-
-      if (channel.channelStatus != ChannelStatus.Pending) {
-        if (isPrivate && isActive) {
-          listtileIcon = ListTileIcon.private_active;
-        } else if (isPrivate && !isActive) {
-          listtileIcon = ListTileIcon.private_inactive;
-        } else if (!isPrivate && isActive) {
-          listtileIcon = ListTileIcon.public_active;
-        } else {
-          listtileIcon = ListTileIcon.public_inactive;
-        }
-      } else {
-        listtileIcon = ListTileIcon.pending;
-      }
-
-      Icon? channelIcon = ChannelIconMap[listtileIcon];
-
-      //Add an active/inactive listtile
       channelListTiles.add(
         Card(
           color: AppColors.blueGrey,
           child: ListTile(
-            // onTap: (){}, //TODO: navigate to channel details page
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChannelDetailsScreen(
+                      channel: channel,
+                    ),
+                  ));
+            },
             style: ListTileStyle.list,
             leading: channelIcon,
             title: Column(
@@ -558,7 +535,7 @@ class _ActivitiesState extends State<Activities> {
                   style: const TextStyle(color: AppColors.grey, fontSize: 17),
                 ),
                 Text(
-                  '${channel.alias}',
+                  '${channel.label}',
                   style: const TextStyle(
                     fontSize: 18,
                   ),
@@ -603,7 +580,6 @@ class _ActivitiesState extends State<Activities> {
       IconButton(
         icon: Icon(Icons.connect_without_contact),
         onPressed: () {
-          //TODO: redirect to OpenChannel screen
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -612,8 +588,9 @@ class _ActivitiesState extends State<Activities> {
         },
       ),
       Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: _isTxTab ? _transactionFilterButton() : _channelFilterButton())
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: _isTxTab ? _transactionFilterButton() : _channelFilterButton(),
+      )
     ];
   }
 
@@ -882,26 +859,4 @@ class _ActivitiesState extends State<Activities> {
       ],
     );
   }
-
-  Map<ListTileIcon, Icon> ChannelIconMap = {
-    ListTileIcon.private_active: Icon(
-      Icons.private_connectivity,
-      color: AppColors.green,
-    ),
-    ListTileIcon.private_inactive: Icon(
-      Icons.private_connectivity,
-      color: AppColors.red,
-    ),
-    ListTileIcon.public_active: Icon(
-      Icons.public,
-      color: AppColors.green,
-    ),
-    ListTileIcon.public_inactive: Icon(
-      Icons.public,
-      color: AppColors.red,
-    ),
-    ListTileIcon.pending: Icon(
-      Icons.pending,
-    ),
-  };
 }
