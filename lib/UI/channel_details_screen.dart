@@ -20,13 +20,14 @@ class ChannelDetailsScreen extends StatefulWidget {
 class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   // final _formKey = GlobalKey<FormState>();
   TextEditingController channelLabelController = TextEditingController();
+  TextEditingController remotePubkeyLabelController = TextEditingController();
   bool userIsAddingLabel = false;
   late double _localBalancePercentage;
-  bool _channelLabelIsEditable = true;
 
   @override
   void initState() {
     _fetchChannelLabel();
+    _fetchRemotePubkeyLabel();
     _localBalancePercentage = (int.parse(widget.channel.channel!.localBalance) /
         (int.parse(widget.channel.channel!.capacity)));
     super.initState();
@@ -35,6 +36,12 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   void _fetchChannelLabel() async {
     channelLabelController.text =
         await SecureStorage.readValue(widget.channel.chanId) ?? '';
+  }
+
+  void _fetchRemotePubkeyLabel() async {
+    remotePubkeyLabelController.text =
+        await SecureStorage.readValue(widget.channel.channel!.remotePubkey) ??
+            '';
   }
 
   @override
@@ -48,6 +55,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 20),
               child: _channelDetailsForm(),
+            ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 20),
+              child: _channelPolicy(),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
@@ -89,6 +100,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         ElevatedButton(
           onPressed: () {
             _saveChannelLabel();
+            _saveRemotePubkeyLabel();
 
             Navigator.push(
               context,
@@ -160,26 +172,33 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         Center(
           child: Container(
             width: MediaQuery.of(context).size.width / 1.1,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 5,
-                    child: TextFormField(
-                      enabled: _channelLabelIsEditable,
-                      controller: channelLabelController,
-                      decoration: InputDecoration(
-                        focusedBorder: Theme.of(context)
-                            .inputDecorationTheme
-                            .focusedBorder,
-                        label: Text('Channel Label'),
-                        hintText: '...',
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                )
-              ],
+            child: TextFormField(
+              controller: channelLabelController,
+              decoration: InputDecoration(
+                focusedBorder:
+                    Theme.of(context).inputDecorationTheme.focusedBorder,
+                label: Text('Channel Label'),
+                hintText: '...',
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ),
+        Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.1,
+            child: TextFormField(
+              controller: remotePubkeyLabelController,
+              decoration: InputDecoration(
+                focusedBorder:
+                    Theme.of(context).inputDecorationTheme.focusedBorder,
+                label: Text(
+                  'Pubkey Label',
+                  style: Theme.of(context).inputDecorationTheme.labelStyle,
+                ),
+                hintText: '...',
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
         ),
@@ -326,68 +345,66 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             ),
           ],
         ),
-        Center(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(widget.channel.channel!.localBalance),
-                          Text(
-                            'Local balance',
-                            style: TextStyle(color: AppColors.blue),
-                          ),
-                        ],
-                      ),
+        Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(widget.channel.channel!.localBalance),
+                        Text(
+                          'Local balance',
+                          style: TextStyle(color: AppColors.blue),
+                        ),
+                      ],
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(widget.channel.channel!.remoteBalance),
-                          Text(
-                            'Remote balance',
-                            style: TextStyle(color: AppColors.red),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: CircularPercentIndicator(
-                  radius: 100,
-                  animation: true,
-                  animationDuration: 1200,
-                  lineWidth: 15.0,
-                  percent: _localBalancePercentage,
-                  center: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(widget.channel.channel!.capacity),
-                      Text(
-                        'Capacity',
-                        style: TextStyle(color: AppColors.grey),
-                      ),
-                    ],
-                  ),
-                  circularStrokeCap: CircularStrokeCap.square,
-                  backgroundColor: AppColors.red,
-                  progressColor: AppColors.blue,
                 ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(widget.channel.channel!.remoteBalance),
+                        Text(
+                          'Remote balance',
+                          style: TextStyle(color: AppColors.red),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: CircularPercentIndicator(
+                radius: 100,
+                animation: true,
+                animationDuration: 1200,
+                lineWidth: 15.0,
+                percent: _localBalancePercentage,
+                center: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(widget.channel.channel!.capacity),
+                    Text(
+                      'Capacity',
+                      style: TextStyle(color: AppColors.grey),
+                    ),
+                  ],
+                ),
+                circularStrokeCap: CircularStrokeCap.square,
+                backgroundColor: AppColors.red,
+                progressColor: AppColors.blue,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );
@@ -397,6 +414,50 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
     await SecureStorage.writeValue(
       widget.channel.chanId,
       channelLabelController.text,
+    );
+  }
+
+  void _saveRemotePubkeyLabel() async {
+    await SecureStorage.writeValue(
+      widget.channel.channel!.remotePubkey,
+      remotePubkeyLabelController.text,
+    );
+  }
+
+  _channelPolicy() {
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(widget.channel.channel!.feePerKw),
+                Text(
+                  'Fee per kw',
+                  style: TextStyle(color: AppColors.grey),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(widget.channel.channel!.pushAmountSat),
+                Text(
+                  'Push amount sat',
+                  style: TextStyle(color: AppColors.grey),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
     );
   }
 }

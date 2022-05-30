@@ -8,7 +8,8 @@ class ChannelDetail {
   ChannelType channelType;
   int capacity;
   String chanId;
-  String label;
+  String channelLabel;
+  String pubKeyLabel;
   PendingOpenChannel? pendingChannel;
   Channel? channel;
 
@@ -17,7 +18,8 @@ class ChannelDetail {
     this.channelType,
     this.capacity,
     this.chanId,
-    this.label, {
+    this.channelLabel,
+    this.pubKeyLabel, {
     this.pendingChannel,
     this.channel,
   });

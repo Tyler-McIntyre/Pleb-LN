@@ -1,4 +1,3 @@
-import 'package:firebolt/UI/channel_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../api/lnd.dart';
@@ -19,6 +18,7 @@ import '../../models/invoices.dart';
 import '../../models/payments.dart';
 import '../../util/app_colors.dart';
 import '../../util/formatting.dart';
+import '../channel_details_screen.dart';
 import '../open_channel_screen.dart';
 
 class Activities extends StatefulWidget {
@@ -121,29 +121,41 @@ class _ActivitiesState extends State<Activities> {
 
     for (PendingOpenChannel pendingChannel
         in pendingChannels.pendingOpenChannels) {
+      String remotePubkeyLabel =
+          await SecureStorage.readValue(pendingChannel.channel.remoteNodePub) ??
+              pendingChannel.channel.remoteNodePub;
+
       channelDetailList.add(
         ChannelDetail(
-            ChannelStatus.Pending,
-            pendingChannel.channel.private ?? true
-                ? ChannelType.private
-                : ChannelType.public,
-            int.parse(pendingChannel.channel.capacity),
-            '',
-            pendingChannel.channel.remoteNodePub,
-            pendingChannel: pendingChannel),
+          ChannelStatus.Pending,
+          pendingChannel.channel.private ?? true
+              ? ChannelType.private
+              : ChannelType.public,
+          int.parse(pendingChannel.channel.capacity),
+          '',
+          remotePubkeyLabel,
+          ChannelStatus.Pending.name,
+          pendingChannel: pendingChannel,
+        ),
       );
     }
 
     for (Channel channel in channels.channels) {
       String channelLabel = await SecureStorage.readValue(channel.chanId) ?? '';
+      String remotePubkeyLabel =
+          await SecureStorage.readValue(channel.remotePubkey) ??
+              channel.remotePubkey;
+      print(remotePubkeyLabel);
       channelDetailList.add(
         ChannelDetail(
-            channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
-            channel.private ? ChannelType.private : ChannelType.public,
-            int.parse(channel.capacity),
-            channel.chanId,
-            channelLabel.isNotEmpty ? channelLabel : channel.chanId,
-            channel: channel),
+          channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
+          channel.private ? ChannelType.private : ChannelType.public,
+          int.parse(channel.capacity),
+          channel.chanId,
+          channelLabel.isNotEmpty ? channelLabel : channel.chanId,
+          remotePubkeyLabel,
+          channel: channel,
+        ),
       );
     }
 
@@ -177,7 +189,7 @@ class _ActivitiesState extends State<Activities> {
         break;
       case ChannelSortType.Id:
         channelDetailList.sort((a, b) {
-          return b.label.compareTo(a.label);
+          return b.channelLabel.compareTo(a.channelLabel);
         });
         break;
       case ChannelSortType.Pending:
@@ -531,11 +543,11 @@ class _ActivitiesState extends State<Activities> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${channel.channelStatus == ChannelStatus.Pending ? ChannelStatus.Pending.name : channel.channelType.name}',
+                  '${channel.channelStatus == ChannelStatus.Pending ? ChannelStatus.Pending.name : channel.pubKeyLabel}',
                   style: const TextStyle(color: AppColors.grey, fontSize: 17),
                 ),
                 Text(
-                  '${channel.label}',
+                  '${channel.channelLabel}',
                   style: const TextStyle(
                     fontSize: 18,
                   ),

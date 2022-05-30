@@ -172,7 +172,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                 fundingAmountController.text,
                 // hex.decode(nodePubkeyController.text),
                 hex.decode(
-                    '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b'), //for testing
+                    '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b'), //TODO: REMOVE ME
                 minConfs,
                 _useDefaultChannelFee ? '0' : channelFeeController.text,
                 minConfs == 0 ? true : false,
@@ -331,7 +331,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         title: Row(
           children: [
             Text(
-              'Channel fee',
+              'Channel fee rate',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             IconButton(
