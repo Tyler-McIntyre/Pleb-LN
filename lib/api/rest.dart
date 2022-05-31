@@ -1,20 +1,23 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:firebolt/constants/http_methods.dart';
 import 'package:firebolt/database/secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/src/response.dart';
+import 'package:http_plus/http_plus.dart' as http;
 
 class RestApi {
-  Future<http.Response> getRequest(String route) =>
-      _request(route, 'get', null);
+  Future<Response> getRequest(String route) =>
+      _request(route, HTTPMethod.GET, null);
 
-  Future<http.Response> postRequest(String route, dynamic data) =>
-      _request(route, 'post', data);
+  Future<Response> postRequest(String route, dynamic data) =>
+      _request(route, HTTPMethod.POST, data);
 
-  Future<http.Response> deleteRequest(String route) =>
-      _request(route, 'delete', null);
+  Future<Response> deleteRequest(String route) =>
+      _request(route, HTTPMethod.DELETE, null);
 
-  Future<http.Response> _request(
+  Future<Response> _request(
     String route,
-    String method,
+    HTTPMethod method,
     Map<String, dynamic>? data,
   ) async {
     final String host = await SecureStorage.readValue('host') ?? '';
@@ -25,7 +28,6 @@ class RestApi {
     String url = _getURL(host, port, route);
     Map<String, String> headers = {
       'Grpc-Metadata-macaroon': macaroon,
-      'Content-Type': 'application/json',
     };
 
     return _restReq(headers, url, method, data);
@@ -45,33 +47,48 @@ class RestApi {
     return '$baseUrl$route';
   }
 
-  Future<http.Response> _restReq(
+  Future<Response> _restReq(
     Map<String, String> headers,
     String url,
-    String method,
+    HTTPMethod method,
     Map<String, dynamic>? data,
   ) async {
-    late http.Response response;
+    late Response response;
+    http.HttpPlusClient client = http.HttpPlusClient(
+      enableHttp2: true,
+      context: SecurityContext(withTrustedRoots: true),
+      badCertificateCallback: (cert, host, port) => true,
+      connectionTimeout: Duration(seconds: 30),
+      autoUncompress: true,
+      maintainOpenConnections: true,
+      maxOpenConnections: -1,
+      enableLogging: false,
+    );
 
-    if (method == 'get') {
-      response = await http.get(
-        Uri.parse(url),
-        headers: headers,
-      );
-    } else if (method == 'post') {
-      response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonEncode(
-          data,
-        ),
-      );
-    } else if (method == 'delete') {
-      response = await http.delete(
-        Uri.parse(url),
-        headers: headers,
-      );
+    switch (method) {
+      case (HTTPMethod.GET):
+        response = await client.get(
+          Uri.parse(url),
+          headers: headers,
+        );
+        break;
+      case (HTTPMethod.POST):
+        response = await client.post(
+          Uri.parse(url),
+          headers: headers,
+          body: jsonEncode(
+            data,
+          ),
+        );
+        break;
+      case (HTTPMethod.DELETE):
+        response = await client.delete(
+          Uri.parse(url),
+          headers: headers,
+        );
+        break;
     }
+    // http.closeAllConnections();
 
     return response;
   }

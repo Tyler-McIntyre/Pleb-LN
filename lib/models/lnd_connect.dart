@@ -7,9 +7,9 @@ class LNDConnect {
   bool useTor = false;
 
   static Map<String, RegExp> _lndConnectParsePatterns = {
-    'findHost': RegExp('.*(?=:)'), //Replace LNDConnect with https?
+    'findHost': RegExp('.*(?=:)'),
     'findPort': RegExp('(?<=:)[0-9]*'),
-    'findMacaroon': RegExp('(?<=macaroon=).*(?<=&)') //convert this to hex
+    'findMacaroon': RegExp('(?<=macaroon=).*')
   };
 
   static Future<LNDConnect> parseConnectionString(
