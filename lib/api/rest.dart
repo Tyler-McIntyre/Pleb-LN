@@ -9,6 +9,9 @@ class RestApi {
   Future<http.Response> postRequest(String route, dynamic data) =>
       _request(route, 'post', data);
 
+  Future<http.Response> deleteRequest(String route) =>
+      _request(route, 'delete', null);
+
   Future<http.Response> _request(
     String route,
     String method,
@@ -62,6 +65,11 @@ class RestApi {
         body: jsonEncode(
           data,
         ),
+      );
+    } else if (method == 'delete') {
+      response = await http.delete(
+        Uri.parse(url),
+        headers: headers,
       );
     }
 

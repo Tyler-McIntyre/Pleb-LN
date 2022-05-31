@@ -1,9 +1,15 @@
+import 'package:convert/convert.dart';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:firebolt/models/channel_detail.dart';
+import 'package:firebolt/models/channel_fee_report.dart';
+import 'package:firebolt/models/fee_report.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import '../api/lnd.dart';
 import '../constants/channel_list_tile_icon.dart';
 import '../database/secure_storage.dart';
+import '../models/channel_point.dart';
+import '../models/update_channel_policy.dart';
 import '../util/app_colors.dart';
 
 class ChannelDetailsScreen extends StatefulWidget {
@@ -21,27 +27,49 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   // final _formKey = GlobalKey<FormState>();
   TextEditingController channelLabelController = TextEditingController();
   TextEditingController remotePubkeyLabelController = TextEditingController();
+  TextEditingController feePerKwController = TextEditingController();
+  TextEditingController baseFeeController = TextEditingController();
+  TextEditingController feeRateController = TextEditingController();
   bool userIsAddingLabel = false;
+  late Future<ChannelFeeReport> _channelFeeReport;
   late double _localBalancePercentage;
 
   @override
   void initState() {
-    _fetchChannelLabel();
-    _fetchRemotePubkeyLabel();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      this.channelLabelController.text = await _fetchChannelLabel();
+      this.remotePubkeyLabelController.text = await _fetchRemotePubkeyLabel();
+      Future<ChannelFeeReport> futureFeeReport = _fetchFeeReport();
+      setState(() {
+        futureFeeReport
+            .then((value) => baseFeeController.text = value.baseFeeMsat);
+        futureFeeReport
+            .then((value) => feeRateController.text = value.feeRate.toString());
+        this._channelFeeReport = futureFeeReport;
+      });
+    });
     _localBalancePercentage = (int.parse(widget.channel.channel!.localBalance) /
         (int.parse(widget.channel.channel!.capacity)));
+    feePerKwController.text = widget.channel.channel!.feePerKw;
     super.initState();
   }
 
-  void _fetchChannelLabel() async {
-    channelLabelController.text =
-        await SecureStorage.readValue(widget.channel.chanId) ?? '';
+  Future<ChannelFeeReport> _fetchFeeReport() async {
+    LND api = LND();
+    FeeReport feeReport = await api.getFeeReport();
+    ChannelFeeReport? channelFeeReport = feeReport.channelFees
+        .firstWhere((report) => report.chanId == widget.channel.chanId);
+    return channelFeeReport;
   }
 
-  void _fetchRemotePubkeyLabel() async {
-    remotePubkeyLabelController.text =
-        await SecureStorage.readValue(widget.channel.channel!.remotePubkey) ??
-            '';
+  Future<String> _fetchChannelLabel() async {
+    return await SecureStorage.readValue(widget.channel.chanId) ?? '';
+  }
+
+  Future<String> _fetchRemotePubkeyLabel() async {
+    return await SecureStorage.readValue(
+            widget.channel.channel!.remotePubkey) ??
+        '';
   }
 
   @override
@@ -75,7 +103,16 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            LND api = LND();
+            api.closeChannel(widget.channel.channel!.channelPoint);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DashboardScreen(),
+              ),
+            );
+          },
           child: Text(
             'Close Channel',
             style: TextStyle(fontSize: 20),
@@ -101,6 +138,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
           onPressed: () {
             _saveChannelLabel();
             _saveRemotePubkeyLabel();
+            _updateChannelPolicy(widget.channel.channel!.channelPoint);
 
             Navigator.push(
               context,
@@ -345,6 +383,40 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             ),
           ],
         ),
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(widget.channel.channel!.feePerKw),
+                    Text(
+                      'Fee per kw',
+                      style: TextStyle(color: AppColors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(widget.channel.channel!.pushAmountSat),
+                    Text(
+                      'Push amount sat',
+                      style: TextStyle(color: AppColors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
         Column(
           children: [
             Row(
@@ -425,39 +497,107 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   }
 
   _channelPolicy() {
-    return Row(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+    return FutureBuilder(
+        future: _channelFeeReport,
+        builder: ((context, AsyncSnapshot<ChannelFeeReport> snapshot) {
+          Widget child;
+          if (snapshot.hasData) {
+            child = Column(
               children: [
-                Text(widget.channel.channel!.feePerKw),
-                Text(
-                  'Fee per kw',
-                  style: TextStyle(color: AppColors.grey),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: TextFormField(
+                          controller: baseFeeController,
+                          decoration: InputDecoration(
+                            focusedBorder: Theme.of(context)
+                                .inputDecorationTheme
+                                .focusedBorder,
+                            label: Text.rich(
+                              TextSpan(
+                                text: 'base fee ',
+                                children: [
+                                  TextSpan(
+                                      text: '(msats)',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displaySmall),
+                                ],
+                              ),
+                            ),
+                            hintText: '...',
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: TextFormField(
+                          controller: feeRateController,
+                          decoration: InputDecoration(
+                            focusedBorder: Theme.of(context)
+                                .inputDecorationTheme
+                                .focusedBorder,
+                            label: Text('fee rate'),
+                            hintText: '...',
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ],
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(widget.channel.channel!.pushAmountSat),
-                Text(
-                  'Push amount sat',
-                  style: TextStyle(color: AppColors.grey),
+            );
+          } else if (snapshot.hasError) {
+            child = Column(children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).errorColor,
+                  size: 40,
                 ),
-              ],
-            ),
-          ),
-        )
-      ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Error: ${snapshot.error}',
+                  style: TextStyle(color: Theme.of(context).errorColor),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ]);
+          } else {
+            child = SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return child;
+        }));
+  }
+
+  void _updateChannelPolicy(String channelPointStr) {
+    LND api = LND();
+    List<String> splitChannelPoint = channelPointStr.split(':');
+    List<int> fundingTxidBytes = hex.decode(splitChannelPoint[0]);
+
+    ChannelPoint chanPoint = ChannelPoint(fundingTxidBytes,
+        splitChannelPoint[0], int.parse(splitChannelPoint[1]));
+    UpdateChannelPolicy params = UpdateChannelPolicy(
+      false,
+      chanPoint,
+      baseFeeController.text,
+      double.parse(feeRateController.text),
+      timeLockDelta: 30,
     );
+    api.updateChannelPolicy(params);
   }
 }

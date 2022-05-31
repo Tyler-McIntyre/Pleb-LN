@@ -15,7 +15,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late bool nodeIsConfigured;
-  late Future<bool> _init;
+  late Future<bool> _isConfigured;
   bool _isExpanded = false;
   Icon caretIcon = Icon(FontAwesomeIcons.caretUp);
   @override
@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   init() async {
-    _init = _nodeIsConfigured();
+    this._isConfigured = _nodeIsConfigured();
   }
 
   Future<bool> _nodeIsConfigured() async {
@@ -67,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: FutureBuilder(
-        future: _init,
+        future: _isConfigured,
         builder: (context, snapshot) {
           late Widget child;
           if (snapshot.hasData) {

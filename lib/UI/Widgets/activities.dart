@@ -145,7 +145,6 @@ class _ActivitiesState extends State<Activities> {
       String remotePubkeyLabel =
           await SecureStorage.readValue(channel.remotePubkey) ??
               channel.remotePubkey;
-      print(remotePubkeyLabel);
       channelDetailList.add(
         ChannelDetail(
           channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
