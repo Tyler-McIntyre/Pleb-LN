@@ -1,16 +1,14 @@
 import 'package:convert/convert.dart';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:firebolt/models/channel_detail.dart';
-import 'package:firebolt/models/channel_fee_report.dart';
-import 'package:firebolt/models/fee_report.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import '../api/lnd.dart';
 import '../constants/channel_list_tile_icon.dart';
 import '../database/secure_storage.dart';
-import '../models/channel_point.dart';
-import '../models/update_channel_policy.dart';
+import '../generated/lightning.pb.dart';
+import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
+import 'package:fixnum/fixnum.dart';
 
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
@@ -31,21 +29,18 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   TextEditingController baseFeeController = TextEditingController();
   TextEditingController feeRateController = TextEditingController();
   bool userIsAddingLabel = false;
-  late Future<ChannelFeeReport> _channelFeeReport;
   late double _localBalancePercentage;
+  bool userIsSure = false;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       this.channelLabelController.text = await _fetchChannelLabel();
       this.remotePubkeyLabelController.text = await _fetchRemotePubkeyLabel();
-      Future<ChannelFeeReport> futureFeeReport = _fetchFeeReport();
+      ChannelFeeReport _feeReport = await _fetchFeeReport();
       setState(() {
-        futureFeeReport
-            .then((value) => baseFeeController.text = value.baseFeeMsat);
-        futureFeeReport
-            .then((value) => feeRateController.text = value.feeRate.toString());
-        this._channelFeeReport = futureFeeReport;
+        baseFeeController.text = _feeReport.baseFeeMsat.toString();
+        feeRateController.text = _feeReport.feeRate.toString();
       });
     });
     _localBalancePercentage =
@@ -56,10 +51,11 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   }
 
   Future<ChannelFeeReport> _fetchFeeReport() async {
-    LND api = LND();
-    FeeReport feeReport = await api.getFeeReport();
-    ChannelFeeReport? channelFeeReport = feeReport.channelFees
-        .firstWhere((report) => report.chanId == widget.channel.chanId);
+    LND rpc = LND();
+    FeeReportResponse feeReport = await rpc.feeReport();
+
+    ChannelFeeReport channelFeeReport = feeReport.channelFees.firstWhere(
+        (report) => report.chanId.toString() == widget.channel.chanId);
     return channelFeeReport;
   }
 
@@ -104,15 +100,18 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         ElevatedButton(
-          onPressed: () {
-            LND api = LND();
-            api.closeChannel(widget.channel.channel!.channelPoint);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const DashboardScreen(),
-              ),
-            );
+          onPressed: () async {
+            await closeChannelDialog(context);
+
+            if (userIsSure) {
+              _closeChannel();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DashboardScreen(),
+                ),
+              );
+            }
           },
           child: Text(
             'Close Channel',
@@ -136,10 +135,30 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             _saveChannelLabel();
             _saveRemotePubkeyLabel();
-            _updateChannelPolicy(widget.channel.channel!.channelPoint);
+
+            try {
+              await _updateChannelPolicy(widget.channel.channel!.channelPoint);
+            } catch (ex) {
+              print('catch3');
+              String message = ex.toString().replaceAll('Exception:', '');
+
+              final snackBar = SnackBar(
+                duration: Duration(seconds: 5),
+                content: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                backgroundColor: (AppColors.red),
+              );
+
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+              throw Exception(ex);
+            }
 
             Navigator.push(
               context,
@@ -500,7 +519,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
 
   _channelPolicy() {
     return FutureBuilder(
-        future: _channelFeeReport,
+        future: _fetchFeeReport(),
         builder: ((context, AsyncSnapshot<ChannelFeeReport> snapshot) {
           Widget child;
           if (snapshot.hasData) {
@@ -586,20 +605,94 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         }));
   }
 
-  void _updateChannelPolicy(String channelPointStr) {
-    LND api = LND();
+  _updateChannelPolicy(String channelPointStr) async {
+    LND rpc = LND();
     List<String> splitChannelPoint = channelPointStr.split(':');
     List<int> fundingTxidBytes = hex.decode(splitChannelPoint[0]);
-
-    ChannelPoint chanPoint = ChannelPoint(fundingTxidBytes,
-        splitChannelPoint[0], int.parse(splitChannelPoint[1]));
-    UpdateChannelPolicy params = UpdateChannelPolicy(
-      false,
-      chanPoint,
-      baseFeeController.text,
-      double.parse(feeRateController.text),
-      timeLockDelta: 30,
+    PolicyUpdateResponse response = PolicyUpdateResponse();
+    ChannelPoint chanPoint = ChannelPoint(
+      fundingTxidBytes: fundingTxidBytes,
+      fundingTxidStr: splitChannelPoint[0],
+      outputIndex: int.parse(
+        splitChannelPoint[1],
+      ),
     );
-    api.updateChannelPolicy(params);
+
+    PolicyUpdateRequest policyUpdateRequest = PolicyUpdateRequest(
+      chanPoint: chanPoint,
+      baseFeeMsat: Int64.parseInt(baseFeeController.text).toInt64(),
+      feeRate: double.parse(feeRateController.text),
+      timeLockDelta: 18,
+    );
+    try {
+      response = await rpc.updateChannelPolicy(policyUpdateRequest);
+    } catch (ex) {
+      throw Exception(ex);
+    }
+    return response;
+  }
+
+  Future<CloseStatusUpdate> _closeChannel() async {
+    LND rpc = LND();
+    String channelPoint = widget.channel.channel!.channelPoint;
+    List<String> splitChannelPoint = channelPoint.split(':');
+    List<int> fundingTxidBytes = hex.decode(splitChannelPoint[0]);
+    ChannelPoint chanPoint = ChannelPoint(
+      fundingTxidBytes: fundingTxidBytes,
+      fundingTxidStr: splitChannelPoint[0],
+      outputIndex: int.parse(
+        splitChannelPoint[1],
+      ),
+    );
+    CloseChannelRequest closeChannelRequest =
+        CloseChannelRequest(channelPoint: chanPoint);
+    return await rpc.closeChannel(closeChannelRequest);
+  }
+
+  Future<void> closeChannelDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: Icon(
+          Icons.info_outline,
+          color: AppColors.blue,
+          size: 35,
+        ),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text(
+                'Are you sure you want to close this channel?',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.black, fontSize: 20),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontSize: 20),
+            ),
+            onPressed: () {
+              userIsSure = false;
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text(
+              'Continue',
+              style: TextStyle(fontSize: 20),
+            ),
+            onPressed: () {
+              userIsSure = true;
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      ),
+    );
   }
 }

@@ -188,6 +188,71 @@ class LND {
     return response;
   }
 
+  Future<FeeReportResponse> feeReport() async {
+    FeeReportResponse response = FeeReportResponse();
+    LightningClient stub = await _stub;
+
+    try {
+      response = await stub.feeReport(FeeReportRequest());
+    } on GrpcError catch (ex) {
+      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
+        if (ex.message!.toLowerCase().contains('failed host lookup')) {
+          throw FailedHostLookup(
+                  'Unable to connect to host, check your node settings and try again.')
+              .message;
+        }
+      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
+        throw TimeoutException(
+            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
+      } else {
+        throw Exception(ex.message);
+      }
+    }
+
+    return response;
+  }
+
+  Future<PolicyUpdateResponse> updateChannelPolicy(
+      PolicyUpdateRequest policyUpdateRequest) async {
+    PolicyUpdateResponse response = PolicyUpdateResponse();
+    LightningClient stub = await _stub;
+
+    try {
+      response = await stub.updateChannelPolicy(policyUpdateRequest);
+    } on GrpcError catch (ex) {
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
+    }
+
+    return response;
+  }
+
+  Future<CloseStatusUpdate> closeChannel(
+      CloseChannelRequest closeChannelRequest) async {
+    CloseStatusUpdate response = CloseStatusUpdate();
+    LightningClient stub = await _stub;
+
+    try {
+      response = await stub.closeChannel(closeChannelRequest).first;
+    } on GrpcError catch (ex) {
+      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
+        if (ex.message!.toLowerCase().contains('failed host lookup')) {
+          throw FailedHostLookup(
+                  'Unable to connect to host, check your node settings and try again.')
+              .message;
+        }
+      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
+        throw TimeoutException(
+            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
+      } else {
+        throw Exception(ex.message);
+      }
+    }
+
+    return response;
+  }
+
   Future<OpenStatusUpdate> openChannel(
       OpenChannelRequest openChannelRequest) async {
     OpenStatusUpdate response = OpenStatusUpdate();
