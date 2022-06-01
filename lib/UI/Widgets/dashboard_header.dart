@@ -1,11 +1,12 @@
 import 'package:firebolt/UI/create_invoice_screen.dart';
 import 'package:firebolt/UI/pay_screen.dart';
-import 'package:firebolt/models/blockchain_balance.dart';
-import 'package:firebolt/api/lnd.dart';
+import 'package:firebolt/generated/lightning.pb.dart';
+import 'package:firebolt/generated/lightning.pbgrpc.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../database/secure_storage.dart';
+import '../../rpc/lnd.dart';
 import '../../util/app_colors.dart';
 import 'curve_clipper.dart';
 import '../node_config_screen.dart';
@@ -44,14 +45,14 @@ class _DashboardHeaderState extends State<DashboardHeader> {
     }
   }
 
-  Future<BlockchainBalance> _nodeBalance() async {
-    BlockchainBalance result;
+  Future<WalletBalanceResponse> _nodeBalance() async {
+    WalletBalanceResponse result;
+    LND rpc = LND();
     if (widget.nodeIsConfigured) {
-      LND api = LND();
       //TODO: Fetch the current exchange rate
       double currentBtcExchangeRate = 40000;
-      result = await api.getBlockchainBalance();
-      String totalBalance = result.totalBalance;
+      result = await rpc.getWalletBalance();
+      String totalBalance = result.totalBalance.toString();
       balanceWidgets = [
         Text.rich(
           TextSpan(
@@ -93,12 +94,12 @@ class _DashboardHeaderState extends State<DashboardHeader> {
         )
       ];
     } else {
-      result = BlockchainBalance('0', null, null, null);
+      result = WalletBalanceResponse();
       balanceWidgets = [
         Text.rich(
             TextSpan(
                 text: MoneyFormatter(
-                  amount: int.parse(result.totalBalance).toDouble(),
+                  amount: 0,
                 ).output.withoutFractionDigits,
                 children: [
                   TextSpan(
@@ -132,44 +133,48 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FutureBuilder<BlockchainBalance>(
+                FutureBuilder<WalletBalanceResponse>(
                   future: _nodeBalance(),
                   builder: (BuildContext context,
-                      AsyncSnapshot<BlockchainBalance> snapshot) {
-                    List<Widget> children;
+                      AsyncSnapshot<WalletBalanceResponse> snapshot) {
+                    Widget child;
                     if (snapshot.hasData) {
-                      children = [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _changeBalanceWidget();
-                            });
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              nicknameController.text.isNotEmpty
-                                  ? Text(
-                                      nicknameController.text,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall,
-                                    )
-                                  : Text(
-                                      'balance',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall,
-                                    ),
-                              balanceWidgets[balanceWidgetIndex],
-                            ],
+                      child = SizedBox(
+                        height: 135,
+                        child: Column(children: [
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _changeBalanceWidget();
+                              });
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                nicknameController.text.isNotEmpty
+                                    ? Text(
+                                        nicknameController.text,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      )
+                                    : Text(
+                                        'balance',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                balanceWidgets[balanceWidgetIndex],
+                              ],
+                            ),
                           ),
-                        ),
-                      ];
+                        ]),
+                      );
                     } else if (snapshot.hasError) {
-                      children = <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width / 1.25,
+                      child = Container(
+                        width: MediaQuery.of(context).size.width / 1.1,
+                        child: SizedBox(
+                          height: 200,
                           child: Column(
                             children: [
                               const Icon(
@@ -178,7 +183,7 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                                 size: 40,
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 16),
+                                padding: const EdgeInsets.only(top: 8),
                                 child: Text(
                                   'Error: ${snapshot.error}',
                                   style: TextStyle(
@@ -188,24 +193,16 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                               )
                             ],
                           ),
-                        )
-                      ];
-                    } else {
-                      children = const <Widget>[
-                        SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: CircularProgressIndicator(),
                         ),
-                      ];
+                      );
+                    } else {
+                      child = SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(),
+                      );
                     }
-                    return SizedBox(
-                      height: 135,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: children,
-                      ),
-                    );
+                    return child;
                   },
                 ),
               ],

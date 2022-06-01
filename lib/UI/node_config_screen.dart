@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:firebolt/UI/dashboard_screen.dart';
+import 'package:firebolt/constants/node_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/node_interface.dart';
 import '../util/app_colors.dart';
 import '../database/secure_storage.dart';
 import '../models/lnd_connect.dart';
@@ -53,12 +55,17 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
   }
 
   Future init() async {
-    final String nodeInterface = 'LND';
-    final String nickname = await SecureStorage.readValue('nickname') ?? '';
-    final String host = await SecureStorage.readValue('host') ?? '';
-    final String port = await SecureStorage.readValue('restPort') ?? '';
-    final String macaroon = await SecureStorage.readValue('macaroon') ?? '';
-    final String useTor = await SecureStorage.readValue('useTor') ?? 'false';
+    final String nodeInterface = NodeInterface.LND.name;
+    final String nickname =
+        await SecureStorage.readValue(NodeSetting.nickname.name) ?? '';
+    final String host =
+        await SecureStorage.readValue(NodeSetting.host.name) ?? '';
+    final String port =
+        await SecureStorage.readValue(NodeSetting.grpcport.name) ?? '';
+    final String macaroon =
+        await SecureStorage.readValue(NodeSetting.macaroon.name) ?? '';
+    final String useTor =
+        await SecureStorage.readValue(NodeSetting.useTor.name) ?? 'false';
 
     setState(() {
       nicknameController.text = nickname;
@@ -68,11 +75,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       macaroonController.text = macaroon;
       useTorIsSwitched = useTor.toLowerCase() == 'true' ? true : false;
       configSettings = {
-        'nickname': nicknameController,
-        'nodeInterface': nodeInterfaceController,
-        'host': hostController,
-        'restPort': portController,
-        'macaroon': macaroonController,
+        NodeSetting.nickname.name: nicknameController,
+        NodeInterface.LND.name: nodeInterfaceController,
+        NodeSetting.host.name: hostController,
+        NodeSetting.grpcport.name: portController,
+        NodeSetting.macaroon.name: macaroonController,
       };
     });
   }
@@ -203,22 +210,22 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         },
         style: Theme.of(context).textTheme.bodyMedium,
       ),
-      //*REST port
+      //*Port
       TextFormField(
         controller: portController,
         decoration: InputDecoration(
           focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
           label: Text(
-            'REST Port',
+            'gRPC Port',
             style: Theme.of(context).inputDecorationTheme.labelStyle,
           ),
           border: UnderlineInputBorder(),
           hintStyle: TextStyle(color: AppColors.grey),
-          hintText: '8080',
+          hintText: '10009',
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please enter the REST port';
+            return 'Please enter the gRPC port';
           }
           return null;
         },
@@ -251,7 +258,6 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           },
           style: Theme.of(context).textTheme.bodyMedium),
       //* Use Tor
-      //TODO: This should automatically switch to enabled if tor is detected in the host URL after scanning the config
       SwitchListTile(
         activeColor: AppColors.blue,
         title: Text(
@@ -429,8 +435,8 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           in configSettings.entries) {
         await SecureStorage.writeValue(entry.key, entry.value.text);
       }
-      await SecureStorage.writeValue('useTor', userTorSetting);
-      await SecureStorage.writeValue('isConfigured', 'true');
+      await SecureStorage.writeValue(NodeSetting.useTor.name, userTorSetting);
+      await SecureStorage.writeValue(NodeSetting.isConfigured.name, 'true');
       return true;
     } catch (ex) {
       log('An error occured while saving the node configuration');
@@ -444,9 +450,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
 
       //TODO: Move to a function?
-      if (connectionParams.host == '' ||
-          connectionParams.port == '' ||
-          connectionParams.macaroonHexFormat == '') {
+      if (connectionParams.host.isEmpty ||
+          connectionParams.port.isEmpty ||
+          connectionParams.macaroonHexFormat.isEmpty) {
         //Show the snackbar
         final snackBar = SnackBar(
           content: Text(
@@ -459,11 +465,16 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } else {
+        bool enableTor = false;
+        if (connectionParams.host.contains('.onion')) {
+          enableTor = true;
+        }
         //set the controller text states
         setState(() {
           hostController.text = connectionParams.host;
           portController.text = connectionParams.port;
           macaroonController.text = connectionParams.macaroonHexFormat;
+          useTorIsSwitched = enableTor;
         });
       }
     }

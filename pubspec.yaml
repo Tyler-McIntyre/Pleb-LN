@@ -48,6 +48,8 @@ dependencies:
   convert: ^3.0.1
   percent_indicator: ^4.2.2
   http_plus: ^0.2.1
+  protobuf: ^2.0.1
+  grpc: ^3.0.2
 
 dev_dependencies:
   flutter_test:

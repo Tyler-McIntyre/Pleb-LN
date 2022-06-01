@@ -12,7 +12,6 @@ import 'package:http/src/response.dart';
 import '../constants/payment_status.dart';
 import '../models/accept_open_channel.dart';
 import '../models/accept_open_channel_response.dart';
-import '../models/blockchain_balance.dart';
 import '../models/channel_balance.dart';
 import '../models/fee_report.dart';
 import '../models/invoice.dart';
@@ -35,11 +34,11 @@ class LND {
     return ChannelBalance.fromJson(jsonDecode(responseBody));
   }
 
-  Future<BlockchainBalance> getBlockchainBalance() async {
-    Response response = await rest.getRequest('/v1/balance/blockchain');
-    String responseBody = response.body;
-    return BlockchainBalance.fromJson(jsonDecode(responseBody));
-  }
+  // Future<BlockchainBalance> getBlockchainBalance() async {
+  //   Response response = await rest.getRequest('/v1/balance/blockchain');
+  //   String responseBody = response.body;
+  //   return BlockchainBalance.fromJson(jsonDecode(responseBody));
+  // }
 
   Future<UTXOS> getUnspentUTXOS(UTXOSRequest params) async {
     Response response =

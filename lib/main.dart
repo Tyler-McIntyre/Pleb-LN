@@ -1,13 +1,10 @@
-import 'dart:io';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'util/app_colors.dart';
-import 'util/my_http_overrides .dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
 
   runApp(const FireBolt());
 }

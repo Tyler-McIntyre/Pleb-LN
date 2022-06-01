@@ -5,7 +5,7 @@ class Formatting {
   static DateFormat formatter = DateFormat('MM/dd/yyyy');
 
   static formatHost(String host) {
-    return host.replaceFirst('lndconnect', 'https');
+    return host.replaceFirst('lndconnect://', '');
   }
 
   static formatMacaroon(String macaroon) {
