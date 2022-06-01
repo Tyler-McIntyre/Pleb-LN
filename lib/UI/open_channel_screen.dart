@@ -1,12 +1,12 @@
 import 'package:convert/convert.dart';
+import 'package:fixnum/fixnum.dart';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import '../api/lnd.dart';
-import '../models/open_channel_stream.dart';
+import '../generated/lightning.pb.dart';
+import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
-import 'Widgets/curve_clipper.dart';
 import 'widgets/info_dialog.dart';
 
 class OpenChannelScreen extends StatefulWidget {
@@ -21,9 +21,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nodePubkeyController = TextEditingController();
   TextEditingController fundingAmountController = TextEditingController();
-  TextEditingController channelFeeController = TextEditingController();
+  TextEditingController fundingFeeController = TextEditingController();
   TextEditingController minConfsController = TextEditingController();
-  bool _useDefaultChannelFee = true;
+  TextEditingController pushAmountController = TextEditingController();
+  bool _useDefaultFundingFee = true;
   bool _privateChannel = false;
   bool _useDefaultMinConf = true;
   InfoDialog dialog = InfoDialog();
@@ -31,49 +32,31 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.black,
       appBar: AppBar(),
       resizeToAvoidBottomInset: false,
-      body: Form(
-        key: _formKey,
-        child: Stack(
-          children: [
-            ClipPath(
-              clipper: CurveClipper(),
-              child: Container(
-                height: MediaQuery.of(context).size.height * .80,
-                color: AppColors.black,
-                child: Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _openChannelForm(),
-                    ),
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width / 1.1,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  Form(
+                    key: _formKey,
+                    child: _openChannelForm(),
                   ),
-                ),
-              ),
-            ),
-            Container(
-              alignment: Alignment.topCenter,
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * .73,
-                  right: 10.0,
-                  left: 10.0),
-              child: SizedBox(
-                height: 100.0,
-                width: MediaQuery.of(context).size.width,
-                child: SizedBox(
-                  child: _buttonBar(),
-                ),
-              ),
-            )
-          ],
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  _buttonBar() {
+  Widget _buttonBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -122,9 +105,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
               //TODO: reset all fields
               nodePubkeyController.text = '';
               fundingAmountController.text = '';
-              channelFeeController.text = '';
+              fundingFeeController.text = '';
               minConfsController.text = '';
-              _useDefaultChannelFee = true;
+              pushAmountController.text = '';
+              _useDefaultFundingFee = true;
               _useDefaultMinConf = true;
               _privateChannel = false;
             });
@@ -162,22 +146,40 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              //? Should we either navigate to success splash screen or display error within form?
-              int minConfs = 3;
-              if (!_useDefaultMinConf) {
-                minConfs = int.parse(minConfsController.text);
-              }
-              OpenChannelStream params = OpenChannelStream(
-                _privateChannel,
-                fundingAmountController.text,
-                // hex.decode(nodePubkeyController.text),
-                hex.decode(
-                    '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b'), //TODO: REMOVE ME
-                minConfs,
-                _useDefaultChannelFee ? '0' : channelFeeController.text,
-                minConfs == 0 ? true : false,
+              Int64 satsPerVbyte = _useDefaultFundingFee
+                  ? Int64(40)
+                  : Int64.parseInt(fundingFeeController.text).toInt64();
+              Int64 localFundingAmount =
+                  Int64.parseInt(fundingAmountController.text).toInt64();
+              // List<int> nodePubKey = hex.decode(
+              //     '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b');
+              List<int> nodePubKey = hex.decode(nodePubkeyController.text);
+              int? minConfs = _useDefaultMinConf
+                  ? null
+                  : int.parse(minConfsController.text);
+              bool spendUnconfirmed = minConfsController.text.isNotEmpty &&
+                      int.parse(minConfsController.text) == 0
+                  ? true
+                  : false;
+              bool private = _privateChannel;
+              Int64 pushSat = Int64.parseInt(pushAmountController.text);
+
+              OpenChannelRequest openChannelRequest = OpenChannelRequest(
+                satPerVbyte: satsPerVbyte,
+                localFundingAmount: localFundingAmount,
+                private: private,
+                nodePubkey: nodePubKey,
+                minConfs: minConfs,
+                spendUnconfirmed: spendUnconfirmed,
+                pushSat: pushSat,
               );
-              _openChannel(params);
+
+              try {
+                await _openChannel(openChannelRequest);
+              } catch (ex) {
+                throw Exception(ex);
+              }
+
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => DashboardScreen()));
             }
@@ -237,80 +239,185 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     });
   }
 
-  _openChannelForm() {
-    return [
-      TextFormField(
-        controller: nodePubkeyController,
-        decoration: InputDecoration(
-            suffixIcon: IconButton(
-              icon: Icon(
-                Icons.paste,
-                color: AppColors.orange,
-              ),
-              onPressed: () async {
-                ClipboardData? clipboardData =
-                    await Clipboard.getData(Clipboard.kTextPlain);
-                if (clipboardData!.text!.isNotEmpty) {
-                  String nodePubkey = clipboardData.text!;
+  Widget _openChannelForm() {
+    return Column(
+      children: [
+        TextFormField(
+          controller: nodePubkeyController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a value';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+              errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  Icons.paste,
+                  color: AppColors.orange,
+                ),
+                onPressed: () async {
+                  ClipboardData? clipboardData =
+                      await Clipboard.getData(Clipboard.kTextPlain);
+                  if (clipboardData!.text!.isNotEmpty) {
+                    String nodePubkey = clipboardData.text!;
 
-                  _setConfigFormFields(nodePubkey);
-                }
-              },
-            ),
-            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-            label: Text('Node pubkey',
-                style: Theme.of(context).inputDecorationTheme.labelStyle),
-            hintText: '03f0ba19fd88e...'),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-      //Funding Amount
-      TextFormField(
-        controller: fundingAmountController,
-        decoration: InputDecoration(
-          focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-          label: Text('Funding Amount',
-              style: Theme.of(context).inputDecorationTheme.labelStyle),
+                    _setConfigFormFields(nodePubkey);
+                  }
+                },
+              ),
+              focusedBorder:
+                  Theme.of(context).inputDecorationTheme.focusedBorder,
+              label: Text('Node pubkey',
+                  style: Theme.of(context).inputDecorationTheme.labelStyle),
+              hintText: '03f0ba19fd88e...'),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-      //min confirmations
-      Padding(
-        padding: const EdgeInsets.fromLTRB(0, 30, 0, 8),
-        child: SwitchListTile(
+        //Funding Amount
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: TextFormField(
+            controller: fundingAmountController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a value';
+              }
+              return null;
+            },
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
+              focusedBorder:
+                  Theme.of(context).inputDecorationTheme.focusedBorder,
+              label: Text('Funding Amount',
+                  style: Theme.of(context).inputDecorationTheme.labelStyle),
+            ),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+        //Push Amount
+        TextFormField(
+          controller: pushAmountController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a value';
+            }
+            return null;
+          },
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
+            label: Text('Push Amount',
+                style: Theme.of(context).inputDecorationTheme.labelStyle),
+          ),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        //min confirmations
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: SwitchListTile(
+            tileColor: AppColors.black,
+            contentPadding: EdgeInsets.zero,
+            onChanged: ((value) {
+              setState(() {
+                _useDefaultMinConf = value;
+              });
+            }),
+            value: _useDefaultMinConf,
+            title: Row(
+              children: [
+                Text(
+                  'Minimum confirmations',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                IconButton(
+                  padding: EdgeInsets.only(bottom: 5),
+                  icon: Icon(
+                    Icons.info_outline,
+                    color: Colors.blue,
+                  ),
+                  onPressed: () async {
+                    String body =
+                        dialog.blurbs[DialogType.MinimumConfirmations]!;
+                    await dialog.showMyDialog(body, context);
+                  },
+                )
+              ],
+            ),
+            subtitle: _useDefaultMinConf
+                ? Text(
+                    'Default = 4 confirmations',
+                    style: Theme.of(context).textTheme.displaySmall,
+                  )
+                : TextFormField(
+                    controller: minConfsController,
+                    validator: (value) {
+                      if (value!.isEmpty && !_useDefaultMinConf) {
+                        return 'Please enter a value';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                        errorStyle:
+                            Theme.of(context).inputDecorationTheme.errorStyle,
+                        contentPadding: EdgeInsets.zero,
+                        focusedBorder: Theme.of(context)
+                            .inputDecorationTheme
+                            .focusedBorder,
+                        hintText: '...'),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+          ),
+        ),
+        //Channel Fee
+        SwitchListTile(
+          tileColor: AppColors.black,
           contentPadding: EdgeInsets.zero,
           onChanged: ((value) {
             setState(() {
-              _useDefaultMinConf = value;
+              _useDefaultFundingFee = value;
             });
           }),
-          value: _useDefaultMinConf,
+          value: _useDefaultFundingFee,
           title: Row(
             children: [
               Text(
-                'Minimum confirmations',
+                'Funding fee rate',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               IconButton(
-                padding: EdgeInsets.only(bottom: 5),
+                padding: EdgeInsets.only(bottom: 4),
                 icon: Icon(
                   Icons.info_outline,
                   color: Colors.blue,
                 ),
                 onPressed: () async {
-                  String body = dialog.blurbs[DialogType.MinimumConfirmations]!;
+                  String body = dialog.blurbs[DialogType.ChannelFee]!;
                   await dialog.showMyDialog(body, context);
                 },
               )
             ],
           ),
-          subtitle: _useDefaultMinConf
+          subtitle: _useDefaultFundingFee
               ? Text(
-                  'Default = 3 confirmations',
+                  'Default = 40 sats per vbyte',
                   style: Theme.of(context).textTheme.displaySmall,
                 )
               : TextFormField(
-                  controller: minConfsController,
+                  controller: fundingFeeController,
+                  validator: (value) {
+                    if (value!.isEmpty && !_useDefaultFundingFee) {
+                      return 'Please enter a value';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
+                      errorStyle:
+                          Theme.of(context).inputDecorationTheme.errorStyle,
                       contentPadding: EdgeInsets.zero,
                       focusedBorder:
                           Theme.of(context).inputDecorationTheme.focusedBorder,
@@ -318,71 +425,53 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
         ),
-      ),
-      //Channel Fee
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        onChanged: ((value) {
-          setState(() {
-            _useDefaultChannelFee = value;
-          });
-        }),
-        value: _useDefaultChannelFee,
-        title: Row(
-          children: [
-            Text(
-              'Channel fee rate',
+        //Private channel
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: SwitchListTile(
+            tileColor: AppColors.black,
+            contentPadding: EdgeInsets.zero,
+            onChanged: ((value) {
+              setState(() {
+                _privateChannel = value;
+              });
+            }),
+            value: _privateChannel,
+            title: Text(
+              'Private channel',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            IconButton(
-              padding: EdgeInsets.only(bottom: 4),
-              icon: Icon(
-                Icons.info_outline,
-                color: Colors.blue,
-              ),
-              onPressed: () async {
-                String body = dialog.blurbs[DialogType.ChannelFee]!;
-                await dialog.showMyDialog(body, context);
-              },
-            )
-          ],
+          ),
         ),
-        subtitle: _useDefaultChannelFee
-            ? Text(
-                'Default = 0 sats per vbyte',
-                style: Theme.of(context).textTheme.displaySmall,
-              )
-            : TextFormField(
-                controller: channelFeeController,
-                decoration: InputDecoration(
-                    contentPadding: EdgeInsets.zero,
-                    focusedBorder:
-                        Theme.of(context).inputDecorationTheme.focusedBorder,
-                    hintText: '...'),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-      ),
-      //Private channel
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        onChanged: ((value) {
-          setState(() {
-            _privateChannel = value;
-          });
-        }),
-        value: _privateChannel,
-        title: Text(
-          'Private channel',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
-    ];
+        _buttonBar()
+      ],
+    );
   }
 
-  void _openChannel(
-    OpenChannelStream params,
+  Future<OpenStatusUpdate> _openChannel(
+    OpenChannelRequest params,
   ) async {
-    LND api = LND();
-    await api.openChannelStream(params);
+    LND rpc = LND();
+    OpenStatusUpdate response;
+    try {
+      response = await rpc.openChannel(params);
+    } catch (ex) {
+      String message = ex.toString().replaceAll('Exception:', '');
+
+      final snackBar = SnackBar(
+        duration: Duration(seconds: 5),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18),
+        ),
+        backgroundColor: (AppColors.red),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      throw Exception(ex);
+    }
+    return response;
   }
 }

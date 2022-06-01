@@ -1,7 +1,6 @@
 import '../constants/channel_status.dart';
 import '../constants/channel_type.dart';
-import 'channel.dart';
-import 'pending_open_channel.dart';
+import '../generated/lightning.pb.dart';
 
 class ChannelDetail {
   ChannelStatus channelStatus;
@@ -10,7 +9,7 @@ class ChannelDetail {
   String chanId;
   String channelLabel;
   String pubKeyLabel;
-  PendingOpenChannel? pendingChannel;
+  PendingChannelsResponse_PendingOpenChannel? pendingChannel;
   Channel? channel;
 
   ChannelDetail(

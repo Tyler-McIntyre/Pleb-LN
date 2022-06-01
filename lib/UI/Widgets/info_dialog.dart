@@ -8,7 +8,7 @@ class InfoDialog {
     DialogType.OpenChannelNodeAlias:
         'Assign this channel an alias for organizational purposes. If an alias is not specified then the channel ID will be listed on the dashboard instead. This is saved locally so if you delete the application from your phone, this information will be lost.',
     DialogType.ChannelFee:
-        'A manual fee rate set in sat/vbyte. A fee rate specifys a percentage of each invoice to charge for forwarding a payment.',
+        'A manual fee rate set in sat/vbyte that should be used when crafting the funding transaction.',
     DialogType.MinimumConfirmations:
         'this is the minimum number of confirmations each one of your outputs used for the funding transaction must satisfy'
   };
