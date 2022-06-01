@@ -115,9 +115,12 @@ class _ActivitiesState extends State<Activities> {
 
     for (PendingChannelsResponse_PendingOpenChannel pendingChannel
         in pendingChannels.pendingOpenChannels) {
-      String remotePubkeyLabel =
-          await SecureStorage.readValue(pendingChannel.channel.remoteNodePub) ??
-              pendingChannel.channel.remoteNodePub;
+      String? remotePubkeyLabel =
+          await SecureStorage.readValue(pendingChannel.channel.remoteNodePub);
+
+      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
+          ? remotePubkeyLabel = remotePubkeyLabel
+          : remotePubkeyLabel = pendingChannel.channel.remoteNodePub;
 
       channelDetailList.add(
         ChannelDetail(
@@ -137,9 +140,13 @@ class _ActivitiesState extends State<Activities> {
     for (Channel channel in channels.channels) {
       String channelLabel =
           await SecureStorage.readValue(channel.chanId.toString()) ?? '';
-      String remotePubkeyLabel =
-          await SecureStorage.readValue(channel.remotePubkey) ??
-              channel.remotePubkey;
+      String? remotePubkeyLabel =
+          await SecureStorage.readValue(channel.remotePubkey);
+
+      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
+          ? remotePubkeyLabel = remotePubkeyLabel
+          : remotePubkeyLabel = channel.remotePubkey;
+
       channelDetailList.add(
         ChannelDetail(
           channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
@@ -178,7 +185,9 @@ class _ActivitiesState extends State<Activities> {
         break;
       case ChannelSortType.Public:
         channelDetailList = channelDetailList
-            .where((channel) => channel.channelType == ChannelType.public)
+            .where((channel) =>
+                channel.channelType == ChannelType.public &&
+                channel.channelStatus != ChannelStatus.Pending)
             .toList();
         break;
       case ChannelSortType.Id:
@@ -522,14 +531,18 @@ class _ActivitiesState extends State<Activities> {
         Card(
           color: AppColors.blueGrey,
           child: ListTile(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChannelDetailsScreen(
-                      channel: channel,
-                    ),
-                  ));
+            onTap: () async {
+              if (channel.channelStatus != ChannelStatus.Pending) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChannelDetailsScreen(
+                        channel: channel,
+                      ),
+                    ));
+              } else {
+                await pendingChannelDialog(context);
+              }
             },
             style: ListTileStyle.list,
             leading: channelIcon,
@@ -868,6 +881,42 @@ class _ActivitiesState extends State<Activities> {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> pendingChannelDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: Icon(
+          Icons.info_outline,
+          color: AppColors.blue,
+          size: 35,
+        ),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text(
+                'The status of this channel still currently shows as pending. The open channel request needs to be accepted and funded before you can view it\s details.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.black, fontSize: 20),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text(
+              'Got it!',
+              style: TextStyle(fontSize: 20),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      ),
     );
   }
 }
