@@ -1,0 +1,4 @@
+enum gRPCExceptionType {
+  UNAVAILABLE,
+  DEADLINE_EXCEEDED,
+}

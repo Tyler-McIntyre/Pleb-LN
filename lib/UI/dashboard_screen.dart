@@ -1,3 +1,4 @@
+import 'package:firebolt/constants/node_setting.dart';
 import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -29,7 +30,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<bool> _nodeIsConfigured() async {
-    String result = await SecureStorage.readValue('isConfigured') ?? 'false';
+    String result =
+        await SecureStorage.readValue(NodeSetting.isConfigured.name) ?? 'false';
     setState(() {
       result == 'true'
           ? this.nodeIsConfigured = true
