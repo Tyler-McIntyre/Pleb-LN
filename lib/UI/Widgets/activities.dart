@@ -1,6 +1,6 @@
+import 'package:firebolt/generated/lightning.pbgrpc.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
-import '../../api/lnd.dart';
 import '../../constants/channel_list_tile_icon.dart';
 import '../../constants/channel_sort_type.dart';
 import '../../constants/channel_status.dart';
@@ -8,14 +8,9 @@ import '../../constants/channel_type.dart';
 import '../../constants/transfer_type.dart';
 import '../../constants/tx_sort_type.dart';
 import '../../database/secure_storage.dart';
-import '../../models/pending_channels.dart';
-import '../../models/pending_open_channel.dart';
 import '../../models/transaction_detail.dart';
-import '../../models/channel.dart';
 import '../../models/channel_detail.dart';
-import '../../models/channels.dart';
-import '../../models/invoices.dart';
-import '../../models/payments.dart';
+import '../../rpc/lnd.dart';
 import '../../util/app_colors.dart';
 import '../../util/formatting.dart';
 import '../channel_details_screen.dart';
@@ -58,31 +53,30 @@ class _ActivitiesState extends State<Activities> {
   }
 
   Future<List<TransactionDetail>> _getTransactions(TxSortType sortType) async {
-    LND api = LND();
+    LND rpc = LND();
     //TODO: run these in parallel
-    Payments payments = await api.getPayments();
-    Invoices invoices = await api.getInvoices();
+
+    ListPaymentsResponse payments = await rpc.getPayments();
+    ListInvoiceResponse invoices = await rpc.getInvoices();
     List<TransactionDetail> txList = [];
     payments.payments.forEach((payment) {
       txList.add(
         TransactionDetail(
-            payment.valueSat,
+            payment.valueSat.toString(),
             Formatting.timestampNanoSecondsToDate(
-              int.parse(payment.creationTimeNanoSeconds),
+              payment.creationTimeNs.toInt(),
             ),
             TransferType.sent),
       );
     });
-
-    invoices.invoices.forEach((payment) {
-      if (payment.settled == true &&
-          payment.value!.isNotEmpty &&
-          payment.settleDate!.isNotEmpty) {
+    invoices.invoices.forEach((invoice) {
+      bool invoiceIsSettled = invoice.settleDate > 0;
+      if (invoiceIsSettled) {
         txList.add(
           TransactionDetail(
-              payment.value as String,
+              invoice.value as String,
               Formatting.timestampToDateTime(
-                int.parse(payment.settleDate!),
+                invoice.settleDate.toInt(),
               ),
               TransferType.received),
         );
@@ -115,11 +109,11 @@ class _ActivitiesState extends State<Activities> {
   Future<List<ChannelDetail>> _getChannels(ChannelSortType sortType) async {
     LND api = LND();
     //TODO: run these in parallel
-    Channels channels = await api.getChannels();
-    PendingChannels pendingChannels = await api.getPendingChannels();
+    ListChannelsResponse channels = await api.getChannels();
+    PendingChannelsResponse pendingChannels = await api.getPendingChannels();
     List<ChannelDetail> channelDetailList = [];
 
-    for (PendingOpenChannel pendingChannel
+    for (PendingChannelsResponse_PendingOpenChannel pendingChannel
         in pendingChannels.pendingOpenChannels) {
       String remotePubkeyLabel =
           await SecureStorage.readValue(pendingChannel.channel.remoteNodePub) ??
@@ -128,10 +122,10 @@ class _ActivitiesState extends State<Activities> {
       channelDetailList.add(
         ChannelDetail(
           ChannelStatus.Pending,
-          pendingChannel.channel.private ?? true
+          pendingChannel.channel.private
               ? ChannelType.private
               : ChannelType.public,
-          int.parse(pendingChannel.channel.capacity),
+          pendingChannel.channel.capacity.toInt(),
           '',
           remotePubkeyLabel,
           ChannelStatus.Pending.name,
@@ -141,7 +135,8 @@ class _ActivitiesState extends State<Activities> {
     }
 
     for (Channel channel in channels.channels) {
-      String channelLabel = await SecureStorage.readValue(channel.chanId) ?? '';
+      String channelLabel =
+          await SecureStorage.readValue(channel.chanId.toString()) ?? '';
       String remotePubkeyLabel =
           await SecureStorage.readValue(channel.remotePubkey) ??
               channel.remotePubkey;
@@ -149,9 +144,9 @@ class _ActivitiesState extends State<Activities> {
         ChannelDetail(
           channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
           channel.private ? ChannelType.private : ChannelType.public,
-          int.parse(channel.capacity),
-          channel.chanId,
-          channelLabel.isNotEmpty ? channelLabel : channel.chanId,
+          channel.capacity.toInt(),
+          channel.chanId.toString(),
+          channelLabel.isNotEmpty ? channelLabel : channel.chanId.toString(),
           remotePubkeyLabel,
           channel: channel,
         ),
@@ -543,7 +538,12 @@ class _ActivitiesState extends State<Activities> {
               children: [
                 Text(
                   '${channel.channelStatus == ChannelStatus.Pending ? ChannelStatus.Pending.name : channel.pubKeyLabel}',
-                  style: const TextStyle(color: AppColors.grey, fontSize: 17),
+                  style: const TextStyle(
+                    color: AppColors.grey,
+                    fontSize: 17,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 Text(
                   '${channel.channelLabel}',

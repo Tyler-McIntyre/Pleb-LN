@@ -48,9 +48,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         this._channelFeeReport = futureFeeReport;
       });
     });
-    _localBalancePercentage = (int.parse(widget.channel.channel!.localBalance) /
-        (int.parse(widget.channel.channel!.capacity)));
-    feePerKwController.text = widget.channel.channel!.feePerKw;
+    _localBalancePercentage =
+        (int.parse(widget.channel.channel!.localBalance.toString()) /
+            (int.parse(widget.channel.channel!.capacity.toString())));
+    feePerKwController.text = widget.channel.channel!.feePerKw.toString();
     super.initState();
   }
 
@@ -279,7 +280,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.lifetime),
+                    Text(widget.channel.channel!.lifetime.toString()),
                     Text(
                       'Lifetime',
                       style: TextStyle(
@@ -296,7 +297,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(widget.channel.channel!.uptime),
+                  Text(widget.channel.channel!.uptime.toString()),
                   Text(
                     'Uptime',
                     style: TextStyle(
@@ -317,7 +318,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.totalSatoshisSent),
+                    Text(widget.channel.channel!.totalSatoshisSent.toString()),
                     Text(
                       'Sats sent',
                       style: TextStyle(color: AppColors.grey),
@@ -332,7 +333,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.totalSatoshisReceived),
+                    Text(widget.channel.channel!.totalSatoshisReceived
+                        .toString()),
                     Text(
                       'Sats received',
                       style: TextStyle(color: AppColors.grey),
@@ -353,7 +355,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(widget.channel.channel!.commitFee),
+                      Text(widget.channel.channel!.commitFee.toString()),
                       Text(
                         'Commit fee',
                         style: TextStyle(color: AppColors.grey),
@@ -371,7 +373,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(widget.channel.channel!.unsettledBalance),
+                      Text(widget.channel.channel!.unsettledBalance.toString()),
                       Text(
                         'Unsettled balance',
                         style: TextStyle(color: AppColors.grey),
@@ -391,7 +393,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.feePerKw),
+                    Text(widget.channel.channel!.feePerKw.toString()),
                     Text(
                       'Fee per kw',
                       style: TextStyle(color: AppColors.grey),
@@ -406,7 +408,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.pushAmountSat),
+                    Text(widget.channel.channel!.pushAmountSat.toString()),
                     Text(
                       'Push amount sat',
                       style: TextStyle(color: AppColors.grey),
@@ -427,7 +429,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(widget.channel.channel!.localBalance),
+                        Text(widget.channel.channel!.localBalance.toString()),
                         Text(
                           'Local balance',
                           style: TextStyle(color: AppColors.blue),
@@ -442,7 +444,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(widget.channel.channel!.remoteBalance),
+                        Text(widget.channel.channel!.remoteBalance.toString()),
                         Text(
                           'Remote balance',
                           style: TextStyle(color: AppColors.red),
@@ -464,7 +466,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.capacity),
+                    Text(widget.channel.channel!.capacity.toString()),
                     Text(
                       'Capacity',
                       style: TextStyle(color: AppColors.grey),

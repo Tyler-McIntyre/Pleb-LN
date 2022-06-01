@@ -446,7 +446,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
 
   void _setConfigFormFields(String qrCodeRawData) async {
     //TODO: Fix this error handling
-    if (!qrCode.isEmpty && !qrCodeRawData.contains('Error')) {
+    if (!qrCode.isEmpty &&
+        !qrCodeRawData.contains('Error') &&
+        qrCodeRawData.isNotEmpty) {
       connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
 
       //TODO: Move to a function?

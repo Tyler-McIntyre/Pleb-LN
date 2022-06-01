@@ -16,10 +16,8 @@ import '../models/channel_balance.dart';
 import '../models/fee_report.dart';
 import '../models/invoice.dart';
 import '../models/invoice_request.dart';
-import '../models/invoices.dart';
 import '../models/open_channel.dart';
 import '../models/payment.dart';
-import '../models/payments.dart';
 import '../models/pending_channels.dart';
 import '../models/update_channel_policy_response.dart';
 import '../models/utxos.dart';
@@ -47,19 +45,19 @@ class LND {
     return UTXOS.fromJson(jsonDecode(responseBody));
   }
 
-  Future<Payments> getPayments() async {
-    Response response = await rest.getRequest('/v1/payments');
-    String responseBody = response.body;
-    return Payments.fromJson(jsonDecode(responseBody));
-  }
+  // Future<Payments> getPayments() async {
+  //   Response response = await rest.getRequest('/v1/payments');
+  //   String responseBody = response.body;
+  //   return Payments.fromJson(jsonDecode(responseBody));
+  // }
 
-  Future<Invoices> getInvoices() async {
-    Response response = await rest
-        .getRequest('/v1/invoices?reversed=true&num_max_invoices=100');
-    String responseBody = response.body;
+  // Future<Invoices> getInvoices() async {
+  //   Response response = await rest
+  //       .getRequest('/v1/invoices?reversed=true&num_max_invoices=100');
+  //   String responseBody = response.body;
 
-    return Invoices.fromJson(jsonDecode(responseBody));
-  }
+  //   return Invoices.fromJson(jsonDecode(responseBody));
+  // }
 
   Future<Channels> getChannels() async {
     Response response = await rest.getRequest('/v1/channels');

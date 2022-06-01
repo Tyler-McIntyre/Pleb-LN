@@ -1,11 +1,11 @@
-import 'package:firebolt/models/invoice.dart';
-import 'package:firebolt/models/invoice_request.dart';
 import 'package:flutter/material.dart';
 import 'package:numberpicker/numberpicker.dart';
-import '../api/lnd.dart';
+import '../generated/lightning.pb.dart';
+import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'Widgets/curve_clipper.dart';
 import 'invoice_screen.dart';
+import 'package:fixnum/fixnum.dart';
 
 class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({Key? key}) : super(key: key);
@@ -357,11 +357,12 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
         : expirySeconds =
             ((_currentHourValue * 3600) + (_currentMinutesValue * 60))
                 .toString();
-    InvoiceRequest invoiceRequest = InvoiceRequest(amountController.text,
-        memo: memoController.text, expiry: expirySeconds);
 
-    LND api = LND();
-    Invoice invoice = await api.createInvoice(invoiceRequest);
+    LND rpc = LND();
+    AddInvoiceResponse invoice = await rpc.createInvoice(
+        Int64.parseInt(amountController.text),
+        memoController.text,
+        Int64.parseInt(expirySeconds));
     return invoice.paymentRequest;
   }
 }
