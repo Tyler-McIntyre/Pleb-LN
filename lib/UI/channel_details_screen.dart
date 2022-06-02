@@ -9,6 +9,7 @@ import '../generated/lightning.pb.dart';
 import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'package:fixnum/fixnum.dart';
+import '../util/clipboard_helper.dart';
 
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
@@ -31,9 +32,17 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   bool userIsAddingLabel = false;
   late double _localBalancePercentage;
   bool userIsSure = false;
+  late String chanId;
+  late String remotePubKey;
+  late Int64 localBalance;
+  late Int64 capacity;
 
   @override
   void initState() {
+    remotePubKey = widget.channel.channel!.remotePubkey;
+    chanId = widget.channel.chanId;
+    localBalance = widget.channel.channel!.localBalance;
+    capacity = widget.channel.channel!.capacity;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       this.channelLabelController.text = await _fetchChannelLabel();
       this.remotePubkeyLabelController.text = await _fetchRemotePubkeyLabel();
@@ -43,9 +52,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         feeRateController.text = _feeReport.feeRate.toString();
       });
     });
-    _localBalancePercentage =
-        (int.parse(widget.channel.channel!.localBalance.toString()) /
-            (int.parse(widget.channel.channel!.capacity.toString())));
+
+    _localBalancePercentage = localBalance.toInt() / capacity.toInt();
     feePerKwController.text = widget.channel.channel!.feePerKw.toString();
     super.initState();
   }
@@ -54,19 +62,17 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
     LND rpc = LND();
     FeeReportResponse feeReport = await rpc.feeReport();
 
-    ChannelFeeReport channelFeeReport = feeReport.channelFees.firstWhere(
-        (report) => report.chanId.toString() == widget.channel.chanId);
+    ChannelFeeReport channelFeeReport = feeReport.channelFees
+        .firstWhere((report) => report.chanId.toString() == chanId);
     return channelFeeReport;
   }
 
   Future<String> _fetchChannelLabel() async {
-    return await SecureStorage.readValue(widget.channel.chanId) ?? '';
+    return await SecureStorage.readValue(chanId) ?? '';
   }
 
   Future<String> _fetchRemotePubkeyLabel() async {
-    return await SecureStorage.readValue(
-            widget.channel.channel!.remotePubkey) ??
-        '';
+    return await SecureStorage.readValue(remotePubKey) ?? '';
   }
 
   @override
@@ -206,7 +212,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               ),
               Column(
                 children: [
-                  Text(widget.channel.chanId),
+                  Text(chanId),
                   Text(
                     'Channel id',
                     style: TextStyle(
@@ -218,7 +224,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               ),
               IconButton(
                 onPressed: () {
-                  //TODO: make this copyable
+                  ClipboardHelper.copyToClipboard(chanId, context);
                 },
                 icon: Icon(Icons.copy),
                 color: AppColors.grey,
@@ -269,7 +275,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   decoration: InputDecoration(
                     enabled: false,
                     label: Text(
-                      widget.channel.channel!.remotePubkey,
+                      remotePubKey,
                       style: TextStyle(
                         color: AppColors.white,
                         fontSize: 22,
@@ -278,11 +284,27 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     ),
                   ),
                 ),
-                Text(
-                  'Remote pubkey',
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 20,
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Remote pubkey',
+                        style: TextStyle(
+                          color: AppColors.grey,
+                          fontSize: 20,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          ClipboardHelper.copyToClipboard(
+                              remotePubKey, context);
+                        },
+                        icon: Icon(Icons.copy),
+                        color: AppColors.grey,
+                      )
+                    ],
                   ),
                 ),
               ],
@@ -447,7 +469,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(widget.channel.channel!.localBalance.toString()),
+                        Text(localBalance.toString()),
                         Text(
                           'Local balance',
                           style: TextStyle(color: AppColors.blue),
@@ -484,7 +506,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(widget.channel.channel!.capacity.toString()),
+                    Text(capacity.toString()),
                     Text(
                       'Capacity',
                       style: TextStyle(color: AppColors.grey),
@@ -504,14 +526,14 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
 
   void _saveChannelLabel() async {
     await SecureStorage.writeValue(
-      widget.channel.chanId,
+      chanId,
       channelLabelController.text,
     );
   }
 
   void _saveRemotePubkeyLabel() async {
     await SecureStorage.writeValue(
-      widget.channel.channel!.remotePubkey,
+      remotePubKey,
       remotePubkeyLabelController.text,
     );
   }

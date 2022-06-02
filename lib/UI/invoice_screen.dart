@@ -5,9 +5,9 @@ import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../rpc/lnd.dart';
+import '../util/clipboard_helper.dart';
 import 'Widgets/curve_clipper.dart';
 import 'Widgets/qr_code_helper.dart';
-import 'package:flutter/services.dart';
 import 'package:fixnum/fixnum.dart';
 
 class InvoiceScreen extends StatefulWidget {
@@ -34,14 +34,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     Int64 addIndex = widget.invoice.addIndex;
     this.invoiceSubscription = _invoiceSubscription(addIndex);
     super.initState();
-  }
-
-  Future<void> _copyToClipboard() async {
-    await Clipboard.setData(ClipboardData(text: _textController.text));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      backgroundColor: AppColors.orange,
-      content: Text('Copied to clipboard'),
-    ));
   }
 
   Future<Invoice> _invoiceSubscription(Int64 addIndex) async {
@@ -113,7 +105,10 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                             Icons.copy,
                                             color: AppColors.orange,
                                           ),
-                                          onPressed: _copyToClipboard,
+                                          onPressed: () =>
+                                              ClipboardHelper.copyToClipboard(
+                                                  _textController.text,
+                                                  context),
                                         ),
                                         border: OutlineInputBorder(),
                                       ),
