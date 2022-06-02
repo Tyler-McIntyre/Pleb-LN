@@ -98,6 +98,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
+                            keyboardType: TextInputType.number,
                             controller: amountController,
                             cursorColor: AppColors.white,
                             decoration: InputDecoration(
@@ -263,13 +264,13 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
 
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
               } else {
-                String paymentRequest = await _createInvoice();
-                if (paymentRequest.isNotEmpty) {
+                AddInvoiceResponse invoice = await _createInvoice();
+                if (invoice.hasRHash()) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => InvoiceScreen(
-                          paymentRequest: paymentRequest,
+                          invoice: invoice,
                         ),
                       ));
                 }
@@ -350,7 +351,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
     );
   }
 
-  Future<String> _createInvoice() async {
+  Future<AddInvoiceResponse> _createInvoice() async {
     String expirySeconds;
     _useDefaultExpiry
         ? expirySeconds = '3600'
@@ -360,9 +361,10 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
 
     LND rpc = LND();
     AddInvoiceResponse invoice = await rpc.createInvoice(
-        Int64.parseInt(amountController.text),
-        memoController.text,
-        Int64.parseInt(expirySeconds));
-    return invoice.paymentRequest;
+      Int64.parseInt(amountController.text),
+      memoController.text,
+      Int64.parseInt(expirySeconds),
+    );
+    return invoice;
   }
 }

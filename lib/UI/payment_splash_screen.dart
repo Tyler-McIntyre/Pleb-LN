@@ -24,8 +24,7 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
   }
 
   startTime(Duration duration, Function() route) async {
-    Duration duration = new Duration(seconds: 2);
-    return new Timer(duration, route);
+    return Timer(duration, route);
   }
 
   HomeRoute() {
@@ -95,7 +94,7 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
               message = snapshot.data!.failureReason.toString();
               break;
           }
-          Duration successDuration = Duration(seconds: 5);
+          Duration successDuration = Duration(seconds: 4);
           startTime(successDuration, HomeRoute);
 
           statusWidgets = success

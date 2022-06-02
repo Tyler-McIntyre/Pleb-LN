@@ -75,8 +75,10 @@ class LND {
         'macaroon': macaroon,
       };
 
-      CallOptions callOptions =
-          CallOptions(metadata: headers, timeout: Duration(seconds: 30));
+      CallOptions callOptions = CallOptions(
+        metadata: headers,
+        timeout: Duration(seconds: 30),
+      );
 
       return RouterClient(channel, options: callOptions);
     } else {
@@ -208,6 +210,38 @@ class LND {
     try {
       response = await stub
           .addInvoice(Invoice(value: value, memo: memo, expiry: expiry));
+    } on GrpcError catch (ex) {
+      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
+        if (ex.message!.toLowerCase().contains('failed host lookup')) {
+          throw FailedHostLookup(
+                  'Unable to connect to host, check your node settings and try again.')
+              .message;
+        }
+      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
+        throw TimeoutException(
+            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
+      } else {
+        throw Exception(ex.message);
+      }
+    }
+
+    return response;
+  }
+
+  Future<Invoice> invoiceSubscription(
+      InvoiceSubscription invoiceSubscription) async {
+    Invoice response = Invoice();
+    LightningClient stub = await _lightningStub;
+
+    try {
+      await for (Invoice event in stub.subscribeInvoices(invoiceSubscription,
+          options: CallOptions(timeout: Duration(days: 1)))) {
+        print(event);
+        if (event.state == Invoice_InvoiceState.SETTLED) {
+          response = event;
+          break;
+        }
+      }
     } on GrpcError catch (ex) {
       if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
         if (ex.message!.toLowerCase().contains('failed host lookup')) {

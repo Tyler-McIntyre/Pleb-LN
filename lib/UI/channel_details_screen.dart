@@ -530,6 +530,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: TextFormField(
+                          keyboardType: TextInputType.number,
                           controller: baseFeeController,
                           decoration: InputDecoration(
                             focusedBorder: Theme.of(context)
@@ -557,6 +558,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: TextFormField(
+                          keyboardType: TextInputType.number,
                           controller: feeRateController,
                           decoration: InputDecoration(
                             focusedBorder: Theme.of(context)

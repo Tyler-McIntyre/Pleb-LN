@@ -74,7 +74,7 @@ class _ActivitiesState extends State<Activities> {
       if (invoiceIsSettled) {
         txList.add(
           TransactionDetail(
-              invoice.value as String,
+              invoice.value.toString(),
               Formatting.timestampToDateTime(
                 invoice.settleDate.toInt(),
               ),
