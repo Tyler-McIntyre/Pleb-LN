@@ -1,6 +1,5 @@
 import 'package:convert/convert.dart';
 import 'package:firebolt/UI/dashboard_screen.dart';
-import 'package:firebolt/models/channel_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../constants/channel_list_tile_icon.dart';
@@ -16,7 +15,7 @@ class ChannelDetailsScreen extends StatefulWidget {
     Key? key,
     required this.channel,
   }) : super(key: key);
-  final ChannelDetail channel;
+  final Channel channel;
 
   @override
   State<ChannelDetailsScreen> createState() => _ChannelDetailsScreenState();
@@ -29,9 +28,9 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   TextEditingController baseFeeController = TextEditingController();
   TextEditingController feeRateController = TextEditingController();
   bool userIsAddingLabel = false;
-  late double _localBalancePercentage;
   bool userIsSure = false;
-  late String chanId;
+  late double _localBalancePercentage;
+  late Int64 chanId;
   late String remotePubKey;
   late Int64 localBalance;
   late Int64 capacity;
@@ -45,23 +44,27 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   late Int64 unsettledBalance;
   late Int64 pushAmountSat;
   late Int64 remoteBalance;
+  late bool active;
+  late bool private;
 
   @override
   void initState() {
-    remotePubKey = widget.channel.channel!.remotePubkey;
+    remotePubKey = widget.channel.remotePubkey;
     chanId = widget.channel.chanId;
-    localBalance = widget.channel.channel!.localBalance;
-    channelPoint = widget.channel.channel!.channelPoint;
-    capacity = widget.channel.channel!.capacity;
-    lifetime = widget.channel.channel!.lifetime;
-    uptime = widget.channel.channel!.uptime;
-    totalSatoshisSent = widget.channel.channel!.totalSatoshisSent;
-    totalSatoshisReceived = widget.channel.channel!.totalSatoshisReceived;
-    commitFee = widget.channel.channel!.commitFee;
-    feePerKw = widget.channel.channel!.feePerKw;
-    unsettledBalance = widget.channel.channel!.unsettledBalance;
-    pushAmountSat = widget.channel.channel!.pushAmountSat;
-    remoteBalance = widget.channel.channel!.remoteBalance;
+    localBalance = widget.channel.localBalance;
+    channelPoint = widget.channel.channelPoint;
+    capacity = widget.channel.capacity;
+    lifetime = widget.channel.lifetime;
+    uptime = widget.channel.uptime;
+    totalSatoshisSent = widget.channel.totalSatoshisSent;
+    totalSatoshisReceived = widget.channel.totalSatoshisReceived;
+    commitFee = widget.channel.commitFee;
+    feePerKw = widget.channel.feePerKw;
+    unsettledBalance = widget.channel.unsettledBalance;
+    pushAmountSat = widget.channel.pushAmountSat;
+    remoteBalance = widget.channel.remoteBalance;
+    active = widget.channel.active;
+    private = widget.channel.private;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       this.channelLabelController.text = await _fetchChannelLabel();
@@ -82,13 +85,13 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
     LND rpc = LND();
     FeeReportResponse feeReport = await rpc.feeReport();
 
-    ChannelFeeReport channelFeeReport = feeReport.channelFees
-        .firstWhere((report) => report.chanId.toString() == chanId);
+    ChannelFeeReport channelFeeReport =
+        feeReport.channelFees.firstWhere((report) => report.chanId == chanId);
     return channelFeeReport;
   }
 
   Future<String> _fetchChannelLabel() async {
-    return await SecureStorage.readValue(chanId) ?? '';
+    return await SecureStorage.readValue(chanId.toString()) ?? '';
   }
 
   Future<String> _fetchRemotePubkeyLabel() async {
@@ -232,11 +235,11 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: getChannelStatusIcon(widget.channel) as Icon,
+                child: getChannelStatusIcon(active, private, false) as Icon,
               ),
               Column(
                 children: [
-                  Text(chanId),
+                  Text(chanId.toString()),
                   Text(
                     'Channel id',
                     style: TextStyle(
@@ -248,7 +251,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               ),
               IconButton(
                 onPressed: () {
-                  ClipboardHelper.copyToClipboard(chanId, context);
+                  ClipboardHelper.copyToClipboard(chanId.toString(), context);
                 },
                 icon: Icon(Icons.copy),
                 color: AppColors.grey,
@@ -549,7 +552,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
 
   void _saveChannelLabel() async {
     await SecureStorage.writeValue(
-      chanId,
+      chanId.toString(),
       channelLabelController.text,
     );
   }

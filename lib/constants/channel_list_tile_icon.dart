@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/channel_detail.dart';
 import '../util/app_colors.dart';
-import 'channel_status.dart';
-import 'channel_type.dart';
 
 enum ChannelListTileIcon {
   private_active,
@@ -12,7 +9,7 @@ enum ChannelListTileIcon {
   pending
 }
 
-Map<ChannelListTileIcon, Icon> ChannelIconMap = {
+Map<ChannelListTileIcon, Icon> _ChannelIconMap = {
   ChannelListTileIcon.private_active: Icon(
     Icons.private_connectivity,
     color: AppColors.green,
@@ -34,18 +31,15 @@ Map<ChannelListTileIcon, Icon> ChannelIconMap = {
   ),
 };
 
-Icon? getChannelStatusIcon(ChannelDetail channel) {
-  bool isActive = channel.channelStatus == ChannelStatus.Active ? true : false;
-  bool isPrivate = channel.channelType == ChannelType.private ? true : false;
-
+Icon? getChannelStatusIcon(bool active, bool private, bool pendingChannel) {
   ChannelListTileIcon listtileIcon;
 
-  if (channel.channelStatus != ChannelStatus.Pending) {
-    if (isPrivate && isActive) {
+  if (!pendingChannel) {
+    if (private && active) {
       listtileIcon = ChannelListTileIcon.private_active;
-    } else if (isPrivate && !isActive) {
+    } else if (private && !active) {
       listtileIcon = ChannelListTileIcon.private_inactive;
-    } else if (!isPrivate && isActive) {
+    } else if (!private && active) {
       listtileIcon = ChannelListTileIcon.public_active;
     } else {
       listtileIcon = ChannelListTileIcon.public_inactive;
@@ -54,5 +48,5 @@ Icon? getChannelStatusIcon(ChannelDetail channel) {
     listtileIcon = ChannelListTileIcon.pending;
   }
 
-  return ChannelIconMap[listtileIcon];
+  return _ChannelIconMap[listtileIcon];
 }

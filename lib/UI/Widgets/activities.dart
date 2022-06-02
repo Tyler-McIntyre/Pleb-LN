@@ -54,8 +54,6 @@ class _ActivitiesState extends State<Activities> {
 
   Future<List<TransactionDetail>> _getTransactions(TxSortType sortType) async {
     LND rpc = LND();
-    //TODO: run these in parallel
-
     ListPaymentsResponse payments = await rpc.getPayments();
     ListInvoiceResponse invoices = await rpc.getInvoices();
     List<TransactionDetail> txList = [];
@@ -107,10 +105,9 @@ class _ActivitiesState extends State<Activities> {
   }
 
   Future<List<ChannelDetail>> _getChannels(ChannelSortType sortType) async {
-    LND api = LND();
-    //TODO: run these in parallel
-    ListChannelsResponse channels = await api.getChannels();
-    PendingChannelsResponse pendingChannels = await api.getPendingChannels();
+    LND rpc = LND();
+    ListChannelsResponse channels = await rpc.getChannels();
+    PendingChannelsResponse pendingChannels = await rpc.getPendingChannels();
     List<ChannelDetail> channelDetailList = [];
 
     for (PendingChannelsResponse_PendingOpenChannel pendingChannel
@@ -525,7 +522,10 @@ class _ActivitiesState extends State<Activities> {
     List<Card> channelListTiles = [];
 
     for (ChannelDetail channel in channelDetails) {
-      Icon? channelIcon = getChannelStatusIcon(channel);
+      bool pendingChannel =
+          channel.channelStatus == ChannelStatus.Pending ? true : false;
+      Icon? channelIcon = getChannelStatusIcon(
+          channel.channel!.active, channel.channel!.private, pendingChannel);
 
       channelListTiles.add(
         Card(
@@ -537,7 +537,7 @@ class _ActivitiesState extends State<Activities> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChannelDetailsScreen(
-                        channel: channel,
+                        channel: channel.channel as Channel,
                       ),
                     ));
               } else {
