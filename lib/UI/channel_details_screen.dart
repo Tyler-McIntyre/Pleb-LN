@@ -11,7 +11,6 @@ import '../util/app_colors.dart';
 import 'package:fixnum/fixnum.dart';
 import '../util/clipboard_helper.dart';
 
-
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
     Key? key,
@@ -38,7 +37,6 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   late Int64 localBalance;
   late Int64 capacity;
 
-
   @override
   void initState() {
     remotePubKey = widget.channel.channel!.remotePubkey;
@@ -54,7 +52,6 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         feeRateController.text = _feeReport.feeRate.toString();
       });
     });
-
 
     _localBalancePercentage = localBalance.toInt() / capacity.toInt();
 
