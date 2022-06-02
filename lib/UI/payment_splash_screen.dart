@@ -58,7 +58,6 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
     Payment payment;
 
     payment = await rpc.sendPaymentV2(sendRequest);
-    print('in the splash screen: ${payment.status}');
 
     return payment;
   }

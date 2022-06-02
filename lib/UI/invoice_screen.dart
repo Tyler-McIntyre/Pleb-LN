@@ -41,7 +41,6 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
     InvoiceSubscription invoiceSubscription =
         InvoiceSubscription(addIndex: addIndex);
     Invoice response = await rpc.invoiceSubscription(invoiceSubscription);
-    print('Screen response $response');
     return response;
   }
 

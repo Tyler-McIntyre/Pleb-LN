@@ -236,7 +236,6 @@ class LND {
     try {
       await for (Invoice event in stub.subscribeInvoices(invoiceSubscription,
           options: CallOptions(timeout: Duration(days: 1)))) {
-        print(event);
         if (event.state == Invoice_InvoiceState.SETTLED) {
           response = event;
           break;
@@ -295,7 +294,6 @@ class LND {
       await for (Payment payment in stub.sendPaymentV2(sendPaymentRequest)) {
         paymentList.add(payment);
       }
-      print('last message: ${paymentList.last}');
       response = paymentList.last;
     } on GrpcError catch (ex) {
       if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
