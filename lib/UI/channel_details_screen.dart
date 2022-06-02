@@ -23,7 +23,7 @@ class ChannelDetailsScreen extends StatefulWidget {
 }
 
 class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
-  // final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   TextEditingController channelLabelController = TextEditingController();
   TextEditingController remotePubkeyLabelController = TextEditingController();
   TextEditingController feePerKwController = TextEditingController();
@@ -82,21 +82,24 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
       backgroundColor: AppColors.black,
       appBar: AppBar(),
       body: Center(
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: _channelDetailsForm(),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: _channelPolicy(),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: _channelDetailsButtonBar(),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: _channelDetailsForm(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 20),
+                child: _channelPolicy(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: _channelDetailsButtonBar(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -109,7 +112,6 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         ElevatedButton(
           onPressed: () async {
             await closeChannelDialog(context);
-
             if (userIsSure) {
               _closeChannel();
               Navigator.push(
@@ -143,35 +145,38 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         ),
         ElevatedButton(
           onPressed: () async {
-            _saveChannelLabel();
-            _saveRemotePubkeyLabel();
+            if (_formKey.currentState!.validate()) {
+              _saveChannelLabel();
+              _saveRemotePubkeyLabel();
 
-            try {
-              await _updateChannelPolicy(widget.channel.channel!.channelPoint);
-            } catch (ex) {
-              String message = ex.toString().replaceAll('Exception:', '');
+              try {
+                await _updateChannelPolicy(
+                    widget.channel.channel!.channelPoint);
+              } catch (ex) {
+                String message = ex.toString().replaceAll('Exception:', '');
 
-              final snackBar = SnackBar(
-                duration: Duration(seconds: 5),
-                content: Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18),
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 5),
+                  content: Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  backgroundColor: (AppColors.red),
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                throw Exception(ex);
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DashboardScreen(),
                 ),
-                backgroundColor: (AppColors.red),
               );
-
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-              throw Exception(ex);
             }
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const DashboardScreen(),
-              ),
-            );
           },
           child: Text(
             'Update channel',
@@ -553,6 +558,12 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a value';
+                            }
+                            return null;
+                          },
                           keyboardType: TextInputType.number,
                           controller: baseFeeController,
                           decoration: InputDecoration(
@@ -581,6 +592,12 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a value';
+                            }
+                            return null;
+                          },
                           keyboardType: TextInputType.number,
                           controller: feeRateController,
                           decoration: InputDecoration(
