@@ -14,7 +14,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     const Icon(Icons.computer): 'Nody_Montana',
     const Icon(Icons.insert_drive_file_outlined): 'Node Info',
     //
-    const Icon(Icons.alt_route): 'Manage Channels',
     const Icon(Icons.remove_red_eye): 'Privacy',
     const Icon(Icons.lock): 'Security',
     const Icon(Icons.verified): 'Sign or verify message',

@@ -147,7 +147,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               Int64 satsPerVbyte = _useDefaultFundingFee
-                  ? Int64(40)
+                  ? Int64(17)
                   : Int64.parseInt(fundingFeeController.text).toInt64();
               Int64 localFundingAmount =
                   Int64.parseInt(fundingAmountController.text).toInt64();
@@ -403,7 +403,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           ),
           subtitle: _useDefaultFundingFee
               ? Text(
-                  'Default = 40 sats per vbyte',
+                  'Default = 17 sats per vbyte',
                   style: Theme.of(context).textTheme.displaySmall,
                 )
               : TextFormField(

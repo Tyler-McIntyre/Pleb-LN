@@ -1,9 +1,9 @@
-import 'package:firebolt/models/payment_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:money_formatter/money_formatter.dart';
-import '../api/lnd.dart';
+import '../generated/lightning.pb.dart';
+import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import '../util/formatting.dart';
 import 'Widgets/curve_clipper.dart';
@@ -64,13 +64,8 @@ class _PayScreenState extends State<PayScreen> {
                                       ClipboardData? clipboardData =
                                           await Clipboard.getData(
                                               Clipboard.kTextPlain);
-                                      if (clipboardData!.text!.isNotEmpty) {
-                                        String invoice = clipboardData.text!;
-                                        PaymentRequest payReq =
-                                            await _decodePaymentRequest(
-                                                invoice);
-                                        _setConfigFormFields(payReq, invoice);
-                                      }
+                                      String? pastedData = clipboardData!.text;
+                                      _decodeClipboardData(pastedData);
                                     },
                                   ),
                                   focusedBorder: Theme.of(context)
@@ -87,6 +82,18 @@ class _PayScreenState extends State<PayScreen> {
                           //Memo
                           TextFormField(
                             controller: amountController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter an amount';
+                              } else if (int.tryParse(value) == false) {
+                                return 'Inavlid amount';
+                              } else if (int.parse(value.replaceAll(',', '')) <=
+                                  0) {
+                                return 'Amount must be greater than zero';
+                              }
+                              return null;
+                            },
+                            keyboardType: TextInputType.number,
                             decoration: InputDecoration(
                               focusedBorder: Theme.of(context)
                                   .inputDecorationTheme
@@ -165,7 +172,7 @@ class _PayScreenState extends State<PayScreen> {
           onPressed: () async {
             await scanQrCode();
             String invoice = qrCode;
-            PaymentRequest payReq = await _decodePaymentRequest(invoice);
+            PayReq payReq = await _decodePaymentRequest(invoice);
             _setConfigFormFields(payReq, invoice);
           },
           style: ElevatedButton.styleFrom(
@@ -241,11 +248,13 @@ class _PayScreenState extends State<PayScreen> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PaymentSplashScreen(
-                            invoice: invoiceController.text,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentSplashScreen(
+                    invoice: invoiceController.text,
+                  ),
+                ),
+              );
             }
           },
           style: ElevatedButton.styleFrom(
@@ -297,27 +306,54 @@ class _PayScreenState extends State<PayScreen> {
     }
   }
 
-  void _setConfigFormFields(PaymentRequest paymentRequest, String invoice) {
-    String amount = paymentRequest.num_satoshis;
+  void _setConfigFormFields(PayReq? payReq, String invoice) {
+    if (payReq != null) {
+      String amount = payReq.numSatoshis.toString();
 
-    int timestamp = int.parse(paymentRequest.timestamp);
-    int expiryInSeconds = int.parse(paymentRequest.expiry);
-    DateTime expirationDate =
-        Formatting.getExpirationDate(timestamp, expiryInSeconds);
+      int timestamp = payReq.timestamp.toInt();
+      int expiryInSeconds = payReq.expiry.toInt();
+      DateTime expirationDate =
+          Formatting.getExpirationDate(timestamp, expiryInSeconds);
+
+      setState(() {
+        amountController.text = '${MoneyFormatter(
+          amount: int.parse(amount).toDouble(),
+        ).output.withoutFractionDigits}';
+        memoController.text = payReq.description;
+        expiryController.text = expirationDate.toString();
+      });
+    }
 
     setState(() {
       invoiceController.text = invoice;
-      amountController.text = '${MoneyFormatter(
-        amount: int.parse(amount).toDouble(),
-      ).output.withoutFractionDigits}';
-      memoController.text = paymentRequest.description;
-      expiryController.text = expirationDate.toString();
     });
   }
 
-  Future<PaymentRequest> _decodePaymentRequest(String qrCodeRawData) async {
-    LND api = LND();
-    PaymentRequest payReq = await api.decodePaymentRequest(qrCodeRawData);
+  Future<PayReq> _decodePaymentRequest(String qrCodeRawData) async {
+    LND rpc = LND();
+    PayReqString payReqStr = PayReqString();
+    payReqStr.payReq = qrCodeRawData;
+    PayReq payReq = await rpc.decodePaymentRequest(payReqStr);
     return payReq;
+  }
+
+  void _decodeClipboardData(String? pastedData) async {
+    if (pastedData!.isNotEmpty && pastedData.toLowerCase().startsWith('lnbc')) {
+      PayReq payReq = await _decodePaymentRequest(pastedData);
+      _setConfigFormFields(payReq, pastedData);
+    } else {
+      final snackBar = SnackBar(
+        content: Text(
+          'Unrecognized invoice format',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20),
+        ),
+        backgroundColor: (AppColors.orange),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      _setConfigFormFields(null, pastedData);
+    }
   }
 }

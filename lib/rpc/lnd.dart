@@ -6,11 +6,13 @@ import '../database/secure_storage.dart';
 import '../generated/lightning.pbgrpc.dart';
 import '../models/exceptions.dart';
 import '../constants/grpc_exception_type.dart';
+import '../generated/router.pbgrpc.dart';
 
 class LND {
-  static Future<LightningClient> get _stub => createClientInstance();
+  static Future<LightningClient> get _lightningStub => createLightningClient();
+  static Future<RouterClient> get _routerStub => createRouterClient();
 
-  static Future<LightningClient> createClientInstance() async {
+  static Future<LightningClient> createLightningClient() async {
     String host = await SecureStorage.readValue(NodeSetting.host.name) ?? '';
     String gRPCPort =
         await SecureStorage.readValue(NodeSetting.grpcport.name) ?? '';
@@ -46,9 +48,45 @@ class LND {
     }
   }
 
+  static Future<RouterClient> createRouterClient() async {
+    String host = await SecureStorage.readValue(NodeSetting.host.name) ?? '';
+    String gRPCPort =
+        await SecureStorage.readValue(NodeSetting.grpcport.name) ?? '';
+
+    if (gRPCPort.isNotEmpty && host.isNotEmpty) {
+      int port = int.parse(gRPCPort);
+
+      final channel = ClientChannel(
+        host,
+        port: port,
+        options: ChannelOptions(
+          idleTimeout: Duration(seconds: 20),
+          connectionTimeout: Duration(seconds: 20),
+          credentials: ChannelCredentials.secure(
+            // --- WORKAROUND FOR SELF-SIGNED DEVELOPMENT CA ---
+            onBadCertificate: (cert, host) => true,
+          ),
+        ),
+      );
+      final String macaroon =
+          await SecureStorage.readValue(NodeSetting.macaroon.name) ?? '';
+
+      Map<String, String> headers = {
+        'macaroon': macaroon,
+      };
+
+      CallOptions callOptions =
+          CallOptions(metadata: headers, timeout: Duration(seconds: 30));
+
+      return RouterClient(channel, options: callOptions);
+    } else {
+      throw Exception('Unable to retrieve connection params');
+    }
+  }
+
   Future<WalletBalanceResponse> getWalletBalance() async {
     WalletBalanceResponse response = WalletBalanceResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
     try {
       response =
           await stub.walletBalance(WalletBalanceRequest(), CallOptions());
@@ -72,7 +110,7 @@ class LND {
 
   Future<ListPaymentsResponse> getPayments() async {
     ListPaymentsResponse response = ListPaymentsResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
     try {
       response = await stub.listPayments(ListPaymentsRequest());
     } on GrpcError catch (ex) {
@@ -95,7 +133,7 @@ class LND {
 
   Future<ListInvoiceResponse> getInvoices() async {
     ListInvoiceResponse response = ListInvoiceResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
     try {
       response = await stub.listInvoices(ListInvoiceRequest());
     } on GrpcError catch (ex) {
@@ -118,7 +156,7 @@ class LND {
 
   Future<ListChannelsResponse> getChannels() async {
     ListChannelsResponse response = ListChannelsResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
     try {
       response = await stub.listChannels(ListChannelsRequest());
     } on GrpcError catch (ex) {
@@ -141,7 +179,7 @@ class LND {
 
   Future<PendingChannelsResponse> getPendingChannels() async {
     PendingChannelsResponse response = PendingChannelsResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
     try {
       response = await stub.pendingChannels(PendingChannelsRequest());
     } on GrpcError catch (ex) {
@@ -165,7 +203,7 @@ class LND {
   Future<AddInvoiceResponse> createInvoice(
       Int64 value, String? memo, Int64? expiry) async {
     AddInvoiceResponse response = AddInvoiceResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
 
     try {
       response = await stub
@@ -188,9 +226,64 @@ class LND {
     return response;
   }
 
+  Future<PayReq> decodePaymentRequest(PayReqString payReqStr) async {
+    PayReq response = PayReq();
+    LightningClient stub = await _lightningStub;
+
+    try {
+      response = await stub.decodePayReq(payReqStr);
+    } on GrpcError catch (ex) {
+      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
+        if (ex.message!.toLowerCase().contains('failed host lookup')) {
+          throw FailedHostLookup(
+                  'Unable to connect to host, check your node settings and try again.')
+              .message;
+        }
+      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
+        throw TimeoutException(
+            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
+      } else {
+        throw Exception(ex.message);
+      }
+    } catch (ex) {
+      throw Exception(ex);
+    }
+
+    return response;
+  }
+
+  Future<Payment> sendPaymentV2(SendPaymentRequest sendPaymentRequest) async {
+    Payment response = Payment();
+    RouterClient stub = await _routerStub;
+    List<Payment> paymentList = [];
+
+    try {
+      await for (Payment payment in stub.sendPaymentV2(sendPaymentRequest)) {
+        paymentList.add(payment);
+      }
+      print('last message: ${paymentList.last}');
+      response = paymentList.last;
+    } on GrpcError catch (ex) {
+      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
+        if (ex.message!.toLowerCase().contains('failed host lookup')) {
+          throw FailedHostLookup(
+                  'Unable to connect to host, check your node settings and try again.')
+              .message;
+        }
+      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
+        throw TimeoutException(
+            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
+      } else {
+        throw Exception(ex.message);
+      }
+    }
+
+    return response;
+  }
+
   Future<FeeReportResponse> feeReport() async {
     FeeReportResponse response = FeeReportResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
 
     try {
       response = await stub.feeReport(FeeReportRequest());
@@ -215,7 +308,7 @@ class LND {
   Future<PolicyUpdateResponse> updateChannelPolicy(
       PolicyUpdateRequest policyUpdateRequest) async {
     PolicyUpdateResponse response = PolicyUpdateResponse();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
 
     try {
       response = await stub.updateChannelPolicy(policyUpdateRequest);
@@ -231,7 +324,7 @@ class LND {
   Future<CloseStatusUpdate> closeChannel(
       CloseChannelRequest closeChannelRequest) async {
     CloseStatusUpdate response = CloseStatusUpdate();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
 
     try {
       response = await stub.closeChannel(closeChannelRequest).first;
@@ -256,7 +349,7 @@ class LND {
   Future<OpenStatusUpdate> openChannel(
       OpenChannelRequest openChannelRequest) async {
     OpenStatusUpdate response = OpenStatusUpdate();
-    LightningClient stub = await _stub;
+    LightningClient stub = await _lightningStub;
 
     try {
       response = await stub.openChannel(openChannelRequest).first;
