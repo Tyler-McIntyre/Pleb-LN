@@ -284,7 +284,11 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       children: [
         TextButton(
           onPressed: () async {
-            await scanQrCode();
+            try {
+              await scanQrCode();
+            } catch (ex) {
+              log(ex.toString());
+            }
             String qrCodeRawData = qrCode;
             _setConfigFormFields(qrCodeRawData);
           },

@@ -1,13 +1,11 @@
 import 'dart:async';
-
 import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
-
-import '../api/lnd.dart';
-import '../constants/payment_status.dart';
-import '../models/payment.dart';
+import '../generated/lightning.pb.dart';
+import '../generated/router.pbgrpc.dart';
+import '../rpc/lnd.dart';
 import 'dashboard_screen.dart';
 
 class PaymentSplashScreen extends StatefulWidget {
@@ -25,39 +23,45 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
     super.initState();
   }
 
-  startTime() async {
-    var duration = new Duration(seconds: 2);
+  startTime(Duration duration, Function() route) async {
+    Duration duration = new Duration(seconds: 2);
     return new Timer(duration, route);
   }
 
-  route() {
+  HomeRoute() {
     Navigator.pushReplacement(
-        context,
-        PageTransition(
-          alignment: Alignment.bottomCenter,
-          child: DashboardScreen(),
-          type: PageTransitionType.fade,
-        ));
+      context,
+      PageTransition(
+        alignment: Alignment.bottomCenter,
+        child: DashboardScreen(),
+        type: PageTransitionType.fade,
+      ),
+    );
   }
 
-  Future<PaymentStatus> _payLightningInvoice() async {
-    LND api = LND();
-    Payment payment = Payment(widget.invoice);
-    PaymentStatus status =
-        await api.payLightningInvoice(payment).then(((value) {
-      return value;
-    }));
+  payScreenRoute() {
+    Navigator.pushReplacement(
+      context,
+      PageTransition(
+        alignment: Alignment.bottomCenter,
+        child: DashboardScreen(),
+        type: PageTransitionType.fade,
+      ),
+    );
+  }
 
-    switch (status) {
-      case (PaymentStatus.successful):
-        return PaymentStatus.successful;
-      case (PaymentStatus.invoice_already_paid):
-        return PaymentStatus.invoice_already_paid;
-      case (PaymentStatus.no_route):
-        return PaymentStatus.no_route;
-      default:
-        return PaymentStatus.unknown;
-    }
+  Future<Payment> _payLightningInvoice() async {
+    LND rpc = LND();
+    SendPaymentRequest sendRequest = SendPaymentRequest(
+      paymentRequest: widget.invoice,
+      timeoutSeconds: 20,
+    );
+    Payment payment;
+
+    payment = await rpc.sendPaymentV2(sendRequest);
+    print('in the splash screen: ${payment.status}');
+
+    return payment;
   }
 
   //* Used for testing the progress bar
@@ -71,30 +75,28 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
     return Scaffold(
         body: FutureBuilder(
       future: _payLightningInvoice(),
-      builder: (context, AsyncSnapshot<PaymentStatus> snapshot) {
+      builder: (context, AsyncSnapshot<Payment> snapshot) {
         late Widget statusWidgets;
 
         if (snapshot.hasData) {
           bool success = false;
           late String message;
-          PaymentStatus? status = snapshot.data;
+          Payment_PaymentStatus status = snapshot.data!.status;
+
           switch (status) {
-            case (PaymentStatus.successful):
-              message = PaymentStatus.successful.name;
+            case (Payment_PaymentStatus.SUCCEEDED):
+              message = Payment_PaymentStatus.SUCCEEDED.name;
               success = true;
               break;
-            case (PaymentStatus.invoice_already_paid):
-              message = 'This invoice has already been paid';
-              break;
-            case (PaymentStatus.no_route):
-              message = 'No route available';
+            case (Payment_PaymentStatus.FAILED):
+              message = snapshot.data!.failureReason.toString();
               break;
             default:
-              message = 'An unknown error has occured';
+              message = snapshot.data!.failureReason.toString();
               break;
           }
-
-          startTime();
+          Duration successDuration = Duration(seconds: 5);
+          startTime(successDuration, HomeRoute);
 
           statusWidgets = success
               ? Column(
@@ -132,10 +134,14 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
                       'Payment failed',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text('$message')
+                    Text('$message'),
                   ],
                 );
         } else if (snapshot.hasError) {
+          Duration errorDuration = Duration(seconds: 7);
+          startTime(errorDuration, payScreenRoute);
+          String message =
+              snapshot.error.toString().replaceAll('Exception:', '');
           statusWidgets = Column(
             children: [
               Padding(
@@ -143,17 +149,17 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
                 child: Icon(
                   Icons.error_outline,
                   color: Theme.of(context).errorColor,
-                  size: 40,
+                  size: 50,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text(
-                  'Error: ${snapshot.error}',
-                  style: TextStyle(color: Theme.of(context).errorColor),
+                  '$message',
+                  style: TextStyle(color: AppColors.white),
                   textAlign: TextAlign.center,
                 ),
-              )
+              ),
             ],
           );
         } else {
@@ -178,33 +184,35 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
           );
         }
 
-        return Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              children: [
-                Expanded(
-                  child: Column(children: [
-                    Expanded(child: Container()),
-                    Expanded(
-                        flex: 7,
+        return Center(
+          child: Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width / 1.1,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Column(children: [
+                      Expanded(child: Container()),
+                      Expanded(
+                          flex: 7,
+                          child: Container(
+                            child: Image.asset('images/Pleb-logos.jpeg'),
+                          )),
+                      Expanded(
+                        flex: 4,
                         child: Container(
-                          child: Image.asset('images/Pleb-logos.jpeg'),
-                        )),
-                    Expanded(
-                      flex: 4,
-                      child: Container(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: statusWidgets,
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: statusWidgets,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(child: Container())
-                  ]),
-                ),
-              ],
-            ));
+                      Expanded(child: Container())
+                    ]),
+                  ),
+                ],
+              )),
+        );
       },
     ));
   }

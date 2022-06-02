@@ -142,7 +142,6 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             try {
               await _updateChannelPolicy(widget.channel.channel!.channelPoint);
             } catch (ex) {
-              print('catch3');
               String message = ex.toString().replaceAll('Exception:', '');
 
               final snackBar = SnackBar(
