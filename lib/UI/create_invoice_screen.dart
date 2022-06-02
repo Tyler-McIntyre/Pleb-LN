@@ -366,5 +366,6 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
       Int64.parseInt(expirySeconds),
     );
     return invoice;
+
   }
 }
