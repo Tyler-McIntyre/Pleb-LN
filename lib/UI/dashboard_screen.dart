@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../constants/images.dart';
 import '../database/secure_storage.dart';
-import 'Widgets/activities.dart';
+import 'Widgets/watchtower.dart';
 import 'Widgets/dashboard_header.dart';
 import 'app_settings_screen.dart';
 import 'widgets/future_builder_widgets.dart';
@@ -124,7 +124,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                                 _isExpanded
                                     ? Expanded(
-                                        child: Activities(
+                                        child: Watchtower(
                                             nodeIsConfigured: nodeIsConfigured),
                                       )
                                     : SizedBox.shrink()

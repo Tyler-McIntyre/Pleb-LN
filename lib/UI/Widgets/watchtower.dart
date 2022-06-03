@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebolt/generated/lightning.pbgrpc.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
@@ -32,6 +33,7 @@ class _WatchtowerState extends State<Watchtower> {
   TxSortType _txSortType = TxSortType.DateReceived;
   ChannelSortType _channelSortType = ChannelSortType.Id;
   bool _isTxTab = true;
+  Duration refreshInterval = Duration(seconds: 10);
 
   late Future<List<TransactionDetail>> _transactions;
   late Future<List<ChannelDetail>> _channels;
@@ -52,7 +54,30 @@ class _WatchtowerState extends State<Watchtower> {
   void initState() {
     _transactions = _getTransactions(_txSortType);
     _channels = _getChannels(_channelSortType);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await sweepForNewTransactions();
+    });
+
     super.initState();
+  }
+
+  Future<void> sweepForNewTransactions() async {
+    Timer.periodic(
+      refreshInterval,
+      (Timer t) async {
+        List<TransactionDetail> result = await _getTransactions(_txSortType);
+        List<TransactionDetail> currentTxDetails = await _transactions;
+
+        bool isEqual = currentTxDetails.length == result.length;
+
+        if (!isEqual) {
+          setState(() {
+            _transactions = Future.value(result);
+          });
+        }
+      },
+    );
   }
 
   Future<List<TransactionDetail>> _getTransactions(TxSortType sortType) async {
