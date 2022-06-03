@@ -287,34 +287,34 @@ class _ActivitiesState extends State<Activities> {
                                 if (snapshot.hasData) {
                                   children = _buildTxListTiles(snapshot.data!);
                                 } else if (snapshot.hasError) {
+                                  String message = snapshot.error
+                                      .toString()
+                                      .toLowerCase()
+                                      .replaceAll('exception:', '');
                                   children = <Widget>[
-                                    Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          1.25,
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 8.0),
-                                            child: const Icon(
-                                              Icons.error_outline,
-                                              color: Colors.red,
-                                              size: 40,
-                                            ),
+                                    Column(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8),
+                                          child: const Icon(
+                                            Icons.error_outline,
+                                            color: Colors.red,
+                                            size: 50,
                                           ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 16),
-                                            child: Text(
-                                              'Error: ${snapshot.error}',
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .errorColor),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 16),
+                                          child: Text(
+                                            message,
+                                            style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .errorColor),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        )
+                                      ],
                                     )
                                   ];
                                 } else {
@@ -389,6 +389,10 @@ class _ActivitiesState extends State<Activities> {
                                   children =
                                       _buildChannelListTiles(snapshot.data!);
                                 } else if (snapshot.hasError) {
+                                  String message = snapshot.error
+                                      .toString()
+                                      .toLowerCase()
+                                      .replaceAll('exception:', '');
                                   children = <Widget>[
                                     Container(
                                       width: MediaQuery.of(context).size.width /
@@ -401,14 +405,14 @@ class _ActivitiesState extends State<Activities> {
                                             child: const Icon(
                                               Icons.error_outline,
                                               color: Colors.red,
-                                              size: 40,
+                                              size: 50,
                                             ),
                                           ),
                                           Padding(
                                             padding:
                                                 const EdgeInsets.only(top: 16),
                                             child: Text(
-                                              'Error: ${snapshot.error}',
+                                              message,
                                               style: TextStyle(
                                                   color: Theme.of(context)
                                                       .errorColor),
@@ -524,8 +528,12 @@ class _ActivitiesState extends State<Activities> {
     for (ChannelDetail channel in channelDetails) {
       bool pendingChannel =
           channel.channelStatus == ChannelStatus.Pending ? true : false;
-      Icon? channelIcon = getChannelStatusIcon(
-          channel.channel!.active, channel.channel!.private, pendingChannel);
+      bool private =
+          channel.channel != null && channel.channel!.private ? true : false;
+      bool active =
+          channel.channel != null && channel.channel!.active ? true : false;
+
+      Icon? channelIcon = getChannelStatusIcon(active, private, pendingChannel);
 
       channelListTiles.add(
         Card(
@@ -537,7 +545,7 @@ class _ActivitiesState extends State<Activities> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChannelDetailsScreen(
-                        channel: channel.channel as Channel,
+                        channel: channel.channel!,
                       ),
                     ));
               } else {
@@ -898,7 +906,7 @@ class _ActivitiesState extends State<Activities> {
           child: ListBody(
             children: <Widget>[
               Text(
-                'The status of this channel still currently shows as pending. The open channel request needs to be accepted and funded before you can view it\s details.',
+                'The status of this channel is pending. Once the channel has been successfully opened you can view it\'s details.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.black, fontSize: 20),
               ),

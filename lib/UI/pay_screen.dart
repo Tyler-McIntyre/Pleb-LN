@@ -53,6 +53,12 @@ class _PayScreenState extends State<PayScreen> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 10, 0, 30.0),
                             child: TextFormField(
+                              validator: ((value) {
+                                if (value != null && value.isEmpty) {
+                                  return 'Please enter an invoice';
+                                }
+                                return null;
+                              }),
                               controller: invoiceController,
                               decoration: InputDecoration(
                                   suffixIcon: IconButton(
@@ -338,22 +344,24 @@ class _PayScreenState extends State<PayScreen> {
   }
 
   void _decodeClipboardData(String? pastedData) async {
-    if (pastedData!.isNotEmpty && pastedData.toLowerCase().startsWith('lnbc')) {
-      PayReq payReq = await _decodePaymentRequest(pastedData);
-      _setConfigFormFields(payReq, pastedData);
-    } else {
-      final snackBar = SnackBar(
-        content: Text(
-          'Unrecognized invoice format',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 20),
-        ),
-        backgroundColor: (AppColors.orange),
-      );
+    if (pastedData!.isNotEmpty) {
+      try {
+        PayReq payReq = await _decodePaymentRequest(pastedData);
+        _setConfigFormFields(payReq, pastedData);
+      } catch (ex) {
+        String message =
+            ex.toString().toLowerCase().replaceAll('exception:', '');
+        final snackBar = SnackBar(
+          content: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20),
+          ),
+          backgroundColor: (AppColors.orange),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      _setConfigFormFields(null, pastedData);
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
     }
   }
 }

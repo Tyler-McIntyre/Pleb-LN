@@ -96,8 +96,7 @@ class LND {
       if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
         if (ex.message!.toLowerCase().contains('failed host lookup')) {
           throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
+              'Unable to connect to host, check your node settings and try again.');
         }
       } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
         throw TimeoutException(
@@ -386,22 +385,7 @@ class LND {
     try {
       response = await stub.openChannel(openChannelRequest).first;
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        if (ex.message!.toLowerCase().contains('pending channels exceed')) {
-          throw Exception(
-              'Maximum amount of pending channels reached with this node');
-        }
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
     } catch (ex) {
       throw Exception(ex);
     }

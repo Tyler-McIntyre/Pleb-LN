@@ -171,6 +171,10 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                         ]),
                       );
                     } else if (snapshot.hasError) {
+                      String message = snapshot.error
+                          .toString()
+                          .replaceAll('Exception:', '');
+
                       child = Container(
                         width: MediaQuery.of(context).size.width / 1.1,
                         child: SizedBox(
@@ -180,12 +184,12 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                               const Icon(
                                 Icons.error_outline,
                                 color: Colors.red,
-                                size: 40,
+                                size: 50,
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Text(
-                                  'Error: ${snapshot.error}',
+                                  message,
                                   style: TextStyle(
                                       color: Theme.of(context).errorColor),
                                   textAlign: TextAlign.center,

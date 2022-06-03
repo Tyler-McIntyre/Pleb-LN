@@ -360,12 +360,28 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
                 .toString();
 
     LND rpc = LND();
-    AddInvoiceResponse invoice = await rpc.createInvoice(
-      Int64.parseInt(amountController.text),
-      memoController.text,
-      Int64.parseInt(expirySeconds),
-    );
-    return invoice;
+    AddInvoiceResponse invoice;
+    try {
+      invoice = await rpc.createInvoice(
+        Int64.parseInt(amountController.text),
+        memoController.text,
+        Int64.parseInt(expirySeconds),
+      );
+    } catch (ex) {
+      String message = ex.toString().toLowerCase().replaceAll('exception:', '');
+      final snackBar = SnackBar(
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20),
+        ),
+        backgroundColor: (AppColors.orange),
+      );
 
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      throw (ex);
+    }
+
+    return invoice;
   }
 }

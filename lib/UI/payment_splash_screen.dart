@@ -147,7 +147,7 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
                 child: Icon(
                   Icons.error_outline,
                   color: Theme.of(context).errorColor,
-                  size: 50,
+                  size: 60,
                 ),
               ),
               Padding(

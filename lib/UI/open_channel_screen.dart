@@ -146,33 +146,52 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              Int64 satsPerVbyte = _useDefaultFundingFee
-                  ? Int64(17)
-                  : Int64.parseInt(fundingFeeController.text).toInt64();
-              Int64 localFundingAmount =
-                  Int64.parseInt(fundingAmountController.text).toInt64();
-              // List<int> nodePubKey = hex.decode(
-              //     '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b');
-              List<int> nodePubKey = hex.decode(nodePubkeyController.text);
-              int? minConfs = _useDefaultMinConf
-                  ? null
-                  : int.parse(minConfsController.text);
-              bool spendUnconfirmed = minConfsController.text.isNotEmpty &&
-                      int.parse(minConfsController.text) == 0
-                  ? true
-                  : false;
-              bool private = _privateChannel;
-              Int64 pushSat = Int64.parseInt(pushAmountController.text);
+              OpenChannelRequest openChannelRequest;
+              try {
+                Int64 satsPerVbyte = _useDefaultFundingFee
+                    ? Int64(17)
+                    : Int64.parseInt(fundingFeeController.text).toInt64();
+                Int64 localFundingAmount =
+                    Int64.parseInt(fundingAmountController.text).toInt64();
+                // List<int> nodePubKey = hex.decode(
+                //     '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b');
+                List<int> nodePubKey = hex.decode(nodePubkeyController.text);
+                int? minConfs = _useDefaultMinConf
+                    ? null
+                    : int.parse(minConfsController.text);
+                bool spendUnconfirmed = minConfsController.text.isNotEmpty &&
+                        int.parse(minConfsController.text) == 0
+                    ? true
+                    : false;
+                bool private = _privateChannel;
+                Int64 pushSat = Int64.parseInt(pushAmountController.text);
 
-              OpenChannelRequest openChannelRequest = OpenChannelRequest(
-                satPerVbyte: satsPerVbyte,
-                localFundingAmount: localFundingAmount,
-                private: private,
-                nodePubkey: nodePubKey,
-                minConfs: minConfs,
-                spendUnconfirmed: spendUnconfirmed,
-                pushSat: pushSat,
-              );
+                openChannelRequest = OpenChannelRequest(
+                  satPerVbyte: satsPerVbyte,
+                  localFundingAmount: localFundingAmount,
+                  private: private,
+                  nodePubkey: nodePubKey,
+                  minConfs: minConfs,
+                  spendUnconfirmed: spendUnconfirmed,
+                  pushSat: pushSat,
+                );
+              } catch (ex) {
+                String message = ex.toString().replaceAll('Exception:', '');
+
+                final snackBar = SnackBar(
+                  duration: Duration(seconds: 5),
+                  content: Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  backgroundColor: (AppColors.red),
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                throw Exception(ex);
+              }
 
               try {
                 await _openChannel(openChannelRequest);
