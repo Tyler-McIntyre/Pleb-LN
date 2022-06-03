@@ -8,6 +8,7 @@ import '../generated/lightning.pb.dart';
 import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'widgets/info_dialog.dart';
+import 'widgets/snackbars.dart';
 
 class OpenChannelScreen extends StatefulWidget {
   const OpenChannelScreen({Key? key}) : super(key: key);
@@ -149,7 +150,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
               OpenChannelRequest openChannelRequest;
               try {
                 Int64 satsPerVbyte = _useDefaultFundingFee
-                    ? Int64(17)
+                    ? Int64(2)
                     : Int64.parseInt(fundingFeeController.text).toInt64();
                 Int64 localFundingAmount =
                     Int64.parseInt(fundingAmountController.text).toInt64();
@@ -176,19 +177,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                   pushSat: pushSat,
                 );
               } catch (ex) {
-                String message = ex.toString().replaceAll('Exception:', '');
-
-                final snackBar = SnackBar(
-                  duration: Duration(seconds: 5),
-                  content: Text(
-                    message,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  backgroundColor: (AppColors.red),
+                Snackbars.error(
+                  context,
+                  ex.toString(),
                 );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                 throw Exception(ex);
               }
@@ -293,7 +285,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
               hintText: '03f0ba19fd88e...'),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-        //Funding Amount
+        //Local Funding Amount
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: TextFormField(
@@ -309,7 +301,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
               errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
               focusedBorder:
                   Theme.of(context).inputDecorationTheme.focusedBorder,
-              label: Text('Funding Amount',
+              label: Text('Local Funding Amount',
                   style: Theme.of(context).inputDecorationTheme.labelStyle),
             ),
             style: Theme.of(context).textTheme.bodyMedium,
@@ -367,7 +359,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             ),
             subtitle: _useDefaultMinConf
                 ? Text(
-                    'Default = 4 confirmations',
+                    'Default = 1 confirmation',
                     style: Theme.of(context).textTheme.displaySmall,
                   )
                 : TextFormField(
@@ -422,7 +414,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           ),
           subtitle: _useDefaultFundingFee
               ? Text(
-                  'Default = 17 sats per vbyte',
+                  'Default = 2 sats per vbyte',
                   style: Theme.of(context).textTheme.displaySmall,
                 )
               : TextFormField(
@@ -475,19 +467,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     try {
       response = await rpc.openChannel(params);
     } catch (ex) {
-      String message = ex.toString().replaceAll('Exception:', '');
-
-      final snackBar = SnackBar(
-        duration: Duration(seconds: 5),
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18),
-        ),
-        backgroundColor: (AppColors.red),
+      Snackbars.error(
+        context,
+        ex.toString(),
       );
-
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       throw Exception(ex);
     }

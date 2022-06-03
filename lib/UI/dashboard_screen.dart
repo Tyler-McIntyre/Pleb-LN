@@ -2,10 +2,12 @@ import 'package:firebolt/constants/node_setting.dart';
 import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../constants/images.dart';
 import '../database/secure_storage.dart';
 import 'Widgets/activities.dart';
 import 'Widgets/dashboard_header.dart';
 import 'app_settings_screen.dart';
+import 'widgets/future_builder_widgets.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -48,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Image.asset(
-          'images/Pleb-logos_white.png',
+          Images.whitePlebLogo,
           scale: 20,
         ),
         actions: [
@@ -137,30 +139,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             );
           } else if (snapshot.hasError) {
-            child = Column(children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).errorColor,
-                  size: 40,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  'Error: ${snapshot.error}',
-                  style: TextStyle(color: Theme.of(context).errorColor),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            ]);
-          } else {
-            child = SizedBox(
-              width: 60,
-              height: 60,
-              child: CircularProgressIndicator(),
+            child = FutureBuilderWidgets.error(
+              context,
+              snapshot.error.toString(),
             );
+          } else {
+            child = FutureBuilderWidgets.circularProgressIndicator();
           }
 
           return child;

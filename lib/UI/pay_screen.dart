@@ -8,6 +8,7 @@ import '../util/app_colors.dart';
 import '../util/formatting.dart';
 import 'Widgets/curve_clipper.dart';
 import 'payment_splash_screen.dart';
+import 'widgets/snackbars.dart';
 
 class PayScreen extends StatefulWidget {
   const PayScreen({Key? key}) : super(key: key);
@@ -349,18 +350,10 @@ class _PayScreenState extends State<PayScreen> {
         PayReq payReq = await _decodePaymentRequest(pastedData);
         _setConfigFormFields(payReq, pastedData);
       } catch (ex) {
-        String message =
-            ex.toString().toLowerCase().replaceAll('exception:', '');
-        final snackBar = SnackBar(
-          content: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20),
-          ),
-          backgroundColor: (AppColors.orange),
+        Snackbars.error(
+          context,
+          ex.toString(),
         );
-
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     }
   }

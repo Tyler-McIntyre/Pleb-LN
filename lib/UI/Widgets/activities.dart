@@ -15,6 +15,7 @@ import '../../util/app_colors.dart';
 import '../../util/formatting.dart';
 import '../channel_details_screen.dart';
 import '../open_channel_screen.dart';
+import 'future_builder_widgets.dart';
 
 class Activities extends StatefulWidget {
   const Activities({Key? key, required this.nodeIsConfigured})
@@ -283,66 +284,30 @@ class _ActivitiesState extends State<Activities> {
                                 context,
                                 AsyncSnapshot<List<TransactionDetail>> snapshot,
                               ) {
-                                List<Widget> children = [];
+                                Widget child;
                                 if (snapshot.hasData) {
-                                  children = _buildTxListTiles(snapshot.data!);
-                                } else if (snapshot.hasError) {
-                                  String message = snapshot.error
-                                      .toString()
-                                      .toLowerCase()
-                                      .replaceAll('exception:', '');
-                                  children = <Widget>[
-                                    Column(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8),
-                                          child: const Icon(
-                                            Icons.error_outline,
-                                            color: Colors.red,
-                                            size: 50,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 16),
-                                          child: Text(
-                                            message,
-                                            style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .errorColor),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        )
-                                      ],
-                                    )
-                                  ];
-                                } else {
-                                  children = <Widget>[
-                                    Column(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 50.0),
-                                          child: SizedBox(
-                                            width: 60,
-                                            height: 60,
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        ),
-                                      ],
+                                  child = Scrollbar(
+                                    child: ListView(
+                                      children:
+                                          _buildTxListTiles(snapshot.data!),
                                     ),
-                                  ];
+                                  );
+                                } else if (snapshot.hasError) {
+                                  child = Column(
+                                    children: [
+                                      Expanded(
+                                        child: FutureBuilderWidgets.error(
+                                          context,
+                                          snapshot.error.toString(),
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                } else {
+                                  child = FutureBuilderWidgets
+                                      .circularProgressIndicator();
                                 }
-                                return MediaQuery.removePadding(
-                                    removeTop: true,
-                                    context: context,
-                                    child: Scrollbar(
-                                      child: ListView(
-                                        padding: EdgeInsets.all(0),
-                                        children: children,
-                                      ),
-                                    ));
+                                return child;
                               },
                             )
                           : SizedBox.shrink();
@@ -384,71 +349,29 @@ class _ActivitiesState extends State<Activities> {
                                 context,
                                 AsyncSnapshot<List<ChannelDetail>> snapshot,
                               ) {
-                                List<Widget> children = [];
+                                Widget child;
                                 if (snapshot.hasData) {
-                                  children =
-                                      _buildChannelListTiles(snapshot.data!);
-                                } else if (snapshot.hasError) {
-                                  String message = snapshot.error
-                                      .toString()
-                                      .toLowerCase()
-                                      .replaceAll('exception:', '');
-                                  children = <Widget>[
-                                    Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          1.25,
-                                      child: Column(
-                                        children: [
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 8.0),
-                                            child: const Icon(
-                                              Icons.error_outline,
-                                              color: Colors.red,
-                                              size: 50,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(top: 16),
-                                            child: Text(
-                                              message,
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .errorColor),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  ];
-                                } else {
-                                  children = <Widget>[
-                                    Column(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 50.0),
-                                          child: SizedBox(
-                                            width: 60,
-                                            height: 60,
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        ),
-                                      ],
+                                  child = Scrollbar(
+                                    child: ListView(
+                                      children: _buildChannelListTiles(
+                                          snapshot.data!),
                                     ),
-                                  ];
+                                  );
+                                } else if (snapshot.hasError) {
+                                  child = Column(
+                                    children: [
+                                      Expanded(
+                                          child: FutureBuilderWidgets.error(
+                                        context,
+                                        snapshot.error.toString(),
+                                      )),
+                                    ],
+                                  );
+                                } else {
+                                  child = FutureBuilderWidgets
+                                      .circularProgressIndicator();
                                 }
-                                return MediaQuery.removePadding(
-                                    removeTop: true,
-                                    context: context,
-                                    child: Scrollbar(
-                                      child: ListView(
-                                        padding: EdgeInsets.all(0),
-                                        children: children,
-                                      ),
-                                    ));
+                                return child;
                               },
                             )
                           : SizedBox.shrink();

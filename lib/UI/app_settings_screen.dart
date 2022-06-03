@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../util/app_colors.dart';
+import 'widgets/snackbars.dart';
 
 class AppSettingsScreen extends StatefulWidget {
   const AppSettingsScreen({Key? key}) : super(key: key);
@@ -42,16 +43,10 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                   Card(
                     child: ListTile(
                       onTap: () {
-                        final snackBar = SnackBar(
-                          content: Text(
-                            'Coming Soon -> ${listTileInfo.values.toList()[index]}!',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                          backgroundColor: (AppColors.blueSecondary),
+                        Snackbars.comingSoon(
+                          context,
+                          listTileInfo.values.toList()[index],
                         );
-
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       },
                       leading: listTileInfo.keys.toList()[index],
                       title: Text(

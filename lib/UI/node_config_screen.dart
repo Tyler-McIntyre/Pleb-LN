@@ -10,6 +10,8 @@ import '../models/lnd_connect.dart';
 import 'Widgets/curve_clipper.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
+import 'widgets/snackbars.dart';
+
 class NodeConfigScreen extends StatefulWidget {
   const NodeConfigScreen({Key? key}) : super(key: key);
   static late LNDConnect lndConnectParams;
@@ -365,33 +367,14 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         TextButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              bool saveWasSuccessful = await saveUserSettings();
+              await saveUserSettings();
 
-              if (saveWasSuccessful) {
-                /* TODO:
-                Attempt to make a valid connection,
-                if we are unable to make a successful connection
-                display an error to the user with more details
-                */
-                //Navigate home
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DashboardScreen(),
-                  ),
-                );
-              } else {
-                final snackBar = SnackBar(
-                  content: Text(
-                    'An error occured while trying to save the settings',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  backgroundColor: (AppColors.red),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DashboardScreen(),
+                ),
+              );
             }
           },
           style: ElevatedButton.styleFrom(
@@ -449,33 +432,23 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
   }
 
   void _setConfigFormFields(String qrCodeRawData) async {
-    //TODO: Fix this error handling
     if (!qrCode.isEmpty &&
         !qrCodeRawData.contains('Error') &&
         qrCodeRawData.isNotEmpty) {
       connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
 
-      //TODO: Move to a function?
       if (connectionParams.host.isEmpty ||
           connectionParams.port.isEmpty ||
           connectionParams.macaroonHexFormat.isEmpty) {
-        //Show the snackbar
-        final snackBar = SnackBar(
-          content: Text(
-            'Error parsing the LNDConfig',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          backgroundColor: (AppColors.red),
+        Snackbars.error(
+          context,
+          'Error parsing the LNDConfig',
         );
-
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       } else {
         bool enableTor = false;
         if (connectionParams.host.contains('.onion')) {
           enableTor = true;
         }
-        //set the controller text states
         setState(() {
           hostController.text = connectionParams.host;
           portController.text = connectionParams.port;

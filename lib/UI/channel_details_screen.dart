@@ -9,6 +9,8 @@ import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'package:fixnum/fixnum.dart';
 import '../util/clipboard_helper.dart';
+import 'widgets/future_builder_widgets.dart';
+import 'widgets/snackbars.dart';
 
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
@@ -174,19 +176,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               try {
                 await _updateChannelPolicy(channelPoint);
               } catch (ex) {
-                String message = ex.toString().replaceAll('Exception:', '');
-
-                final snackBar = SnackBar(
-                  duration: Duration(seconds: 5),
-                  content: Text(
-                    message,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  backgroundColor: (AppColors.red),
+                Snackbars.error(
+                  context,
+                  ex.toString(),
                 );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
                 throw Exception(ex);
               }
@@ -636,30 +629,12 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               ],
             );
           } else if (snapshot.hasError) {
-            child = Column(children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).errorColor,
-                  size: 40,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  'Error: ${snapshot.error}',
-                  style: TextStyle(color: Theme.of(context).errorColor),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            ]);
-          } else {
-            child = SizedBox(
-              width: 60,
-              height: 60,
-              child: CircularProgressIndicator(),
+            child = FutureBuilderWidgets.error(
+              context,
+              snapshot.error.toString(),
             );
+          } else {
+            child = FutureBuilderWidgets.circularProgressIndicator();
           }
 
           return child;

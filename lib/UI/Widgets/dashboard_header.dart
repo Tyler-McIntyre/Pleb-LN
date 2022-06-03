@@ -10,6 +10,7 @@ import '../../rpc/lnd.dart';
 import '../../util/app_colors.dart';
 import 'curve_clipper.dart';
 import '../node_config_screen.dart';
+import 'future_builder_widgets.dart';
 
 class DashboardHeader extends StatefulWidget {
   const DashboardHeader({
@@ -171,32 +172,11 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                         ]),
                       );
                     } else if (snapshot.hasError) {
-                      String message = snapshot.error
-                          .toString()
-                          .replaceAll('Exception:', '');
-
                       child = Container(
-                        width: MediaQuery.of(context).size.width / 1.1,
-                        child: SizedBox(
-                          height: 200,
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: Colors.red,
-                                size: 50,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  message,
-                                  style: TextStyle(
-                                      color: Theme.of(context).errorColor),
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            ],
-                          ),
+                        width: MediaQuery.of(context).size.width / 1.25,
+                        child: FutureBuilderWidgets.error(
+                          context,
+                          snapshot.error.toString(),
                         ),
                       );
                     } else {

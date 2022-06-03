@@ -7,6 +7,8 @@ import 'Widgets/curve_clipper.dart';
 import 'invoice_screen.dart';
 import 'package:fixnum/fixnum.dart';
 
+import 'widgets/snackbars.dart';
+
 class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({Key? key}) : super(key: key);
 
@@ -253,16 +255,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
               if (!_useDefaultExpiry &&
                   _currentHourValue == 0 &&
                   _currentMinutesValue == 0) {
-                const snackBar = SnackBar(
-                  content: Text(
-                    'Invalid expiration',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  backgroundColor: (AppColors.red),
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                Snackbars.invalid(context, 'expiration');
               } else {
                 AddInvoiceResponse invoice = await _createInvoice();
                 if (invoice.hasRHash()) {
@@ -368,17 +361,10 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
         Int64.parseInt(expirySeconds),
       );
     } catch (ex) {
-      String message = ex.toString().toLowerCase().replaceAll('exception:', '');
-      final snackBar = SnackBar(
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 20),
-        ),
-        backgroundColor: (AppColors.orange),
+      Snackbars.error(
+        context,
+        ex.toString(),
       );
-
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       throw (ex);
     }
 

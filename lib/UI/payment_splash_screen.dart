@@ -3,10 +3,12 @@ import 'package:firebolt/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
+import '../constants/images.dart';
 import '../generated/lightning.pb.dart';
 import '../generated/router.pbgrpc.dart';
 import '../rpc/lnd.dart';
 import 'dashboard_screen.dart';
+import 'widgets/future_builder_widgets.dart';
 
 class PaymentSplashScreen extends StatefulWidget {
   const PaymentSplashScreen({Key? key, required this.invoice})
@@ -138,27 +140,9 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
         } else if (snapshot.hasError) {
           Duration errorDuration = Duration(seconds: 7);
           startTime(errorDuration, payScreenRoute);
-          String message =
-              snapshot.error.toString().replaceAll('Exception:', '');
-          statusWidgets = Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).errorColor,
-                  size: 60,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  '$message',
-                  style: TextStyle(color: AppColors.white),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
+          statusWidgets = FutureBuilderWidgets.error(
+            context,
+            snapshot.error.toString(),
           );
         } else {
           statusWidgets = Column(
@@ -166,50 +150,46 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
             children: [
               Text(
                 'Routing payment...',
-                style: TextStyle(color: AppColors.white, fontSize: 35),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 18.0),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: CircularProgressIndicator(
-                    color: AppColors.white,
-                  ),
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 35,
                 ),
               ),
+              FutureBuilderWidgets.circularProgressIndicator(),
             ],
           );
         }
 
         return Center(
           child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width / 1.1,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Column(children: [
-                      Expanded(child: Container()),
-                      Expanded(
-                          flex: 7,
-                          child: Container(
-                            child: Image.asset('images/Pleb-logos.jpeg'),
-                          )),
-                      Expanded(
-                        flex: 4,
-                        child: Container(
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: statusWidgets,
-                          ),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width / 1.1,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Column(children: [
+                    Expanded(child: Container()),
+                    Expanded(
+                      flex: 7,
+                      child: Container(
+                        child: Image.asset(Images.plebLogo),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: statusWidgets,
                         ),
                       ),
-                      Expanded(child: Container())
-                    ]),
-                  ),
-                ],
-              )),
+                    ),
+                    Expanded(child: Container())
+                  ]),
+                ),
+              ],
+            ),
+          ),
         );
       },
     ));

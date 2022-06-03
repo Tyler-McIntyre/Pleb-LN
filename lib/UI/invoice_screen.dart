@@ -9,6 +9,7 @@ import '../util/clipboard_helper.dart';
 import 'Widgets/curve_clipper.dart';
 import 'Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
+import 'widgets/future_builder_widgets.dart';
 
 class InvoiceScreen extends StatefulWidget {
   const InvoiceScreen({
@@ -155,28 +156,9 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
                                     );
                                   }
                                 } else if (snapshot.hasError) {
-                                  child = Column(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 8.0),
-                                        child: Icon(
-                                          Icons.error_outline,
-                                          color: Theme.of(context).errorColor,
-                                          size: 40,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 16),
-                                        child: Text(
-                                          'Error: ${snapshot.error}',
-                                          style: TextStyle(
-                                              color:
-                                                  Theme.of(context).errorColor),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      )
-                                    ],
+                                  child = FutureBuilderWidgets.error(
+                                    context,
+                                    snapshot.error.toString(),
                                   );
                                 } else {
                                   child = SizedBox(
