@@ -17,16 +17,18 @@ import '../channel_details_screen.dart';
 import '../open_channel_screen.dart';
 import 'future_builder_widgets.dart';
 
-class Activities extends StatefulWidget {
-  const Activities({Key? key, required this.nodeIsConfigured})
-      : super(key: key);
+class Watchtower extends StatefulWidget {
+  const Watchtower({
+    Key? key,
+    required this.nodeIsConfigured,
+  }) : super(key: key);
   final bool nodeIsConfigured;
 
   @override
-  State<Activities> createState() => _ActivitiesState();
+  State<Watchtower> createState() => _WatchtowerState();
 }
 
-class _ActivitiesState extends State<Activities> {
+class _WatchtowerState extends State<Watchtower> {
   TxSortType _txSortType = TxSortType.DateReceived;
   ChannelSortType _channelSortType = ChannelSortType.Id;
   bool _isTxTab = true;
@@ -220,7 +222,7 @@ class _ActivitiesState extends State<Activities> {
                   actions: _actionsButtonBar(),
                   backgroundColor: AppColors.black,
                   title: Text(
-                    'Balance info',
+                    'Watchtower',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   pinned: true,
