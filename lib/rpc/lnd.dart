@@ -4,8 +4,6 @@ import 'package:firebolt/constants/node_setting.dart';
 import 'package:grpc/grpc.dart';
 import '../database/secure_storage.dart';
 import '../generated/lightning.pbgrpc.dart';
-import '../models/exceptions.dart';
-import '../constants/grpc_exception_type.dart';
 import '../generated/router.pbgrpc.dart';
 
 class LND {
@@ -86,6 +84,8 @@ class LND {
     }
   }
 
+  handleGrpcError(GrpcError ex) {}
+
   Future<WalletBalanceResponse> getWalletBalance() async {
     WalletBalanceResponse response = WalletBalanceResponse();
     LightningClient stub = await _lightningStub;
@@ -93,17 +93,9 @@ class LND {
       response =
           await stub.walletBalance(WalletBalanceRequest(), CallOptions());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-              'Unable to connect to host, check your node settings and try again.');
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -115,18 +107,9 @@ class LND {
     try {
       response = await stub.listPayments(ListPaymentsRequest());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -138,18 +121,9 @@ class LND {
     try {
       response = await stub.listInvoices(ListInvoiceRequest());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -161,18 +135,9 @@ class LND {
     try {
       response = await stub.listChannels(ListChannelsRequest());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -184,18 +149,9 @@ class LND {
     try {
       response = await stub.pendingChannels(PendingChannelsRequest());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -210,18 +166,9 @@ class LND {
       response = await stub
           .addInvoice(Invoice(value: value, memo: memo, expiry: expiry));
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -241,18 +188,9 @@ class LND {
         }
       }
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -265,18 +203,7 @@ class LND {
     try {
       response = await stub.decodePayReq(payReqStr);
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
     } catch (ex) {
       throw Exception(ex);
     }
@@ -295,18 +222,9 @@ class LND {
       }
       response = paymentList.last;
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -319,18 +237,9 @@ class LND {
     try {
       response = await stub.feeReport(FeeReportRequest());
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
@@ -360,18 +269,9 @@ class LND {
     try {
       response = await stub.closeChannel(closeChannelRequest).first;
     } on GrpcError catch (ex) {
-      if (ex.codeName == gRPCExceptionType.UNAVAILABLE.name) {
-        if (ex.message!.toLowerCase().contains('failed host lookup')) {
-          throw FailedHostLookup(
-                  'Unable to connect to host, check your node settings and try again.')
-              .message;
-        }
-      } else if (ex.codeName == gRPCExceptionType.DEADLINE_EXCEEDED.name) {
-        throw TimeoutException(
-            'Unable to connect. This could be due to invalid settings, the server being offline, or an unstable connection');
-      } else {
-        throw Exception(ex.message);
-      }
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
     }
 
     return response;
