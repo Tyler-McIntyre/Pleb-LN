@@ -49,8 +49,8 @@ class _OnChainScreenState extends State<OnChainScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       String nickname = await _getNickname();
-      RefreshTimer.refreshTimer = Timer.periodic(
-          refreshInterval, (timer) => _sweepForNewTransactions(timer));
+      RefreshTimer.refreshTimer =
+          Timer.periodic(refreshInterval, (timer) => _sweepForUpdates(timer));
       if (!mounted) return;
       setState(() {
         nicknameController.text = nickname;
@@ -70,21 +70,35 @@ class _OnChainScreenState extends State<OnChainScreen> {
     return nickname;
   }
 
-  _sweepForNewTransactions(Timer t) async {
+  _sweepForUpdates(Timer t) async {
     Timer.periodic(
       refreshInterval,
       (Timer t) async {
-        List<TransactionDetail> result = await _getTransactions(_txSortType);
+        List<TransactionDetail> transactions =
+            await _getTransactions(_txSortType);
         List<TransactionDetail> currentTxDetails = await _transactions;
 
-        bool isEqual = currentTxDetails.length == result.length;
+        bool newTransactions = currentTxDetails.length == transactions.length;
 
-        if (!isEqual) {
-          if (!mounted) return;
-          setState(() {
-            _transactions = Future.value(result);
-            _onChainBalance = _getOnChainBalance();
-          });
+        WalletBalanceResponse balance = await _getOnChainBalance();
+        WalletBalanceResponse currentBalance = await _onChainBalance;
+
+        bool newBalance = currentBalance.totalBalance != balance.totalBalance;
+
+        if (!newTransactions || newBalance) {
+          if (newTransactions) {
+            if (!mounted) return;
+            setState(() {
+              _transactions = Future.value(transactions);
+            });
+          }
+
+          if (newBalance) {
+            if (!mounted) return;
+            setState(() {
+              _onChainBalance = _getOnChainBalance();
+            });
+          }
         }
       },
     );
