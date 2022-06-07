@@ -30,8 +30,6 @@ class _OnChainScreenState extends State<OnChainScreen> {
   TxSortType _txSortType = TxSortType.Date;
   late Future<List<TransactionDetail>> _transactions;
   late Future<WalletBalanceResponse> _onChainBalance;
-  //TODO: Fetch the current exchange rate
-  double currentBtcExchangeRate = 40000;
   final List<TxSortType> filters = [
     TxSortType.Date,
     TxSortType.Sent,
@@ -165,7 +163,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
     WalletBalanceResponse result = await rpc.getWalletBalance();
 
     String totalBalance = result.totalBalance.toString();
-    _onChainBalanceWidgets = Balance.buildWidgets(totalBalance, context);
+    _onChainBalanceWidgets = await Balance.buildWidgets(totalBalance, context);
 
     return result;
   }

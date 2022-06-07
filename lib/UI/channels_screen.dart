@@ -482,7 +482,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
     String localChannelBalance = result.localBalance.sat.toString();
 
     _offChainBalanceWidgets =
-        Balance.buildWidgets(localChannelBalance, context);
+        await Balance.buildWidgets(localChannelBalance, context);
     return result;
   }
 

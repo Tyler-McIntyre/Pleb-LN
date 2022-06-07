@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 
-class Balance {
-  static double currentBtcExchangeRate = 40000;
+import '../../rest/coin_gecko.dart';
 
-  static List<Widget> buildWidgets(String amt, BuildContext context) {
+class Balance {
+  static Future<List<Widget>> buildWidgets(
+      String amt, BuildContext context) async {
+    double usdToBtcRate = await CoinGecko.fetchBtcExchangeRate();
     return [
       Text.rich(
         TextSpan(
@@ -40,8 +42,7 @@ class Balance {
       ),
       //balance in bitcoin / the current exchange rate
       Text(
-        (MoneyFormatter(
-                amount: ((int.parse(amt) / 10000000) * currentBtcExchangeRate))
+        (MoneyFormatter(amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
             .output
             .symbolOnLeft),
         style: Theme.of(context).textTheme.bodyLarge,
