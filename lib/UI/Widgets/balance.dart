@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
-
 import '../../rest/coin_gecko.dart';
 
 class Balance {

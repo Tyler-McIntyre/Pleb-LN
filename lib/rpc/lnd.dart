@@ -42,7 +42,7 @@ class LND {
 
       return LightningClient(channel, options: callOptions);
     } else {
-      throw Exception('Unable to retrieve connection string');
+      throw Exception('Missing node settings');
     }
   }
 
@@ -80,7 +80,7 @@ class LND {
 
       return RouterClient(channel, options: callOptions);
     } else {
-      throw Exception('Unable to retrieve connection string');
+      throw Exception('Missing node settings');
     }
   }
 
