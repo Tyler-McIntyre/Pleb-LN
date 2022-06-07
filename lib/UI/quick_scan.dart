@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../constants/node_setting.dart';
 import '../database/secure_storage.dart';
@@ -19,21 +20,38 @@ class QuickScan extends StatefulWidget {
   State<QuickScan> createState() => _QuickScanState();
 }
 
-class _QuickScanState extends State<QuickScan> {
+class _QuickScanState extends State<QuickScan>
+    with SingleTickerProviderStateMixin {
   late Future<Invoice> invoiceSubscription;
   late QrImage _qrImage;
   TextEditingController _paymentRequestController = TextEditingController();
   double _formSpacing = 12;
   late Future<bool> _init;
+  bool invoiceWasPaid = false;
+  late AnimationController _controller;
 
   @override
   void initState() {
+    _controller = AnimationController(vsync: this);
+
     _init = _initQuickScan();
+
+    _controller.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        if (!mounted) return;
+        setState(() {
+          invoiceWasPaid = false;
+          _init = _initQuickScan();
+        });
+        _controller.reset();
+      }
+    });
     super.initState();
   }
 
   @override
   dispose() {
+    _controller.dispose();
     super.dispose();
   }
 
@@ -62,8 +80,7 @@ class _QuickScanState extends State<QuickScan> {
       Map<Int64, String> QuickScan = {};
       Invoice invoice = await _lookupInvoice(Int64.parseInt(addIndex));
       //* is it expired or settled?
-
-      if (invoice.settleDate > 0 ||
+      if (invoice.amtPaidSat > 0 ||
           !Formatting.getExpirationDate(
                   invoice.creationDate.toInt(), invoice.expiry.toInt())
               .isAfter(DateTime.now())) {
@@ -111,63 +128,75 @@ class _QuickScanState extends State<QuickScan> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _init,
-        builder: ((context, snapshot) {
-          Widget child;
-          if (snapshot.hasData) {
-            child = Column(
-              children: [
-                Text(
-                  'Quick Scan',
-                  style: TextStyle(color: AppColors.white),
-                ),
-                SizedBox(
-                  height: _formSpacing,
-                ),
-                _invoiceHashAndCode(),
-                SizedBox(
-                  height: _formSpacing,
-                ),
-                Text(
-                  'or',
-                  style: TextStyle(color: AppColors.white),
-                ),
-                SizedBox(
-                  height: _formSpacing,
-                ),
-                _createInvoiceButton()
-              ],
-            );
-          } else if (snapshot.hasError) {
-            child =
-                FutureBuilderWidgets.error(context, snapshot.error.toString());
-          } else {
-            child = Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FutureBuilderWidgets.circularProgressIndicator(),
-              ],
-            );
-          }
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(child: child),
-            ],
-          );
-        }));
+    return invoiceWasPaid
+        ? Lottie.asset(
+            'animations/blue-checkmark.json',
+            controller: _controller,
+            frameRate: FrameRate.max,
+            onLoaded: (composition) {
+              _controller.duration = composition.duration;
+              _controller.forward();
+            },
+          )
+        : FutureBuilder(
+            future: _init,
+            builder: ((context, snapshot) {
+              Widget child;
+              if (snapshot.hasData) {
+                child = Column(
+                  children: [
+                    Text(
+                      'Quick Scan',
+                      style: TextStyle(color: AppColors.white),
+                    ),
+                    SizedBox(
+                      height: _formSpacing,
+                    ),
+                    _invoiceHashAndCode(),
+                    SizedBox(
+                      height: _formSpacing,
+                    ),
+                    Text(
+                      'or',
+                      style: TextStyle(color: AppColors.white),
+                    ),
+                    SizedBox(
+                      height: _formSpacing,
+                    ),
+                    _createInvoiceButton()
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                child = FutureBuilderWidgets.error(
+                    context, snapshot.error.toString());
+              } else {
+                child = Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FutureBuilderWidgets.circularProgressIndicator(),
+                  ],
+                );
+              }
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(child: child),
+                ],
+              );
+            }));
   }
 
-  Future<Invoice> _invoiceSubscription(Int64 addIndex) async {
+  Future<void> _invoiceSubscription(Int64 addIndex) async {
     LND rpc = LND();
     InvoiceSubscription invoiceSubscription =
         InvoiceSubscription(addIndex: addIndex);
     Invoice response = await rpc.invoiceSubscription(invoiceSubscription);
-    if (response.settleDate > 0) {
-      print('isSettled');
+    if (response.amtPaidSat > 0) {
+      if (!mounted) return;
+      setState(() {
+        invoiceWasPaid = true;
+      });
     }
-    return response;
   }
 
   Widget _invoiceHashAndCode() {
@@ -222,54 +251,3 @@ class _QuickScanState extends State<QuickScan> {
     );
   }
 }
-
-
-  // _invoiceSubscriptionFutureBuilder(),
-
-  // Widget _invoiceSubscriptionFutureBuilder() {
-  //   return FutureBuilder(
-  //     future: invoiceSubscription,
-  //     builder: ((context, AsyncSnapshot<Invoice> snapshot) {
-  //       Widget child;
-  //       if (snapshot.hasData) {
-  //         bool isSettled = snapshot.data!.settleDate > 0 ? true : false;
-  //         if (isSettled) {
-  //           child = SizedBox(
-  //             width: MediaQuery.of(context).size.width / 1.1,
-  //             child: Center(
-  //               child: Column(
-  //                 children: [
-  //                   Icon(
-  //                     Icons.thumb_up,
-  //                     color: AppColors.green,
-  //                     size: 50,
-  //                   ),
-  //                   Text(
-  //                     'Paid!',
-  //                     style: TextStyle(
-  //                       color: AppColors.white,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           );
-  //         } else {
-  //           child = SizedBox(
-  //             width: 60,
-  //             height: 60,
-  //             child: Text(snapshot.data!.state.name),
-  //           );
-  //         }
-  //       } else if (snapshot.hasError) {
-  //         child = FutureBuilderWidgets.error(
-  //           context,
-  //           snapshot.error.toString(),
-  //         );
-  //       } else {
-  //         child = FutureBuilderWidgets.circularProgressIndicator();
-  //       }
-  //       return child;
-  //     }),
-  //   );
-  // }
