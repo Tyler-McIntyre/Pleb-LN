@@ -89,6 +89,7 @@ class _FireBoltState extends State<FireBolt> {
         ),
         fontFamily: GoogleFonts.lato().fontFamily,
         scaffoldBackgroundColor: AppColors.black,
+        appBarTheme: AppBarTheme(backgroundColor: AppColors.black),
       ),
       home: const DashboardScreen(
         tabIndex: 2,

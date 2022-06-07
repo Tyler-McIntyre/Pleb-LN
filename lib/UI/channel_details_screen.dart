@@ -763,7 +763,6 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     CloseStatusUpdate closeSuccessful;
 
                     closeSuccessful = await _closeChannel();
-                    print(closeSuccessful.hasClosePending());
 
                     Future.delayed(Duration(seconds: 1), () {
                       setState(() {

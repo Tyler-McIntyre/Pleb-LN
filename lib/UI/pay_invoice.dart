@@ -56,7 +56,7 @@ class _PayInvoiceState extends State<PayInvoice> {
   _buttonBar() {
     return Column(
       children: [
-        _scanLndConfigButton(),
+        _scanButton(),
         SizedBox(
           height: _formSpacing,
         ),
@@ -80,7 +80,7 @@ class _PayInvoiceState extends State<PayInvoice> {
     return payment;
   }
 
-  _scanLndConfigButton() {
+  _scanButton() {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(

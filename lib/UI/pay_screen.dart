@@ -5,7 +5,9 @@ import 'pay_invoice.dart';
 import 'quick_scan.dart';
 
 class PayScreen extends StatefulWidget {
-  const PayScreen({Key? key}) : super(key: key);
+  const PayScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<PayScreen> createState() => _PayScreenState();
@@ -13,6 +15,12 @@ class PayScreen extends StatefulWidget {
 
 class _PayScreenState extends State<PayScreen> {
   int pageIndex = 0;
+  @override
+  void initState() {
+    pageIndex = 0;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     @override

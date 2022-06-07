@@ -1,3 +1,4 @@
+import 'package:firebolt/UI/create_invoice_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:lottie/lottie.dart';
@@ -56,28 +57,28 @@ class _QuickScanState extends State<QuickScan>
   }
 
   Future<bool> _initQuickScan() async {
-    Map<Int64, String> QuickScanMap = await _getInvoice();
-    String paymentRequest = QuickScanMap.values.first;
+    Invoice invoice = await _getInvoice();
+    String paymentRequest = invoice.paymentRequest;
 
     _qrImage = QrCodeHelper.createQrImage(paymentRequest);
     _paymentRequestController.text = paymentRequest;
-    Int64 addIndex = QuickScanMap.keys.first;
+    Int64 addIndex = invoice.addIndex;
     _invoiceSubscription(addIndex);
 
     return true;
   }
 
-  Future<Map<Int64, String>> _getInvoice() async {
+  Future<Invoice> _getInvoice() async {
     String addIndex =
         await SecureStorage.readValue(NodeSetting.quickScan.name) ?? '';
-
     if (addIndex.isEmpty) {
       AddInvoiceResponse invoiceResp = await _createInvoice();
       await SecureStorage.writeValue(
           NodeSetting.quickScan.name, invoiceResp.addIndex.toString());
-      return {invoiceResp.addIndex: invoiceResp.paymentRequest};
+      return Invoice(
+          addIndex: invoiceResp.addIndex,
+          paymentRequest: invoiceResp.paymentRequest);
     } else {
-      Map<Int64, String> QuickScan = {};
       Invoice invoice = await _lookupInvoice(Int64.parseInt(addIndex));
       //* is it expired or settled?
       if (invoice.amtPaidSat > 0 ||
@@ -87,12 +88,13 @@ class _QuickScanState extends State<QuickScan>
         AddInvoiceResponse invoiceResp = await _createInvoice();
         await SecureStorage.writeValue(
             NodeSetting.quickScan.name, invoiceResp.addIndex.toString());
-        QuickScan = {invoiceResp.addIndex: invoiceResp.paymentRequest};
+        return Invoice(
+            addIndex: invoiceResp.addIndex,
+            paymentRequest: invoiceResp.paymentRequest);
       } else {
-        QuickScan = {invoice.addIndex: invoice.paymentRequest};
+        return Invoice(
+            addIndex: invoice.addIndex, paymentRequest: invoice.paymentRequest);
       }
-
-      return QuickScan;
     }
   }
 
@@ -239,7 +241,14 @@ class _QuickScanState extends State<QuickScan>
       height: MediaQuery.of(context).size.height / 14,
       child: ElevatedButton.icon(
         icon: Icon(Icons.create),
-        onPressed: () async {},
+        onPressed: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateInvoice(),
+            ),
+          );
+        },
         label: Text('Create a New Invoice'),
         style: ElevatedButton.styleFrom(
           elevation: 3,

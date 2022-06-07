@@ -208,7 +208,8 @@ class LND {
     try {
       await for (Invoice event in stub.subscribeInvoices(invoiceSubscription,
           options: CallOptions(timeout: Duration(days: 1)))) {
-        if (event.state == Invoice_InvoiceState.SETTLED) {
+        if (event.addIndex == invoiceSubscription.addIndex &&
+            event.state == Invoice_InvoiceState.SETTLED) {
           response = event;
           break;
         }

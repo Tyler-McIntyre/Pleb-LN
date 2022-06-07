@@ -49,7 +49,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
           icon: Icon(Icons.arrow_back),
         ),
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.black,
       ),
       body: Center(
         child: Column(
