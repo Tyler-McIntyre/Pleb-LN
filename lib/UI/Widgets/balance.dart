@@ -19,7 +19,6 @@ class Balance {
             ],
             style: Theme.of(context).textTheme.bodyLarge),
       ),
-      //balance in sats / 10000000
       Text.rich(
         TextSpan(
           children: [
@@ -33,6 +32,7 @@ class Balance {
                 ),
               ),
             ),
+            //btc balance = balance in sats / 10000000
             TextSpan(
               text: '${(int.parse(amt) / 10000000)}',
             ),
@@ -40,7 +40,7 @@ class Balance {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
-      //balance in bitcoin / the current exchange rate
+      //balance in USD = balance in bitcoin / the current exchange rate
       Text(
         (MoneyFormatter(amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
             .output
