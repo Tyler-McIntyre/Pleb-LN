@@ -1,1 +1,1 @@
-enum TransferType { sent, received }
+enum TransferType { Sent, Received }

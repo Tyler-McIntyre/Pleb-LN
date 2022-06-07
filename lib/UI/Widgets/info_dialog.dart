@@ -29,7 +29,7 @@ class InfoDialog {
                 Text(
                   body,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.black, fontSize: 20),
+                  style: TextStyle(color: AppColors.blue, fontSize: 20),
                 ),
               ],
             ),

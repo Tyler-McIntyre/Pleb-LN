@@ -2,6 +2,8 @@ import 'package:convert/convert.dart';
 import 'package:firebolt/UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:progress_state_button/iconed_button.dart';
+import 'package:progress_state_button/progress_button.dart';
 import '../constants/channel_list_tile_icon.dart';
 import '../database/secure_storage.dart';
 import '../generated/lightning.pb.dart';
@@ -10,7 +12,6 @@ import '../util/app_colors.dart';
 import 'package:fixnum/fixnum.dart';
 import '../util/clipboard_helper.dart';
 import 'widgets/future_builder_widgets.dart';
-import 'widgets/snackbars.dart';
 
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
@@ -48,6 +49,9 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   late Int64 remoteBalance;
   late bool active;
   late bool private;
+  final double _formSpacing = 12;
+  ButtonState stateTextWithIcon_update = ButtonState.idle;
+  ButtonState stateTextWithIcon_close = ButtonState.idle;
 
   @override
   void initState() {
@@ -78,7 +82,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
       });
     });
 
-    _localBalancePercentage = localBalance.toInt() / capacity.toInt();
+    _localBalancePercentage =
+        localBalance.toInt() / (localBalance.toInt() + remoteBalance.toInt());
 
     super.initState();
   }
@@ -103,15 +108,13 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.black,
-      appBar: AppBar(),
       body: Center(
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.only(top: 10),
                 child: _channelDetailsForm(),
               ),
               Padding(
@@ -130,89 +133,13 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
   }
 
   Widget _channelDetailsButtonBar() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
       children: [
-        ElevatedButton(
-          onPressed: () async {
-            await closeChannelDialog(context);
-            if (userIsSure) {
-              _closeChannel();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const DashboardScreen(),
-                ),
-              );
-            }
-          },
-          child: Text(
-            'Close Channel',
-            style: TextStyle(fontSize: 20),
-          ),
-          style: ElevatedButton.styleFrom(
-            elevation: 3,
-            fixedSize: const Size(175, 50),
-            primary: AppColors.black,
-            onPrimary: AppColors.white,
-            textStyle: Theme.of(context).textTheme.displaySmall,
-            side: const BorderSide(
-              color: AppColors.red,
-              width: 1.0,
-            ),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-          ),
+        _closeButton(),
+        SizedBox(
+          height: _formSpacing,
         ),
-        ElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              _saveChannelLabel();
-              _saveRemotePubkeyLabel();
-
-              try {
-                await _updateChannelPolicy(channelPoint);
-              } catch (ex) {
-                Snackbars.error(
-                  context,
-                  ex.toString(),
-                );
-
-                throw Exception(ex);
-              }
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const DashboardScreen(),
-                ),
-              );
-            }
-          },
-          child: Text(
-            'Update channel',
-            style: TextStyle(fontSize: 20),
-          ),
-          style: ElevatedButton.styleFrom(
-            elevation: 3,
-            fixedSize: const Size(175, 50),
-            primary: AppColors.black,
-            onPrimary: AppColors.white,
-            textStyle: Theme.of(context).textTheme.displaySmall,
-            side: const BorderSide(
-              color: AppColors.blue,
-              width: 1.0,
-            ),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-          ),
-        )
+        _updateButton()
       ],
     );
   }
@@ -226,15 +153,27 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: getChannelStatusIcon(active, private, false) as Icon,
+              IconButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DashboardScreen(
+                        tabIndex: 1,
+                      ),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.arrow_back),
               ),
               Column(
                 children: [
-                  Text(chanId.toString()),
                   Text(
-                    'Channel id',
+                    chanId.toString(),
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
+                  Text(
+                    'Channel Id',
                     style: TextStyle(
                       color: AppColors.grey,
                       fontSize: 20,
@@ -242,15 +181,15 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: () {
-                  ClipboardHelper.copyToClipboard(chanId.toString(), context);
-                },
-                icon: Icon(Icons.copy),
-                color: AppColors.grey,
-              )
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: getChannelStatusIcon(active, private, false) as Icon,
+              ),
             ],
           ),
+        ),
+        SizedBox(
+          height: _formSpacing,
         ),
         Center(
           child: Container(
@@ -266,6 +205,9 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
+        ),
+        SizedBox(
+          height: _formSpacing,
         ),
         Center(
           child: Container(
@@ -285,23 +227,21 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             ),
           ),
         ),
+        SizedBox(
+          height: _formSpacing,
+        ),
         Padding(
           padding: const EdgeInsets.all(8),
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Column(
               children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                    enabled: false,
-                    label: Text(
-                      remotePubKey,
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 22,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 1.1,
+                  child: Text(
+                    remotePubKey.toString(),
+                    style: Theme.of(context).textTheme.displayMedium,
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 Container(
@@ -310,7 +250,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Remote pubkey',
+                        'Remote PubKey',
                         style: TextStyle(
                           color: AppColors.grey,
                           fontSize: 20,
@@ -340,7 +280,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(lifetime.toString()),
+                    Text(
+                      lifetime.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Lifetime',
                       style: TextStyle(
@@ -352,21 +295,25 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               ),
             ),
             Expanded(
-                child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(uptime.toString()),
-                  Text(
-                    'Uptime',
-                    style: TextStyle(
-                      color: AppColors.grey,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      uptime.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
-                  ),
-                ],
+                    Text(
+                      'Uptime',
+                      style: TextStyle(
+                        color: AppColors.grey,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ))
+            )
           ],
         ),
         Row(
@@ -378,7 +325,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(totalSatoshisSent.toString()),
+                    Text(
+                      totalSatoshisSent.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Sats sent',
                       style: TextStyle(color: AppColors.grey),
@@ -393,7 +343,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(totalSatoshisReceived.toString()),
+                    Text(
+                      totalSatoshisReceived.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Sats received',
                       style: TextStyle(color: AppColors.grey),
@@ -414,7 +367,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(commitFee.toString()),
+                      Text(
+                        commitFee.toString(),
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
                       Text(
                         'Commit fee',
                         style: TextStyle(color: AppColors.grey),
@@ -432,7 +388,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(unsettledBalance.toString()),
+                      Text(
+                        unsettledBalance.toString(),
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
                       Text(
                         'Unsettled balance',
                         style: TextStyle(color: AppColors.grey),
@@ -452,7 +411,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(feePerKw.toString()),
+                    Text(
+                      feePerKw.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Fee per kw',
                       style: TextStyle(color: AppColors.grey),
@@ -467,7 +429,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(pushAmountSat.toString()),
+                    Text(
+                      pushAmountSat.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Push amount sat',
                       style: TextStyle(color: AppColors.grey),
@@ -488,7 +453,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(localBalance.toString()),
+                        Text(
+                          localBalance.toString(),
+                          style: Theme.of(context).textTheme.displayMedium,
+                        ),
                         Text(
                           'Local balance',
                           style: TextStyle(color: AppColors.blue),
@@ -503,7 +471,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(remoteBalance.toString()),
+                        Text(
+                          remoteBalance.toString(),
+                          style: Theme.of(context).textTheme.displayMedium,
+                        ),
                         Text(
                           'Remote balance',
                           style: TextStyle(color: AppColors.red),
@@ -525,7 +496,10 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(capacity.toString()),
+                    Text(
+                      capacity.toString(),
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
                     Text(
                       'Capacity',
                       style: TextStyle(color: AppColors.grey),
@@ -641,7 +615,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         }));
   }
 
-  _updateChannelPolicy(String channelPointStr) async {
+  Future<PolicyUpdateResponse> _updateChannelPolicy(
+      String channelPointStr) async {
     LND rpc = LND();
     List<String> splitChannelPoint = channelPointStr.split(':');
     List<int> fundingTxidBytes = hex.decode(splitChannelPoint[0]);
@@ -690,6 +665,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
       context: context,
       barrierDismissible: true,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.white,
         title: Icon(
           Icons.info_outline,
           color: AppColors.blue,
@@ -701,16 +677,18 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
               Text(
                 'Are you sure you want to close this channel?',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.black, fontSize: 20),
               ),
             ],
           ),
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(
+                fontSize: 20,
+                color: AppColors.green,
+              ),
             ),
             onPressed: () {
               userIsSure = false;
@@ -718,9 +696,12 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             },
           ),
           TextButton(
-            child: const Text(
+            child: Text(
               'Continue',
-              style: TextStyle(fontSize: 20),
+              style: TextStyle(
+                fontSize: 20,
+                color: AppColors.red,
+              ),
             ),
             onPressed: () {
               userIsSure = true;
@@ -728,6 +709,209 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             },
           )
         ],
+      ),
+    );
+  }
+
+  Widget _closeButton() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 1,
+          color: AppColors.red,
+        ),
+        borderRadius: BorderRadius.all(
+          Radius.circular(10),
+        ),
+      ),
+      height: MediaQuery.of(context).size.height / 14,
+      child: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: ProgressButton.icon(
+          iconedButtons: {
+            ButtonState.idle: IconedButton(
+              text: 'Close Channel',
+              icon: Icon(Icons.close),
+              color: Colors.transparent,
+            ),
+            ButtonState.loading: IconedButton(
+              text: 'Closing Channel',
+              color: Colors.transparent,
+            ),
+            ButtonState.fail: IconedButton(
+              text: 'Failed',
+              icon: Icon(Icons.cancel),
+              color: Colors.transparent,
+            ),
+            ButtonState.success: IconedButton(
+              text: 'Success',
+              icon: Icon(Icons.check_circle),
+              color: Colors.transparent,
+            )
+          },
+          radius: 10.0,
+          textStyle: Theme.of(context).textTheme.labelMedium,
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              await closeChannelDialog(context);
+              if (userIsSure) {
+                switch (stateTextWithIcon_close) {
+                  case ButtonState.idle:
+                    stateTextWithIcon_close = ButtonState.loading;
+
+                    CloseStatusUpdate closeSuccessful;
+
+                    closeSuccessful = await _closeChannel();
+                    print(closeSuccessful.hasClosePending());
+
+                    Future.delayed(Duration(seconds: 1), () {
+                      setState(() {
+                        stateTextWithIcon_close =
+                            closeSuccessful.hasClosePending()
+                                ? ButtonState.success
+                                : ButtonState.fail;
+                      });
+
+                      if (stateTextWithIcon_close == ButtonState.success) {
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DashboardScreen(
+                                tabIndex: 1,
+                              ),
+                            ),
+                          );
+                        });
+                      }
+                    });
+
+                    break;
+                  case ButtonState.loading:
+                    break;
+                  case ButtonState.success:
+                    stateTextWithIcon_close = ButtonState.idle;
+                    break;
+                  case ButtonState.fail:
+                    stateTextWithIcon_close = ButtonState.idle;
+                    break;
+                }
+                if (!mounted) return;
+                setState(() {
+                  stateTextWithIcon_close = stateTextWithIcon_close;
+                });
+
+                Future.delayed(Duration(seconds: 5), () {
+                  if (!mounted) return;
+                  setState(() {
+                    stateTextWithIcon_close = ButtonState.idle;
+                  });
+                });
+              }
+            }
+          },
+          state: stateTextWithIcon_close,
+        ),
+      ),
+    );
+  }
+
+  Widget _updateButton() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 1,
+          color: AppColors.blue,
+        ),
+        borderRadius: BorderRadius.all(
+          Radius.circular(10),
+        ),
+      ),
+      height: MediaQuery.of(context).size.height / 14,
+      child: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: ProgressButton.icon(
+          iconedButtons: {
+            ButtonState.idle: IconedButton(
+              text: 'Update Channel',
+              icon: Icon(Icons.update),
+              color: Colors.transparent,
+            ),
+            ButtonState.loading: IconedButton(
+              text: 'Updating',
+              color: Colors.transparent,
+            ),
+            ButtonState.fail: IconedButton(
+              text: 'Failed',
+              icon: Icon(Icons.cancel),
+              color: Colors.transparent,
+            ),
+            ButtonState.success: IconedButton(
+              text: 'Success',
+              icon: Icon(Icons.check_circle),
+              color: Colors.transparent,
+            )
+          },
+          radius: 10.0,
+          textStyle: Theme.of(context).textTheme.labelMedium,
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              switch (stateTextWithIcon_update) {
+                case ButtonState.idle:
+                  stateTextWithIcon_update = ButtonState.loading;
+
+                  _saveChannelLabel();
+                  _saveRemotePubkeyLabel();
+
+                  PolicyUpdateResponse updateSuccessful =
+                      await _updateChannelPolicy(channelPoint);
+
+                  Future.delayed(Duration(seconds: 1), () {
+                    setState(() {
+                      stateTextWithIcon_update =
+                          updateSuccessful.failedUpdates.length <= 0
+                              ? ButtonState.success
+                              : ButtonState.fail;
+                    });
+
+                    Future.delayed(Duration(seconds: 2), () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DashboardScreen(
+                            tabIndex: 1,
+                          ),
+                        ),
+                      );
+                    });
+                  });
+
+                  break;
+                case ButtonState.loading:
+                  break;
+                case ButtonState.success:
+                  stateTextWithIcon_update = ButtonState.idle;
+                  break;
+                case ButtonState.fail:
+                  stateTextWithIcon_update = ButtonState.idle;
+                  break;
+              }
+              if (!mounted) return;
+              setState(() {
+                stateTextWithIcon_update = stateTextWithIcon_update;
+              });
+              Future.delayed(Duration(seconds: 5), () {
+                if (!mounted) return;
+                setState(() {
+                  stateTextWithIcon_update = ButtonState.idle;
+                });
+              });
+            }
+          },
+          state: stateTextWithIcon_update,
+        ),
       ),
     );
   }

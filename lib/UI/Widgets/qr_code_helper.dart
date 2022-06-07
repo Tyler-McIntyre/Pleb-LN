@@ -4,7 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../util/app_colors.dart';
 
 class QrCodeHelper {
-  static createQrImage(String data) {
+  static QrImage createQrImage(String data) {
     return QrImage(
       data: data,
       version: QrVersions.auto,

@@ -1,1 +1,9 @@
-enum NodeSetting { nickname, host, grpcport, macaroon, useTor, isConfigured }
+enum NodeSetting {
+  nickname,
+  host,
+  grpcport,
+  macaroon,
+  useTor,
+  isConfigured,
+  quickInvoice
+}

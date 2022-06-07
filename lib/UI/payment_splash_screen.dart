@@ -34,7 +34,9 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
       context,
       PageTransition(
         alignment: Alignment.bottomCenter,
-        child: DashboardScreen(),
+        child: DashboardScreen(
+          tabIndex: 1,
+        ),
         type: PageTransitionType.fade,
       ),
     );
@@ -45,7 +47,9 @@ class _PaymentSplashScreenState extends State<PaymentSplashScreen> {
       context,
       PageTransition(
         alignment: Alignment.bottomCenter,
-        child: DashboardScreen(),
+        child: DashboardScreen(
+          tabIndex: 1,
+        ),
         type: PageTransitionType.fade,
       ),
     );

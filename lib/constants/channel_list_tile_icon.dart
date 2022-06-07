@@ -12,7 +12,7 @@ enum ChannelListTileIcon {
 Map<ChannelListTileIcon, Icon> _ChannelIconMap = {
   ChannelListTileIcon.private_active: Icon(
     Icons.private_connectivity,
-    color: AppColors.green,
+    color: AppColors.lightGreen,
   ),
   ChannelListTileIcon.private_inactive: Icon(
     Icons.private_connectivity,
@@ -20,7 +20,7 @@ Map<ChannelListTileIcon, Icon> _ChannelIconMap = {
   ),
   ChannelListTileIcon.public_active: Icon(
     Icons.public,
-    color: AppColors.green,
+    color: AppColors.lightGreen,
   ),
   ChannelListTileIcon.public_inactive: Icon(
     Icons.public,

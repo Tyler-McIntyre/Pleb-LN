@@ -1,1 +1,1 @@
-enum TxSortType { DateReceived, Sent, Received }
+enum TxSortType { Date, Sent, Received }

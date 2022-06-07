@@ -84,7 +84,19 @@ class LND {
     }
   }
 
-  handleGrpcError(GrpcError ex) {}
+  Future<GetInfoResponse> getInfo() async {
+    GetInfoResponse response = GetInfoResponse();
+    LightningClient stub = await _lightningStub;
+    try {
+      response = await stub.getInfo(GetInfoRequest());
+    } on GrpcError catch (ex) {
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
+    }
+
+    return response;
+  }
 
   Future<WalletBalanceResponse> getWalletBalance() async {
     WalletBalanceResponse response = WalletBalanceResponse();
@@ -92,6 +104,20 @@ class LND {
     try {
       response =
           await stub.walletBalance(WalletBalanceRequest(), CallOptions());
+    } on GrpcError catch (ex) {
+      throw Exception(ex.message);
+    } catch (ex) {
+      throw Exception(ex);
+    }
+
+    return response;
+  }
+
+  Future<ChannelBalanceResponse> getChannelBalance() async {
+    ChannelBalanceResponse response = ChannelBalanceResponse();
+    LightningClient stub = await _lightningStub;
+    try {
+      response = await stub.channelBalance(ChannelBalanceRequest());
     } on GrpcError catch (ex) {
       throw Exception(ex.message);
     } catch (ex) {
@@ -115,7 +141,7 @@ class LND {
     return response;
   }
 
-  Future<ListInvoiceResponse> getInvoices() async {
+  Future<ListInvoiceResponse> listInvoices() async {
     ListInvoiceResponse response = ListInvoiceResponse();
     LightningClient stub = await _lightningStub;
     try {
@@ -215,7 +241,6 @@ class LND {
     Payment response = Payment();
     RouterClient stub = await _routerStub;
     List<Payment> paymentList = [];
-
     try {
       await for (Payment payment in stub.sendPaymentV2(sendPaymentRequest)) {
         paymentList.add(payment);

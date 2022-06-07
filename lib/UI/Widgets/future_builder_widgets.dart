@@ -32,12 +32,11 @@ class FutureBuilderWidgets {
   static Widget circularProgressIndicator() {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 50.0),
-          child: SizedBox(
-            width: 60,
-            height: 60,
-            child: CircularProgressIndicator(),
+        SizedBox(
+          width: 60,
+          height: 60,
+          child: CircularProgressIndicator(
+            color: AppColors.white,
           ),
         ),
       ],

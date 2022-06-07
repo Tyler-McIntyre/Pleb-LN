@@ -5,18 +5,14 @@ import '../../util/app_colors.dart';
 class Snackbars {
   static ScaffoldFeatureController<SnackBar, SnackBarClosedReason> error(
       BuildContext context, String exception) {
-    String message = exception
-        .toLowerCase()
-        .replaceAll('exception', '')
-        .replaceAll(':', '')
-        .replaceAll('error', '');
+    String message = exception.replaceAll('Exception:', '');
 
     final snackBar = SnackBar(
       duration: Duration(seconds: 5),
       content: Text(
         message,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 18),
+        style: Theme.of(context).textTheme.bodySmall,
       ),
       backgroundColor: (AppColors.red),
     );
@@ -46,7 +42,7 @@ class Snackbars {
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 20),
       ),
-      backgroundColor: (AppColors.blueSecondary),
+      backgroundColor: (AppColors.grey),
     );
 
     return ScaffoldMessenger.of(context).showSnackBar(snackBar);

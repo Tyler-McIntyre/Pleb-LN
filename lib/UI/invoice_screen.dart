@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../rpc/lnd.dart';
 import '../util/clipboard_helper.dart';
-import 'Widgets/curve_clipper.dart';
 import 'Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
 import 'widgets/future_builder_widgets.dart';
@@ -24,14 +23,14 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen> {
   late QrImage _qrImage;
-  TextEditingController _textController = TextEditingController();
+  TextEditingController _paymentRequestController = TextEditingController();
   late Future<Invoice> invoiceSubscription;
 
   @override
   void initState() {
     String paymentRequest = widget.invoice.paymentRequest;
     this._qrImage = QrCodeHelper.createQrImage(paymentRequest);
-    _textController.text = paymentRequest;
+    _paymentRequestController.text = paymentRequest;
     Int64 addIndex = widget.invoice.addIndex;
     this.invoiceSubscription = _invoiceSubscription(addIndex);
     super.initState();
@@ -47,7 +46,7 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
 
   @override
   void dispose() {
-    _textController.dispose();
+    _paymentRequestController.dispose();
     super.dispose();
   }
 
@@ -59,135 +58,115 @@ class _InvoiceScreenState extends State<InvoiceScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(8.0),
         child: FloatingActionButton(
-          backgroundColor: AppColors.black,
+          backgroundColor: AppColors.blue,
           foregroundColor: AppColors.white,
           child: Icon(Icons.home),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DashboardScreen(),
+              builder: (context) => DashboardScreen(
+                tabIndex: 1,
+              ),
             ),
           ),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          ClipPath(
-            clipper: CurveClipper(),
-            child: Container(
-              height: MediaQuery.of(context).size.height * .93,
-              color: AppColors.black,
-              child: Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.1,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 6,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              flex: 6,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  _qrImage,
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 32),
-                                    child: TextField(
-                                      style: TextStyle(
-                                          color: AppColors.white, fontSize: 22),
-                                      readOnly: true,
-                                      controller: _textController,
-                                      decoration: InputDecoration(
-                                        suffixIcon: IconButton(
-                                          icon: const Icon(
-                                            Icons.copy,
-                                            color: AppColors.orange,
-                                          ),
-                                          onPressed: () =>
-                                              ClipboardHelper.copyToClipboard(
-                                                  _textController.text,
-                                                  context),
-                                        ),
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                      _qrImage,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 32),
+                        child: TextField(
+                          style:
+                              TextStyle(color: AppColors.white, fontSize: 22),
+                          readOnly: true,
+                          controller: _paymentRequestController,
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                Icons.copy,
+                                color: AppColors.grey,
                               ),
+                              onPressed: () => ClipboardHelper.copyToClipboard(
+                                  _paymentRequestController.text, context),
                             ),
-                            FutureBuilder(
-                              future: invoiceSubscription,
-                              builder:
-                                  ((context, AsyncSnapshot<Invoice> snapshot) {
-                                Widget child;
-                                if (snapshot.hasData) {
-                                  bool isSettled = snapshot.data!.settleDate > 0
-                                      ? true
-                                      : false;
-                                  if (isSettled) {
-                                    child = SizedBox(
-                                      width: MediaQuery.of(context).size.width /
-                                          1.1,
-                                      child: Center(
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              Icons.thumb_up,
-                                              color: AppColors.green,
-                                              size: 50,
-                                            ),
-                                            Text(
-                                              'Paid!',
-                                              style: TextStyle(
-                                                color: AppColors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    child = SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: Text(snapshot.data!.state.name),
-                                    );
-                                  }
-                                } else if (snapshot.hasError) {
-                                  child = FutureBuilderWidgets.error(
-                                    context,
-                                    snapshot.error.toString(),
-                                  );
-                                } else {
-                                  child = SizedBox(
-                                    height: 60,
-                                    width: 60,
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                                return Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          child,
-                                        ],
-                                      ),
-                                    ));
-                              }),
-                            ),
-                          ],
+                            border: OutlineInputBorder(),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+                FutureBuilder(
+                  future: invoiceSubscription,
+                  builder: ((context, AsyncSnapshot<Invoice> snapshot) {
+                    Widget child;
+                    if (snapshot.hasData) {
+                      bool isSettled =
+                          snapshot.data!.settleDate > 0 ? true : false;
+                      if (isSettled) {
+                        child = SizedBox(
+                          width: MediaQuery.of(context).size.width / 1.1,
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.thumb_up,
+                                  color: AppColors.green,
+                                  size: 50,
+                                ),
+                                Text(
+                                  'Paid!',
+                                  style: TextStyle(
+                                    color: AppColors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        child = SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: Text(snapshot.data!.state.name),
+                        );
+                      }
+                    } else if (snapshot.hasError) {
+                      child = FutureBuilderWidgets.error(
+                        context,
+                        snapshot.error.toString(),
+                      );
+                    } else {
+                      child = SizedBox(
+                        height: 60,
+                        width: 60,
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    return Expanded(
+                        flex: 2,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              child,
+                            ],
+                          ),
+                        ));
+                  }),
+                ),
+              ],
             ),
           ),
         ],

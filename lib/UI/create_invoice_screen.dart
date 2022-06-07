@@ -3,39 +3,36 @@ import 'package:numberpicker/numberpicker.dart';
 import '../generated/lightning.pb.dart';
 import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
-import 'Widgets/curve_clipper.dart';
 import 'invoice_screen.dart';
 import 'package:fixnum/fixnum.dart';
 
 import 'widgets/snackbars.dart';
 
-class CreateInvoiceScreen extends StatefulWidget {
-  const CreateInvoiceScreen({Key? key}) : super(key: key);
+class CreateInvoice extends StatefulWidget {
+  const CreateInvoice({Key? key}) : super(key: key);
 
   @override
-  State<CreateInvoiceScreen> createState() => _CreateInvoiceScreenState();
+  State<CreateInvoice> createState() => _CreateInvoiceState();
 }
 
-class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
+class _CreateInvoiceState extends State<CreateInvoice> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
-      body: CreateInvoiceScreenForm(),
+      body: CreateInvoiceForm(),
     );
   }
 }
 
-class CreateInvoiceScreenForm extends StatefulWidget {
-  const CreateInvoiceScreenForm({Key? key}) : super(key: key);
+class CreateInvoiceForm extends StatefulWidget {
+  const CreateInvoiceForm({Key? key}) : super(key: key);
 
   @override
-  State<CreateInvoiceScreenForm> createState() =>
-      _CreateInvoiceScreenFormState();
+  State<CreateInvoiceForm> createState() => _CreateInvoiceFormState();
 }
 
-class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
+class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
   final _formKey = GlobalKey<FormState>();
   int _currentHourValue = 0;
   int _currentMinutesValue = 0;
@@ -57,131 +54,122 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
       key: _formKey,
       child: Stack(
         children: [
-          ClipPath(
-            clipper: CurveClipper(),
-            child: Container(
-              height: MediaQuery.of(context).size.height * .70,
-              color: AppColors.black,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        //*Memo
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: memoController,
-                            cursorColor: AppColors.white,
-                            decoration: InputDecoration(
-                              focusedBorder: Theme.of(context)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 1.1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //*Memo
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        controller: memoController,
+                        cursorColor: AppColors.white,
+                        decoration: InputDecoration(
+                          focusedBorder: Theme.of(context)
+                              .inputDecorationTheme
+                              .focusedBorder,
+                          label: Text(
+                            'Memo',
+                            style: Theme.of(context)
+                                .inputDecorationTheme
+                                .labelStyle,
+                          ),
+                          border: UnderlineInputBorder(),
+                          hintStyle: TextStyle(color: AppColors.grey),
+                          hintText: 'A Satoshi for your thoughts?',
+                        ),
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    //*Amount
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        controller: amountController,
+                        cursorColor: AppColors.white,
+                        decoration: InputDecoration(
+                          focusedBorder: Theme.of(context)
+                              .inputDecorationTheme
+                              .focusedBorder,
+                          label: Text.rich(
+                            TextSpan(
+                              text: 'Amount ',
+                              style: Theme.of(context)
                                   .inputDecorationTheme
-                                  .focusedBorder,
-                              label: Text(
-                                'Memo',
-                                style: Theme.of(context)
-                                    .inputDecorationTheme
-                                    .labelStyle,
-                              ),
-                              border: UnderlineInputBorder(),
-                              hintStyle: TextStyle(color: AppColors.grey),
-                              hintText: 'A Satoshi for your thoughts?',
-                            ),
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: 20,
+                                  .labelStyle,
+                              children: [
+                                TextSpan(
+                                    text: '(sats)',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall),
+                              ],
                             ),
                           ),
+                          border: UnderlineInputBorder(),
+                          hintStyle: TextStyle(color: AppColors.grey),
+                          hintText: '0',
                         ),
-                        //*Amount
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            controller: amountController,
-                            cursorColor: AppColors.white,
-                            decoration: InputDecoration(
-                              focusedBorder: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .focusedBorder,
-                              label: Text.rich(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          return null;
+                        },
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    //*Expiration
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Expiration',
+                                style: Theme.of(context).textTheme.bodySmall),
+                          ),
+                          SwitchListTile(
+                              title: Text.rich(
                                 TextSpan(
-                                  text: 'Amount ',
-                                  style: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .labelStyle,
+                                  text: 'Use default ',
                                   children: [
                                     TextSpan(
-                                        text: '(sats)',
+                                        text: ' = 1 hour',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .headlineSmall),
+                                            .displaySmall)
                                   ],
+                                  style:
+                                      Theme.of(context).textTheme.displayMedium,
                                 ),
                               ),
-                              border: UnderlineInputBorder(),
-                              hintStyle: TextStyle(color: AppColors.grey),
-                              hintText: '0',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter an amount';
-                              }
-                              return null;
-                            },
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        //*Expiration
-                        Padding(
-                          padding: const EdgeInsets.only(top: 24.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('Expiration',
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall),
-                              ),
-                              SwitchListTile(
-                                  title: Text.rich(
-                                    TextSpan(
-                                      text: 'Use default ',
-                                      children: [
-                                        TextSpan(
-                                            text: ' = 1 hour',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .displaySmall)
-                                      ],
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .displayMedium,
-                                    ),
-                                  ),
-                                  activeColor: AppColors.blue,
-                                  value: _useDefaultExpiry,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _useDefaultExpiry = value;
-                                    });
-                                  }),
-                              _useDefaultExpiry
-                                  ? SizedBox.shrink()
-                                  : _showExpirationNumberPicker(),
-                            ],
-                          ),
-                        ),
-                      ],
+                              activeColor: AppColors.blue,
+                              value: _useDefaultExpiry,
+                              onChanged: (value) {
+                                setState(() {
+                                  _useDefaultExpiry = value;
+                                });
+                              }),
+                          _useDefaultExpiry
+                              ? SizedBox.shrink()
+                              : _showExpirationNumberPicker(),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -195,9 +183,9 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
             child: SizedBox(
               height: 100.0,
               width: MediaQuery.of(context).size.width,
-              child: SizedBox(
-                child: CreateInvoiceScreenButtonBar(),
-              ),
+              // child: SizedBox(
+              //   child: CreateInvoiceButtonBar(),
+              // ),
             ),
           )
         ],
@@ -205,7 +193,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
     );
   }
 
-  CreateInvoiceScreenButtonBar() {
+  CreateInvoiceButtonBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -222,7 +210,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           style: ElevatedButton.styleFrom(
             elevation: 3,
             fixedSize: const Size(150, 71),
-            primary: AppColors.black,
+            primary: AppColors.blue,
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
             side: const BorderSide(
@@ -259,7 +247,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
               } else {
                 AddInvoiceResponse invoice = await _createInvoice();
                 if (invoice.hasRHash()) {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => InvoiceScreen(
@@ -273,11 +261,11 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           style: ElevatedButton.styleFrom(
             elevation: 3,
             fixedSize: const Size(150, 71),
-            primary: AppColors.black,
+            primary: AppColors.blue,
             onPrimary: AppColors.white,
             textStyle: const TextStyle(fontSize: 20),
-            side: const BorderSide(
-              color: AppColors.orange,
+            side: BorderSide(
+              color: AppColors.grey,
               width: 1.0,
             ),
             shape: const RoundedRectangleBorder(
@@ -310,7 +298,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           minValue: 0,
           maxValue: 72,
           textStyle: TextStyle(color: AppColors.white),
-          selectedTextStyle: TextStyle(color: AppColors.orange, fontSize: 25),
+          selectedTextStyle: TextStyle(color: AppColors.grey, fontSize: 25),
           onChanged: (value) {
             setState(() {
               value == 1 ? _hoursLabel = 'Hour' : _hoursLabel = 'Hours';
@@ -328,7 +316,7 @@ class _CreateInvoiceScreenFormState extends State<CreateInvoiceScreenForm> {
           minValue: 0,
           maxValue: 60,
           textStyle: TextStyle(color: AppColors.white),
-          selectedTextStyle: TextStyle(color: AppColors.orange, fontSize: 25),
+          selectedTextStyle: TextStyle(color: AppColors.grey, fontSize: 25),
           onChanged: (value) {
             setState(() {
               value == 1 ? _minutesLabel = 'Minute' : _minutesLabel = 'Minutes';

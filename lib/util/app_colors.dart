@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const blueGrey = Colors.blueGrey;
-  static Color? secondaryGrey = Colors.grey[900];
-  static const green = Color(0xff6AE007);
-  static const redSecondary = Color.fromRGBO(230, 25, 32, 1);
-  static const yellow = Color.fromRGBO(230, 226, 48, 1);
-  static const blueSecondary = Color.fromRGBO(9, 100, 153, 1);
-  static const transparent = Colors.transparent;
-  static const white60 = Colors.white60;
-  static const white70 = Colors.white70;
-
-  //new colors
-  static const greySecondary = Color.fromARGB(158, 243, 243, 244);
-  static const white = Color(0xffF3F3F4);
-  static const orange = Color(0xffF75C03);
-  static const grey = Color(0xff7E7F83);
-  static const blackSecondary = Color(0xff34312D);
-  static const black = Color(0xff14110F);
-  static const blue = Color(0xff076AE0);
-  static const red = Color(0xffDE1A1A);
-  static const teal = Color(0xff80D39B);
+  static const background = Color(0xffDCDCDD);
+  static const grey = Color(0xffC5C3C6);
+  static const jet = Color.fromARGB(90, 70, 73, 76);
+  static const darkBlue = Color(0xff4C5C68);
+  static const blue = Color(0xff1985A1);
+  static const green = Color(0xff388A4B);
+  static const red = Color.fromARGB(255, 245, 22, 37);
+  static const white = Color(0xffF2FCF3);
+  static const black = Colors.black;
+  static const black2 = Color.fromARGB(185, 42, 49, 43);
+  static const purple = Colors.purple;
+  static const lightGreen = Colors.green;
 }

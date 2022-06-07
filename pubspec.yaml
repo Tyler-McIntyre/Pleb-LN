@@ -50,6 +50,11 @@ dependencies:
   http_plus: ^0.2.1
   protobuf: ^2.0.1
   grpc: ^3.0.2
+  curved_navigation_bar: ^1.0.3
+  progress_state_button: "^1.0.4"
+  dropdown_button2: ^1.5.2
+  carousel_slider: ^4.1.1
+  carousel_indicator: ^1.0.6
   
 
 dev_dependencies:
