@@ -1,4 +1,4 @@
-import 'package:firebolt/UI/create_invoice_screen.dart';
+import '../UI/create_invoice_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:lottie/lottie.dart';

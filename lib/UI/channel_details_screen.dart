@@ -1,5 +1,5 @@
 import 'package:convert/convert.dart';
-import 'package:firebolt/UI/dashboard_screen.dart';
+import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:progress_state_button/iconed_button.dart';

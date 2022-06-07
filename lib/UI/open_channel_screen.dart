@@ -1,6 +1,6 @@
 import 'package:convert/convert.dart';
 import 'package:fixnum/fixnum.dart';
-import 'package:firebolt/UI/dashboard_screen.dart';
+import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';

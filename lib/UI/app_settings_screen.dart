@@ -1,5 +1,5 @@
-import 'package:firebolt/generated/lightning.pb.dart';
-import 'package:firebolt/util/app_colors.dart';
+import '../generated/lightning.pb.dart';
+import '../util/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../rpc/lnd.dart';
 import '../util/clipboard_helper.dart';

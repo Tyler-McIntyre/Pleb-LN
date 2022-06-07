@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:firebolt/UI/widgets/balance.dart';
-import 'package:firebolt/generated/lightning.pbgrpc.dart';
+import '../UI/widgets/balance.dart';
+import '../generated/lightning.pbgrpc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';

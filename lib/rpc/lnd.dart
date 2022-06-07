@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:fixnum/fixnum.dart';
-import 'package:firebolt/constants/node_setting.dart';
+import '../constants/node_setting.dart';
 import 'package:grpc/grpc.dart';
 import '../database/secure_storage.dart';
 import '../generated/lightning.pbgrpc.dart';

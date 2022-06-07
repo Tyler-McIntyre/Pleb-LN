@@ -1,4 +1,4 @@
-import 'package:firebolt/generated/lightning.pb.dart';
+import '../generated/lightning.pb.dart';
 
 class PaymentFailure {
   static String getMessage(PaymentFailureReason reason) {

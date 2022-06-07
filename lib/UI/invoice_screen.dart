@@ -1,7 +1,7 @@
-import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
-import 'package:firebolt/UI/dashboard_screen.dart';
-import 'package:firebolt/generated/lightning.pb.dart';
-import 'package:firebolt/util/app_colors.dart';
+import '../UI/Widgets/qr_code_helper.dart';
+import '../UI/dashboard_screen.dart';
+import '../generated/lightning.pb.dart';
+import '../util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';

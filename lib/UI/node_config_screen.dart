@@ -1,4 +1,4 @@
-import 'package:firebolt/constants/node_setting.dart';
+import '../constants/node_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:progress_state_button/iconed_button.dart';
