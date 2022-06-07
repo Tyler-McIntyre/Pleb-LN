@@ -12,21 +12,23 @@ import 'Widgets/qr_code_helper.dart';
 import 'widgets/future_builder_widgets.dart';
 import 'widgets/snackbars.dart';
 
-class QuickInvoice extends StatefulWidget {
-  const QuickInvoice({Key? key}) : super(key: key);
+class QuickScan extends StatefulWidget {
+  const QuickScan({Key? key}) : super(key: key);
 
   @override
-  State<QuickInvoice> createState() => _QuickInvoiceState();
+  State<QuickScan> createState() => _QuickScanState();
 }
 
-class _QuickInvoiceState extends State<QuickInvoice> {
+class _QuickScanState extends State<QuickScan> {
   late Future<Invoice> invoiceSubscription;
   late QrImage _qrImage;
   TextEditingController _paymentRequestController = TextEditingController();
   double _formSpacing = 12;
+  late Future<bool> _init;
 
   @override
   void initState() {
+    _init = _initQuickScan();
     super.initState();
   }
 
@@ -35,47 +37,45 @@ class _QuickInvoiceState extends State<QuickInvoice> {
     super.dispose();
   }
 
-  Future<bool> _initQuickInvoice() async {
-    Map<Int64, String> quickInvoiceMap = await _getInvoice();
-    String paymentRequest = quickInvoiceMap.values.first;
+  Future<bool> _initQuickScan() async {
+    Map<Int64, String> QuickScanMap = await _getInvoice();
+    String paymentRequest = QuickScanMap.values.first;
 
     _qrImage = QrCodeHelper.createQrImage(paymentRequest);
     _paymentRequestController.text = paymentRequest;
-    Int64 addIndex = quickInvoiceMap.keys.first;
-    invoiceSubscription = _invoiceSubscription(addIndex).whenComplete(() {
-      setState(() {});
-    });
+    Int64 addIndex = QuickScanMap.keys.first;
+    _invoiceSubscription(addIndex);
 
     return true;
   }
 
   Future<Map<Int64, String>> _getInvoice() async {
     String addIndex =
-        await SecureStorage.readValue(NodeSetting.quickInvoice.name) ?? '';
+        await SecureStorage.readValue(NodeSetting.quickScan.name) ?? '';
 
     if (addIndex.isEmpty) {
       AddInvoiceResponse invoiceResp = await _createInvoice();
       await SecureStorage.writeValue(
-          NodeSetting.quickInvoice.name, invoiceResp.addIndex.toString());
+          NodeSetting.quickScan.name, invoiceResp.addIndex.toString());
       return {invoiceResp.addIndex: invoiceResp.paymentRequest};
     } else {
-      Map<Int64, String> quickInvoice = {};
+      Map<Int64, String> QuickScan = {};
       Invoice invoice = await _lookupInvoice(Int64.parseInt(addIndex));
       //* is it expired or settled?
 
-      if (invoice.hasSettleDate() ||
+      if (invoice.settleDate > 0 ||
           !Formatting.getExpirationDate(
                   invoice.creationDate.toInt(), invoice.expiry.toInt())
               .isAfter(DateTime.now())) {
         AddInvoiceResponse invoiceResp = await _createInvoice();
         await SecureStorage.writeValue(
-            NodeSetting.quickInvoice.name, invoiceResp.addIndex.toString());
-        quickInvoice = {invoiceResp.addIndex: invoiceResp.paymentRequest};
+            NodeSetting.quickScan.name, invoiceResp.addIndex.toString());
+        QuickScan = {invoiceResp.addIndex: invoiceResp.paymentRequest};
       } else {
-        quickInvoice = {invoice.addIndex: invoice.paymentRequest};
+        QuickScan = {invoice.addIndex: invoice.paymentRequest};
       }
 
-      return quickInvoice;
+      return QuickScan;
     }
   }
 
@@ -112,7 +112,7 @@ class _QuickInvoiceState extends State<QuickInvoice> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _initQuickInvoice(),
+        future: _init,
         builder: ((context, snapshot) {
           Widget child;
           if (snapshot.hasData) {
@@ -164,6 +164,9 @@ class _QuickInvoiceState extends State<QuickInvoice> {
     InvoiceSubscription invoiceSubscription =
         InvoiceSubscription(addIndex: addIndex);
     Invoice response = await rpc.invoiceSubscription(invoiceSubscription);
+    if (response.settleDate > 0) {
+      print('isSettled');
+    }
     return response;
   }
 

@@ -26,7 +26,7 @@ class ChannelsScreen extends StatefulWidget {
 
 class _ChannelsScreenState extends State<ChannelsScreen> {
   ChannelSortType _channelSortType = ChannelSortType.Id;
-  Duration refreshInterval = Duration(seconds: 10);
+  Duration refreshInterval = Duration(seconds: 15);
   late Future<List<ChannelDetail>> _channels;
   late List<Widget> _offChainBalanceWidgets;
   static int offChainBalanceWidgetIndex = 0;
@@ -54,6 +54,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
       String nickname = await _getNickname();
       RefreshTimer.refreshTimer = Timer.periodic(
           refreshInterval, (timer) => _sweepForChannelUpdates(timer));
+      if (!mounted) return;
       setState(() {
         nicknameController.text = nickname;
       });
@@ -88,6 +89,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
       if (!mounted) return;
       setState(() {
         _channels = Future.value(result);
+        _offChainBalance = _getOffChainBalance();
       });
     }
   }
@@ -260,6 +262,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         return Expanded(
           flex: 2,
           child: Container(
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.bottomRight,
@@ -402,7 +405,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
                     _channelSortType = ChannelSortType.Public;
                     break;
                 }
-
+                if (!mounted) return;
                 setState(() {
                   selectedValue = value as ChannelSortType;
                   _channels = _getChannels(_channelSortType);
@@ -434,6 +437,7 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         if (snapshot.hasData) {
           child = TextButton(
             onPressed: () {
+              if (!mounted) return;
               setState(() {
                 _changeOffChainBalanceWidget();
               });

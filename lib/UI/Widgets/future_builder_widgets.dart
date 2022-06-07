@@ -4,11 +4,8 @@ import '../../util/app_colors.dart';
 
 class FutureBuilderWidgets {
   static Widget error(BuildContext context, String exception) {
-    String message = exception
-        .toLowerCase()
-        .replaceAll('exception', '')
-        .replaceAll(':', '')
-        .replaceAll('error', '');
+    String message =
+        exception.replaceAll('Exception:', '').replaceAll('Error:', '');
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

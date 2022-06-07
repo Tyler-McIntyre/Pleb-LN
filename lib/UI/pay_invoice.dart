@@ -11,6 +11,7 @@ import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import '../util/formatting.dart';
 import 'widgets/snackbars.dart';
+import 'package:fixnum/fixnum.dart';
 
 class PayInvoice extends StatefulWidget {
   const PayInvoice({Key? key}) : super(key: key);
@@ -28,6 +29,7 @@ class _PayInvoiceState extends State<PayInvoice> {
   TextEditingController expiryController = TextEditingController();
   ButtonState stateTextWithIcon = ButtonState.idle;
   double _formSpacing = 12;
+  bool nonZeroPayReq = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +65,12 @@ class _PayInvoiceState extends State<PayInvoice> {
     );
   }
 
-  Future<Payment> _payLightningInvoice(String invoice) async {
+  Future<Payment> _payLightningInvoice(
+      String paymentRequest, Int64? amtSats) async {
     LND rpc = LND();
     SendPaymentRequest sendRequest = SendPaymentRequest(
-      paymentRequest: invoice,
+      paymentRequest: paymentRequest,
+      amt: amtSats != null ? amtSats : null,
       timeoutSeconds: 20,
     );
     Payment payment;
@@ -135,19 +139,16 @@ class _PayInvoiceState extends State<PayInvoice> {
       int expiryInSeconds = payReq.expiry.toInt();
       DateTime expirationDate =
           Formatting.getExpirationDate(timestamp, expiryInSeconds);
-
+      if (!mounted) return;
       setState(() {
         amountController.text = '${MoneyFormatter(
           amount: int.parse(amount).toDouble(),
         ).output.withoutFractionDigits}';
         memoController.text = payReq.description;
         expiryController.text = expirationDate.toString();
+        invoiceController.text = invoice;
       });
     }
-
-    setState(() {
-      invoiceController.text = invoice;
-    });
   }
 
   Future<PayReq> _decodePaymentRequest(String qrCodeRawData) async {
@@ -155,17 +156,17 @@ class _PayInvoiceState extends State<PayInvoice> {
     PayReqString payReqStr = PayReqString();
     payReqStr.payReq = qrCodeRawData;
     PayReq payReq = await rpc.decodePaymentRequest(payReqStr);
+
+    setState(() {
+      nonZeroPayReq = payReq.numSatoshis > 0;
+    });
     return payReq;
   }
 
   void _decodeClipboardData(String? pastedData) async {
     if (pastedData!.isNotEmpty) {
-      try {
-        PayReq payReq = await _decodePaymentRequest(pastedData);
-        _setConfigFormFields(payReq, pastedData);
-      } catch (ex) {
-        Snackbars.error(context, ex.toString());
-      }
+      PayReq payReq = await _decodePaymentRequest(pastedData);
+      _setConfigFormFields(payReq, pastedData);
     }
   }
 
@@ -298,8 +299,12 @@ class _PayInvoiceState extends State<PayInvoice> {
                   stateTextWithIcon = ButtonState.loading;
                   bool successfulPayment = false;
                   try {
-                    response =
-                        await _payLightningInvoice(invoiceController.text);
+                    Int64 amtSats = Int64.parseInt(
+                      amountController.text.replaceAll(',', ''),
+                    );
+
+                    response = await _payLightningInvoice(
+                        invoiceController.text, nonZeroPayReq ? null : amtSats);
                     successfulPayment =
                         response.status == Payment_PaymentStatus.SUCCEEDED
                             ? true

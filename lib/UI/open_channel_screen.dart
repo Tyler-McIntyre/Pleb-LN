@@ -209,6 +209,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                     requestSuccessful = false;
                   }
                   Future.delayed(Duration(seconds: 1), () {
+                    if (!mounted) return;
                     setState(() {
                       stateTextWithIcon = requestSuccessful
                           ? ButtonState.success
@@ -282,6 +283,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   }
 
   void _setConfigFormFields(String nodePubkey) {
+    if (!mounted) return;
     setState(() {
       nodePubkeyController.text = nodePubkey;
     });
@@ -371,6 +373,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             activeColor: AppColors.blue,
             contentPadding: EdgeInsets.zero,
             onChanged: ((value) {
+              if (!mounted) return;
               setState(() {
                 _useDefaultMinConf = value;
               });
@@ -425,6 +428,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           activeColor: AppColors.blue,
           contentPadding: EdgeInsets.zero,
           onChanged: ((value) {
+            if (!mounted) return;
             setState(() {
               _useDefaultFundingFee = value;
             });
@@ -480,6 +484,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             activeColor: AppColors.blue,
             contentPadding: EdgeInsets.zero,
             onChanged: ((value) {
+              if (!mounted) return;
               setState(() {
                 _privateChannel = value;
               });

@@ -5,5 +5,5 @@ enum NodeSetting {
   macaroon,
   useTor,
   isConfigured,
-  quickInvoice
+  quickScan
 }

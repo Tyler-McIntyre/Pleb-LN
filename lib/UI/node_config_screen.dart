@@ -225,7 +225,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       await SecureStorage.writeValue(NodeSetting.isConfigured.name, 'true');
       return true;
     } catch (ex) {
-      print('An error occured while saving the node configuration');
+      await Snackbars.error(
+          context, 'An error occured while saving the node configuration');
+
       return false;
     }
   }
@@ -356,9 +358,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           try {
             await scanQrCode();
           } catch (ex) {
-            print(
-              ex.toString(),
-            );
+            Snackbars.error(context, ex.toString());
           }
           String qrCodeRawData = qrCode;
           _setConfigFormFields(qrCodeRawData);

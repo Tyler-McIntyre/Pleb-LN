@@ -42,7 +42,7 @@ class LND {
 
       return LightningClient(channel, options: callOptions);
     } else {
-      throw Exception('Unable to retrieve connection params');
+      throw Exception('Unable to retrieve connection string');
     }
   }
 
@@ -80,7 +80,7 @@ class LND {
 
       return RouterClient(channel, options: callOptions);
     } else {
-      throw Exception('Unable to retrieve connection params');
+      throw Exception('Unable to retrieve connection string');
     }
   }
 

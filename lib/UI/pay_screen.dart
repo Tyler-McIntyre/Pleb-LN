@@ -2,7 +2,7 @@ import 'package:carousel_indicator/carousel_indicator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'pay_invoice.dart';
-import 'quick_invoice.dart';
+import 'quick_scan.dart';
 
 class PayScreen extends StatefulWidget {
   const PayScreen({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class _PayScreenState extends State<PayScreen> {
   @override
   Widget build(BuildContext context) {
     @override
-    List<Widget> _payScreens = [PayInvoice(), QuickInvoice()];
+    List<Widget> _payScreens = [PayInvoice(), QuickScan()];
     return Column(
       children: [
         Expanded(

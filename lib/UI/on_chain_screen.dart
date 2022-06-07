@@ -38,7 +38,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
     TxSortType.Received,
   ];
   TxSortType? selectedValue;
-  Duration refreshInterval = Duration(seconds: 20);
+  Duration refreshInterval = Duration(seconds: 15);
 
   @override
   void initState() {
@@ -51,6 +51,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
       String nickname = await _getNickname();
       RefreshTimer.refreshTimer = Timer.periodic(
           refreshInterval, (timer) => _sweepForNewTransactions(timer));
+      if (!mounted) return;
       setState(() {
         nicknameController.text = nickname;
       });
@@ -82,6 +83,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
           if (!mounted) return;
           setState(() {
             _transactions = Future.value(result);
+            _onChainBalance = _getOnChainBalance();
           });
         }
       },
@@ -186,6 +188,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
             children: [
               TextButton(
                 onPressed: () {
+                  if (!mounted) return;
                   setState(() {
                     _changeOnChainBalanceWidget();
                   });
@@ -266,6 +269,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
         return Expanded(
           flex: 2,
           child: Container(
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.bottomRight,
@@ -379,7 +383,6 @@ class _OnChainScreenState extends State<OnChainScreen> {
                   .toList(),
               value: selectedValue,
               onChanged: (value) {
-                print(value);
                 switch (value) {
                   case (TxSortType.Date):
                     _txSortType = TxSortType.Date;
@@ -391,7 +394,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
                     _txSortType = TxSortType.Received;
                     break;
                 }
-
+                if (!mounted) return;
                 setState(() {
                   selectedValue = value as TxSortType;
                   _transactions = _getTransactions(_txSortType);
