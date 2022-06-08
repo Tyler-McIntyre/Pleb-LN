@@ -14,18 +14,25 @@ class LNDConnect {
 
   static Future<LNDConnect> parseConnectionString(
       String connectionString) async {
-    //TODO: Error handling for null matches
     LNDConnect lndConnectParams = LNDConnect();
-    String? hostMatch = _lndConnectParsePatterns['findHost']
-        ?.firstMatch(connectionString)!
-        .group(0);
-    String? portMatch = _lndConnectParsePatterns['findPort']
-        ?.allMatches(connectionString)
-        .last
-        .group(0);
-    String? macaroonMatch = _lndConnectParsePatterns['findMacaroon']
-        ?.firstMatch(connectionString)!
-        .group(0);
+    String? hostMatch;
+    String? portMatch;
+    String? macaroonMatch;
+    try {
+      hostMatch = _lndConnectParsePatterns['findHost']
+          ?.firstMatch(connectionString)!
+          .group(0);
+      portMatch = _lndConnectParsePatterns['findPort']
+          ?.allMatches(connectionString)
+          .last
+          .group(0);
+      macaroonMatch = _lndConnectParsePatterns['findMacaroon']
+          ?.firstMatch(connectionString)!
+          .group(0);
+    } catch (ex) {
+      throw Exception(
+          'Invalid LND connection string. Format: lndconnect://{host}:{gRPCPort}?cert={cert}&macaroon={macaroon}');
+    }
 
     hostMatch != null
         ? lndConnectParams.host = Formatting.formatHost(hostMatch)

@@ -220,14 +220,21 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
 
   void _setConfigFormFields(String data) async {
     if (!data.isEmpty && !data.contains('Error') && data.isNotEmpty) {
-      connectionParams = await LNDConnect.parseConnectionString(data);
+      try {
+        connectionParams = await LNDConnect.parseConnectionString(data);
+      } catch (ex) {
+        await Snackbars.error(
+          context,
+          'Invalid LND connection string. Format: lndconnect://{host}:{gRPCPort}?cert={cert}&macaroon={macaroon}',
+        );
+      }
 
       if (connectionParams.host.isEmpty ||
           connectionParams.port.isEmpty ||
           connectionParams.macaroonHexFormat.isEmpty) {
-        Snackbars.error(
+        await Snackbars.error(
           context,
-          'Error parsing the LNDConfig',
+          'Invalid LND connection string. Format: lndconnect://{host}:{gRPCPort}?cert={cert}&macaroon={macaroon}',
         );
       } else {
         bool enableTor = false;
