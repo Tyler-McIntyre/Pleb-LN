@@ -82,72 +82,73 @@ class _InvoiceScreenState extends State<InvoiceScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Image.asset(Images.whitePlebLogo),
-        automaticallyImplyLeading: false,
-      ),
-      body: invoiceWasPaid
-          ? Lottie.asset(
-              'animations/blue-checkmark.json',
-              controller: _controller,
-              frameRate: FrameRate.max,
-              onLoaded: (composition) {
-                _controller.duration = composition.duration;
-                _controller.forward();
-              },
-            )
-          : FutureBuilder(
-              future: _init,
-              builder: ((context, snapshot) {
-                Widget child;
-                if (snapshot.hasData) {
-                  child = Column(
-                    children: [
-                      Expanded(
-                          child: Column(
-                        children: [
-                          Text(
-                            'Scan',
-                            style: TextStyle(color: AppColors.white),
-                          ),
-                          SizedBox(
-                            height: _formSpacing,
-                          ),
-                          _invoiceHashAndCode(),
-                          SizedBox(
-                            height: _formSpacing,
-                          ),
-                          Text(
-                            'or',
-                            style: TextStyle(color: AppColors.white),
-                          ),
-                          SizedBox(
-                            height: _formSpacing,
-                          ),
-                          _backToDashboardButton()
-                        ],
-                      )),
-                    ],
-                  );
-                } else if (snapshot.hasError) {
-                  child = FutureBuilderWidgets.error(
-                      context, snapshot.error.toString());
-                } else {
-                  child = Column(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          leading: Image.asset(
+            Images.whitePlebLogo,
+          ),
+        ),
+        body: invoiceWasPaid
+            ? Lottie.asset(
+                'animations/blue-checkmark.json',
+                controller: _controller,
+                frameRate: FrameRate.max,
+                onLoaded: (composition) {
+                  _controller.duration = composition.duration;
+                  _controller.forward();
+                },
+              )
+            : FutureBuilder(
+                future: _init,
+                builder: ((context, snapshot) {
+                  Widget child;
+                  if (snapshot.hasData) {
+                    child = Column(
+                      children: [
+                        Text(
+                          'Scan',
+                          style: TextStyle(color: AppColors.white),
+                        ),
+                        SizedBox(
+                          height: _formSpacing,
+                        ),
+                        _invoiceHashAndCode(),
+                        SizedBox(
+                          height: _formSpacing,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'or',
+                              style: TextStyle(color: AppColors.white),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: _formSpacing,
+                        ),
+                        _backToDashboardButton(),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    child = FutureBuilderWidgets.error(
+                        context, snapshot.error.toString());
+                  } else {
+                    child = Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FutureBuilderWidgets.circularProgressIndicator(),
+                      ],
+                    );
+                  }
+                  return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      FutureBuilderWidgets.circularProgressIndicator(),
+                      Expanded(child: child),
                     ],
                   );
-                }
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(child: child),
-                  ],
-                );
-              })),
-    );
+                })));
   }
 
   Widget _invoiceHashAndCode() {
@@ -161,6 +162,7 @@ class _InvoiceScreenState extends State<InvoiceScreen>
           readOnly: true,
           controller: _paymentRequestController,
           decoration: InputDecoration(
+            label: Text('Invoice'),
             suffixIcon: IconButton(
               icon: Icon(
                 Icons.copy,
