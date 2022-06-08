@@ -1,9 +1,9 @@
 import 'package:convert/convert.dart';
+import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:progress_state_button/iconed_button.dart';
 import 'package:progress_state_button/progress_button.dart';
 import '../generated/lightning.pb.dart';
@@ -20,7 +20,6 @@ class OpenChannelScreen extends StatefulWidget {
 }
 
 class _OpenChannelScreenState extends State<OpenChannelScreen> {
-  late String qrCode;
   final _formKey = GlobalKey<FormState>();
   TextEditingController nodePubkeyController = TextEditingController();
   TextEditingController fundingAmountController = TextEditingController();
@@ -115,13 +114,15 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
       child: ElevatedButton.icon(
         icon: Icon(Icons.qr_code_scanner),
         onPressed: () async {
-          await scanQrCode();
-          String nodePubKey = qrCode;
-          String? pubKeyMatch =
-              RegExp('.*(?=@)').firstMatch(nodePubKey)!.group(0);
-          if (pubKeyMatch!.isNotEmpty) {
-            _setConfigFormFields(nodePubKey);
-          }
+          QrCodeHelper helper = QrCodeHelper();
+          String data = await helper.scanQrCode(mounted);
+
+          RegExpMatch? matches = RegExp('.*(?=@)').firstMatch(data);
+          String? pubKeyMatch;
+          pubKeyMatch = matches != null ? pubKeyMatch = matches.group(0) : null;
+
+          pubKeyMatch != null ? data = pubKeyMatch : null;
+          _setConfigFormFields(data);
         },
         label: Text('Scan'),
         style: ElevatedButton.styleFrom(
@@ -279,25 +280,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     );
   }
 
-  Future<void> scanQrCode() async {
-    try {
-      String qrCode = await FlutterBarcodeScanner.scanBarcode(
-          '#E62119', 'Cancel', true, ScanMode.QR);
-
-      if (!mounted) return;
-
-      setState(() {
-        this.qrCode = qrCode;
-      });
-    } on PlatformException {
-      this.qrCode = 'Failed to get platform version.';
-    }
-  }
-
-  void _setConfigFormFields(String nodePubkey) {
+  void _setConfigFormFields(String data) {
     if (!mounted) return;
     setState(() {
-      nodePubkeyController.text = nodePubkey;
+      nodePubkeyController.text = data;
     });
   }
 

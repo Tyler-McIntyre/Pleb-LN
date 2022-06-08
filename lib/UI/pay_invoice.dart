@@ -1,6 +1,6 @@
+import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:money_formatter/money_formatter.dart';
 import 'package:progress_state_button/iconed_button.dart';
 import 'package:progress_state_button/progress_button.dart';
@@ -21,7 +21,6 @@ class PayInvoice extends StatefulWidget {
 }
 
 class _PayInvoiceState extends State<PayInvoice> {
-  late String qrCode;
   final _formKey = GlobalKey<FormState>();
   TextEditingController invoiceController = TextEditingController();
   TextEditingController amountController = TextEditingController();
@@ -95,16 +94,16 @@ class _PayInvoiceState extends State<PayInvoice> {
       child: ElevatedButton.icon(
         icon: Icon(Icons.qr_code_scanner),
         onPressed: () async {
-          await scanQrCode();
-          String invoice = qrCode;
+          QrCodeHelper helper = QrCodeHelper();
+          String data = await helper.scanQrCode(mounted);
           PayReq payReq = PayReq();
           try {
-            if (invoice.isEmpty) return;
-            payReq = await _decodePaymentRequest(invoice);
+            if (data.isEmpty) return;
+            payReq = await _decodePaymentRequest(data);
           } catch (ex) {
             await Snackbars.error(context, ex.toString());
           }
-          _setConfigFormFields(payReq, invoice);
+          _setConfigFormFields(payReq, data);
         },
         label: Text('Scan'),
         style: ElevatedButton.styleFrom(
@@ -115,21 +114,6 @@ class _PayInvoiceState extends State<PayInvoice> {
         ),
       ),
     );
-  }
-
-  Future<void> scanQrCode() async {
-    try {
-      String qrCode = await FlutterBarcodeScanner.scanBarcode(
-          '#E62119', 'Cancel', true, ScanMode.QR);
-
-      if (!mounted) return;
-
-      setState(() {
-        this.qrCode = qrCode;
-      });
-    } on PlatformException {
-      this.qrCode = 'Failed to get platform version.';
-    }
   }
 
   void _setConfigFormFields(PayReq? payReq, String invoice) {

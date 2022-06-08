@@ -1,12 +1,11 @@
+import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
 import '../constants/node_setting.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:progress_state_button/iconed_button.dart';
 import 'package:progress_state_button/progress_button.dart';
 import '../util/app_colors.dart';
 import '../database/secure_storage.dart';
 import '../models/lnd_connect.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'widgets/snackbars.dart';
 
 class NodeConfigScreen extends StatefulWidget {
@@ -39,7 +38,6 @@ class NodeConfigForm extends StatefulWidget {
 class _NodeConfigFormState extends State<NodeConfigForm> {
   static final _formKey = GlobalKey<FormState>();
   static bool useTorIsSwitched = false;
-  late String qrCode;
   TextEditingController nicknameController = TextEditingController();
   TextEditingController nodeInterfaceController = TextEditingController();
   TextEditingController hostController = TextEditingController();
@@ -115,21 +113,6 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         _saveButton(),
       ],
     );
-  }
-
-  Future<void> scanQrCode() async {
-    try {
-      String qrCode = await FlutterBarcodeScanner.scanBarcode(
-          '#E62119', 'Cancel', true, ScanMode.QR);
-
-      if (!mounted) return;
-
-      setState(() {
-        this.qrCode = qrCode;
-      });
-    } on PlatformException {
-      this.qrCode = 'Failed to get platform version.';
-    }
   }
 
   Widget _configFormFields() {
@@ -234,11 +217,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
     }
   }
 
-  void _setConfigFormFields(String qrCodeRawData) async {
-    if (!qrCode.isEmpty &&
-        !qrCodeRawData.contains('Error') &&
-        qrCodeRawData.isNotEmpty) {
-      connectionParams = await LNDConnect.parseConnectionString(qrCodeRawData);
+  void _setConfigFormFields(String data) async {
+    if (!data.isEmpty && !data.contains('Error') && data.isNotEmpty) {
+      connectionParams = await LNDConnect.parseConnectionString(data);
 
       if (connectionParams.host.isEmpty ||
           connectionParams.port.isEmpty ||
@@ -357,12 +338,14 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       child: ElevatedButton.icon(
         icon: Icon(Icons.qr_code_scanner),
         onPressed: () async {
+          String data = '';
           try {
-            await scanQrCode();
+            QrCodeHelper helper = QrCodeHelper();
+            data = await helper.scanQrCode(mounted);
           } catch (ex) {
             Snackbars.error(context, ex.toString());
           }
-          String data = qrCode;
+
           if (data.isEmpty) return;
           _setConfigFormFields(data);
         },
