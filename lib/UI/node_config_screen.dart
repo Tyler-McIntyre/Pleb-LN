@@ -362,8 +362,9 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           } catch (ex) {
             Snackbars.error(context, ex.toString());
           }
-          String qrCodeRawData = qrCode;
-          _setConfigFormFields(qrCodeRawData);
+          String data = qrCode;
+          if (data.isEmpty) return;
+          _setConfigFormFields(data);
         },
         label: Text('LNDConfig'),
         style: ElevatedButton.styleFrom(

@@ -100,7 +100,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
     );
   }
 
-  _scanLndConfigButton() {
+  _scanButton() {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -267,7 +267,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   Widget _buttonBar() {
     return Column(
       children: [
-        _scanLndConfigButton(),
+        _scanButton(),
         SizedBox(
           height: _formSpacing,
         ),
