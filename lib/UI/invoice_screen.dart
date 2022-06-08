@@ -38,7 +38,6 @@ class _InvoiceScreenState extends State<InvoiceScreen>
     _controller = AnimationController(vsync: this);
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        //TODO: add a delay and navigate to the dashboard screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

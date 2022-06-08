@@ -13,6 +13,7 @@ import '../util/formatting.dart';
 import 'Widgets/qr_code_helper.dart';
 import 'widgets/future_builder_widgets.dart';
 import 'widgets/snackbars.dart';
+import 'package:collection/collection.dart';
 
 class QuickScan extends StatefulWidget {
   const QuickScan({Key? key}) : super(key: key);
@@ -79,12 +80,15 @@ class _QuickScanState extends State<QuickScan>
           addIndex: invoiceResp.addIndex,
           paymentRequest: invoiceResp.paymentRequest);
     } else {
-      Invoice invoice = await _lookupInvoice(Int64.parseInt(addIndex));
-      //* is it expired or settled?
-      if (invoice.amtPaidSat > 0 ||
-          !Formatting.getExpirationDate(
-                  invoice.creationDate.toInt(), invoice.expiry.toInt())
-              .isAfter(DateTime.now())) {
+      Invoice? invoice = await _lookupInvoice(Int64.parseInt(addIndex));
+
+      bool lookupFailed = invoice == null;
+      bool isSettled = invoice!.amtPaidSat > 0;
+      bool hasExpired = !Formatting.getExpirationDate(
+              invoice.creationDate.toInt(), invoice.expiry.toInt())
+          .isAfter(DateTime.now());
+
+      if (lookupFailed || isSettled || hasExpired) {
         AddInvoiceResponse invoiceResp = await _createInvoice();
         await SecureStorage.writeValue(
             NodeSetting.quickScan.name, invoiceResp.addIndex.toString());
@@ -98,11 +102,11 @@ class _QuickScanState extends State<QuickScan>
     }
   }
 
-  Future<Invoice> _lookupInvoice(Int64 addIndex) async {
+  Future<Invoice?> _lookupInvoice(Int64 addIndex) async {
     LND rpc = LND();
     ListInvoiceResponse list = await rpc.listInvoices();
-    Invoice invoice =
-        list.invoices.where((invoice) => invoice.addIndex == addIndex).first;
+    Invoice? invoice = list.invoices
+        .firstWhereOrNull((invoice) => invoice.addIndex == addIndex);
     return invoice;
   }
 
