@@ -34,7 +34,6 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
   ButtonState stateTextWithIcon = ButtonState.idle;
   final double _formSpacing = 12;
 
-//TODO remove me
   @override
   void initState() {
     super.initState();
