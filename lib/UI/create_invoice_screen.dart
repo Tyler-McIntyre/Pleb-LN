@@ -67,6 +67,8 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
             children: [
               Expanded(
                   child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   SizedBox(
                     height: _formSpacing,

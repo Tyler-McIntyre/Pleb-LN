@@ -61,6 +61,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.zero,
               children: [
                 Row(

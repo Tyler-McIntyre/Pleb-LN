@@ -36,6 +36,7 @@ class _PayInvoiceState extends State<PayInvoice> {
       children: [
         Expanded(
           child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               SizedBox(
                 height: _formSpacing,

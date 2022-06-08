@@ -249,6 +249,8 @@ class _OnChainScreenState extends State<OnChainScreen> {
             context: context,
             child: Scrollbar(
               child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.zero,
                 children: [
                   Column(children: _buildTxListTiles(snapshot.data!)),

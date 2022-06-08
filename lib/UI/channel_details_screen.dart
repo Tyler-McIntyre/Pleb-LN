@@ -114,6 +114,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
             child: Form(
               key: _formKey,
               child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 10),

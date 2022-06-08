@@ -55,6 +55,8 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
           children: [
             Expanded(
               child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 shrinkWrap: true,
                 children: [
                   SizedBox(

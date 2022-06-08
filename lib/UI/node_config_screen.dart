@@ -87,6 +87,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       children: [
         Expanded(
           child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               SizedBox(
                 height: _formSpacing,
