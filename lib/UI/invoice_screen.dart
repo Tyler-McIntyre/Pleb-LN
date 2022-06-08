@@ -81,74 +81,76 @@ class _InvoiceScreenState extends State<InvoiceScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          leading: Image.asset(
-            Images.whitePlebLogo,
-          ),
-        ),
-        body: invoiceWasPaid
-            ? Lottie.asset(
-                'animations/blue-checkmark.json',
-                controller: _controller,
-                frameRate: FrameRate.max,
-                onLoaded: (composition) {
-                  _controller.duration = composition.duration;
-                  _controller.forward();
-                },
-              )
-            : FutureBuilder(
-                future: _init,
-                builder: ((context, snapshot) {
-                  Widget child;
-                  if (snapshot.hasData) {
-                    child = Column(
-                      children: [
-                        Text(
-                          'Scan',
-                          style: TextStyle(color: AppColors.white),
-                        ),
-                        SizedBox(
-                          height: _formSpacing,
-                        ),
-                        _invoiceHashAndCode(),
-                        SizedBox(
-                          height: _formSpacing,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              leading: Image.asset(
+                Images.whitePlebLogo,
+              ),
+            ),
+            body: invoiceWasPaid
+                ? Lottie.asset(
+                    'animations/blue-checkmark.json',
+                    controller: _controller,
+                    frameRate: FrameRate.max,
+                    onLoaded: (composition) {
+                      _controller.duration = composition.duration;
+                      _controller.forward();
+                    },
+                  )
+                : FutureBuilder(
+                    future: _init,
+                    builder: ((context, snapshot) {
+                      Widget child;
+                      if (snapshot.hasData) {
+                        child = Column(
                           children: [
                             Text(
-                              'or',
+                              'Scan',
                               style: TextStyle(color: AppColors.white),
                             ),
+                            SizedBox(
+                              height: _formSpacing,
+                            ),
+                            _invoiceHashAndCode(),
+                            SizedBox(
+                              height: _formSpacing,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'or',
+                                  style: TextStyle(color: AppColors.white),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: _formSpacing,
+                            ),
+                            _backToDashboardButton(),
                           ],
-                        ),
-                        SizedBox(
-                          height: _formSpacing,
-                        ),
-                        _backToDashboardButton(),
-                      ],
-                    );
-                  } else if (snapshot.hasError) {
-                    child = FutureBuilderWidgets.error(
-                        context, snapshot.error.toString());
-                  } else {
-                    child = Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FutureBuilderWidgets.circularProgressIndicator(),
-                      ],
-                    );
-                  }
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(child: child),
-                    ],
-                  );
-                })));
+                        );
+                      } else if (snapshot.hasError) {
+                        child = FutureBuilderWidgets.error(
+                            context, snapshot.error.toString());
+                      } else {
+                        child = Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FutureBuilderWidgets.circularProgressIndicator(),
+                          ],
+                        );
+                      }
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(child: child),
+                        ],
+                      );
+                    }))));
   }
 
   Widget _invoiceHashAndCode() {

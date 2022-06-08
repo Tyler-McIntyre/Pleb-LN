@@ -51,34 +51,36 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back),
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-              child: ListView(
+    return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back),
+            ),
+            automaticallyImplyLeading: false,
+          ),
+          body: Column(
             children: [
-              SizedBox(
-                height: _formSpacing,
-              ),
-              _invoiceForm(),
-              SizedBox(
-                height: _formSpacing,
-              ),
-              _createInvoiceButtonBar()
+              Expanded(
+                  child: ListView(
+                children: [
+                  SizedBox(
+                    height: _formSpacing,
+                  ),
+                  _invoiceForm(),
+                  SizedBox(
+                    height: _formSpacing,
+                  ),
+                  _createInvoiceButtonBar()
+                ],
+              ))
             ],
-          ))
-        ],
-      ),
-    );
+          ),
+        ));
   }
 
   _createInvoiceButtonBar() {

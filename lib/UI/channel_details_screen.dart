@@ -107,29 +107,31 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: _channelDetailsForm(),
+    return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          body: Center(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: _channelDetailsForm(),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: _channelPolicy(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _channelDetailsButtonBar(),
+                  ),
+                ],
               ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 20),
-                child: _channelPolicy(),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: _channelDetailsButtonBar(),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _channelDetailsButtonBar() {

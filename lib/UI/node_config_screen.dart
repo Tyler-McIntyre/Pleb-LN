@@ -20,10 +20,12 @@ class NodeConfigScreen extends StatefulWidget {
 class _NodeConfigScreenState extends State<NodeConfigScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: NodeConfigForm(),
-    );
+    return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: NodeConfigForm(),
+        ));
   }
 }
 
@@ -103,7 +105,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
     );
   }
 
-  _buttonBar() {
+  Widget _buttonBar() {
     return Column(
       children: [
         _scanLndConfigButton(),
