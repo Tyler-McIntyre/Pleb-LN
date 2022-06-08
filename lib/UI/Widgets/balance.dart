@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../../rest/coin_gecko.dart';
@@ -5,9 +6,9 @@ import '../../rest/coin_gecko.dart';
 class Balance {
   static Future<List<Widget>> buildWidgets(
       String amt, BuildContext context) async {
-    double usdToBtcRate = await CoinGecko.fetchBtcExchangeRate();
-    return [
-      Text.rich(
+    List<Widget> balanceWidgets = [];
+    if (amt.isNotEmpty) {
+      balanceWidgets.add(Text.rich(
         TextSpan(
             text: MoneyFormatter(
               amount: int.parse(amt).toDouble(),
@@ -17,35 +18,52 @@ class Balance {
                   text: 'sats', style: Theme.of(context).textTheme.labelSmall),
             ],
             style: Theme.of(context).textTheme.bodyLarge),
-      ),
-      Text.rich(
-        TextSpan(
-          children: [
-            WidgetSpan(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Icon(
-                  Icons.currency_bitcoin,
-                  color: Colors.orange,
-                  size: 30,
+      ));
+      balanceWidgets.add(
+        Text.rich(
+          TextSpan(
+            children: [
+              WidgetSpan(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Icon(
+                    Icons.currency_bitcoin,
+                    color: Colors.orange,
+                    size: 30,
+                  ),
                 ),
               ),
-            ),
-            //btc balance = balance in sats / 10000000
-            TextSpan(
-              text: '${(int.parse(amt) / 10000000)}',
-            ),
-          ],
-          style: Theme.of(context).textTheme.bodyLarge,
+              //btc balance = balance in sats / 10000000
+              TextSpan(
+                text: '${(int.parse(amt) / 10000000)}',
+              ),
+            ],
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
-      ),
-      //balance in USD = balance in bitcoin / the current exchange rate
-      Text(
-        (MoneyFormatter(amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
-            .output
-            .symbolOnLeft),
-        style: Theme.of(context).textTheme.bodyLarge,
-      )
-    ];
+      );
+    }
+
+    try {
+      bool successResponse = await CoinGecko.serverStatus();
+      if (successResponse) {
+        double usdToBtcRate = await CoinGecko.fetchBtcExchangeRate();
+
+        balanceWidgets.add(
+          Text(
+            //balance in USD = balance in bitcoin / the current exchange rate
+            (MoneyFormatter(
+                    amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
+                .output
+                .symbolOnLeft),
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        );
+      }
+    } catch (ex) {
+      //Do nothing
+    }
+
+    return balanceWidgets;
   }
 }

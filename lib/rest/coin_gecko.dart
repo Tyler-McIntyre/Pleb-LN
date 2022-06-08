@@ -16,4 +16,14 @@ class CoinGecko {
 
     return usdToBtcRate;
   }
+
+  static Future<bool> serverStatus() async {
+    CoinGeckoApi api = CoinGeckoApi();
+    CoinGeckoResult<bool> response = await api.ping.ping();
+    if (response.isError) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

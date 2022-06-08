@@ -122,7 +122,7 @@ class _OnChainScreenState extends State<OnChainScreen> {
       if (invoiceIsSettled) {
         txList.add(
           TransactionDetail(
-              invoice.value.toString(),
+              invoice.amtPaidSat.toString(),
               Formatting.timestampToDateTime(
                 invoice.settleDate.toInt(),
               ),
