@@ -69,126 +69,132 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        key: _bottomNavigationKey,
-        selectedIconTheme: IconThemeData(color: AppColors.white),
-        selectedItemColor: AppColors.blue,
-        currentIndex: _selectedIndex,
-        selectedFontSize: 15,
-        unselectedFontSize: 13,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.currency_bitcoin,
-              size: 30,
-            ),
-            label: 'Bitcoin',
-            backgroundColor: AppColors.black,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: Colors.black,
+            key: _bottomNavigationKey,
+            selectedIconTheme: IconThemeData(color: AppColors.white),
+            selectedItemColor: AppColors.blue,
+            currentIndex: _selectedIndex,
+            selectedFontSize: 15,
+            unselectedFontSize: 13,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.currency_bitcoin,
+                  size: 30,
+                ),
+                label: 'Bitcoin',
+                backgroundColor: AppColors.black,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.bolt,
+                  size: 30,
+                ),
+                backgroundColor: AppColors.black,
+                label: 'Lightning',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.qr_code_scanner_outlined,
+                  size: 30,
+                ),
+                label: 'Pay',
+                backgroundColor: AppColors.black,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(
+                  FontAwesomeIcons.raspberryPi,
+                  size: 30,
+                ),
+                backgroundColor: AppColors.black,
+                label: 'Node',
+              )
+            ],
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.bolt,
-              size: 30,
-            ),
-            backgroundColor: AppColors.black,
-            label: 'Lightning',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.qr_code_scanner_outlined,
-              size: 30,
-            ),
-            label: 'Pay',
-            backgroundColor: AppColors.black,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              FontAwesomeIcons.raspberryPi,
-              size: 30,
-            ),
-            backgroundColor: AppColors.black,
-            label: 'Node',
-          )
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
-      body: SafeArea(
-        child: FutureBuilder(
-          future: _isConfigured,
-          builder: (context, snapshot) {
-            late Widget child;
-            if (snapshot.hasData) {
-              child = Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Image.asset(Images.whitePlebLogo, scale: 20),
-                        Row(
-                          children: [
-                            if (_selectedIndex == 1)
-                              IconButton(
-                                onPressed: () {
-                                  Navigate.toRoute(
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const OpenChannelScreen(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: Icon(
-                                  Icons.add,
-                                ),
-                              ),
+          body: _body()),
+    );
+  }
+
+  Widget _body() {
+    return SafeArea(
+      child: FutureBuilder(
+        future: _isConfigured,
+        builder: (context, snapshot) {
+          late Widget child;
+          if (snapshot.hasData) {
+            child = Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Image.asset(Images.whitePlebLogo, scale: 20),
+                      Row(
+                        children: [
+                          if (_selectedIndex == 1)
                             IconButton(
-                              onPressed: () => Navigate.toRoute(
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AppSettingsScreen(
-                                      tabIndex: _selectedIndex,
+                              onPressed: () {
+                                Navigate.toRoute(
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const OpenChannelScreen(),
                                     ),
+                                  ),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.add,
+                              ),
+                            ),
+                          IconButton(
+                            onPressed: () => Navigate.toRoute(
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AppSettingsScreen(
+                                    tabIndex: _selectedIndex,
                                   ),
                                 ),
                               ),
-                              icon: Icon(
-                                Icons.settings,
-                              ),
                             ),
-                          ],
-                        )
-                      ],
-                    ),
+                            icon: Icon(
+                              Icons.settings,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
                   ),
-                  Expanded(
-                    child: _screen[_selectedIndex],
-                  ),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              child = FutureBuilderWidgets.error(
-                context,
-                snapshot.error.toString(),
-              );
-            } else {
-              child = FutureBuilderWidgets.circularProgressIndicator();
-            }
+                ),
+                Expanded(
+                  child: _screen[_selectedIndex],
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            child = FutureBuilderWidgets.error(
+              context,
+              snapshot.error.toString(),
+            );
+          } else {
+            child = FutureBuilderWidgets.circularProgressIndicator();
+          }
 
-            return child;
-          },
-        ),
+          return child;
+        },
       ),
     );
   }

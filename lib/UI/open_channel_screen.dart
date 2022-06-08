@@ -46,45 +46,55 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Center(
-        child: Container(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const DashboardScreen(
-                                    tabIndex: 1,
-                                  ),
-                                ));
-                          },
-                          icon: Icon(Icons.arrow_back),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: _formSpacing,
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: _openChannelForm(),
-                  ),
-                ],
-              );
-            },
+    return GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: SafeArea(
+            child: _body(),
           ),
+        ));
+  }
+
+  Widget _body() {
+    return Center(
+      child: Container(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DashboardScreen(
+                                tabIndex: 1,
+                              ),
+                            ));
+                      },
+                      icon: Icon(Icons.arrow_back),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: _formSpacing,
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _openChannelForm(),
+                      _buttonBar(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -262,6 +272,9 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           height: _formSpacing,
         ),
         _openButton(),
+        SizedBox(
+          height: _formSpacing,
+        ),
       ],
     );
   }
@@ -300,7 +313,6 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             return null;
           },
           decoration: InputDecoration(
-              errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
               suffixIcon: IconButton(
                 icon: Icon(
                   Icons.paste,
@@ -316,35 +328,29 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                   }
                 },
               ),
-              focusedBorder:
-                  Theme.of(context).inputDecorationTheme.focusedBorder,
-              label: Text('Node PubKey',
-                  style: Theme.of(context).inputDecorationTheme.labelStyle),
+              label: Text('Node PubKey'),
               hintText: '03f0ba19fd88e...'),
-          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        SizedBox(
+          height: _formSpacing,
         ),
         //Local Funding Amount
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: TextFormField(
-            controller: fundingAmountController,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a value';
-              }
-              return null;
-            },
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: '...',
-              errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
-              focusedBorder:
-                  Theme.of(context).inputDecorationTheme.focusedBorder,
-              label: Text('Local Funding Amount',
-                  style: Theme.of(context).inputDecorationTheme.labelStyle),
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
+        TextFormField(
+          controller: fundingAmountController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a value';
+            }
+            return null;
+          },
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: '...',
+            label: Text('Local Funding Amount'),
           ),
+        ),
+        SizedBox(
+          height: _formSpacing,
         ),
         //Push Amount
         TextFormField(
@@ -358,71 +364,55 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: '...',
-            errorStyle: Theme.of(context).inputDecorationTheme.errorStyle,
-            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
-            label: Text('Push Amount',
-                style: Theme.of(context).inputDecorationTheme.labelStyle),
+            label: Text('Push Amount'),
           ),
-          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        SizedBox(
+          height: _formSpacing,
         ),
         //min confirmations
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: SwitchListTile(
-            activeColor: AppColors.blue,
-            contentPadding: EdgeInsets.zero,
-            onChanged: ((value) {
-              if (!mounted) return;
-              setState(() {
-                _useDefaultMinConf = value;
-              });
-            }),
-            value: _useDefaultMinConf,
-            title: Row(
-              children: [
-                Text('Minimum confirmations',
-                    style: Theme.of(context).textTheme.bodySmall),
-                IconButton(
-                  padding: EdgeInsets.only(bottom: 5),
-                  icon: Icon(
-                    Icons.info_outline,
-                    color: Colors.blue,
-                  ),
-                  onPressed: () async {
-                    String body =
-                        dialog.blurbs[DialogType.MinimumConfirmations]!;
-                    await dialog.showMyDialog(body, context);
-                  },
-                )
-              ],
-            ),
-            subtitle: _useDefaultMinConf
-                ? Text(
-                    'Default = 1 confirmation',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  )
-                : TextFormField(
-                    controller: minConfsController,
-                    validator: (value) {
-                      if (value!.isEmpty && !_useDefaultMinConf) {
-                        return 'Please enter a value';
-                      }
-                      return null;
-                    },
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                        errorStyle:
-                            Theme.of(context).inputDecorationTheme.errorStyle,
-                        contentPadding: EdgeInsets.zero,
-                        focusedBorder: Theme.of(context)
-                            .inputDecorationTheme
-                            .focusedBorder,
-                        hintText: '...'),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+        SwitchListTile(
+          activeColor: AppColors.blue,
+          contentPadding: EdgeInsets.zero,
+          onChanged: ((value) {
+            if (!mounted) return;
+            setState(() {
+              _useDefaultMinConf = value;
+            });
+          }),
+          value: _useDefaultMinConf,
+          title: Row(
+            children: [
+              Text('Minimum confirmations'),
+              IconButton(
+                icon: Icon(
+                  Icons.info_outline,
+                  color: Colors.blue,
+                ),
+                onPressed: () async {
+                  String body = dialog.blurbs[DialogType.MinimumConfirmations]!;
+                  await dialog.showMyDialog(body, context);
+                },
+              )
+            ],
           ),
+          subtitle: _useDefaultMinConf
+              ? Text('Default = 1 confirmation')
+              : TextFormField(
+                  controller: minConfsController,
+                  validator: (value) {
+                    if (value!.isEmpty && !_useDefaultMinConf) {
+                      return 'Please enter a value';
+                    }
+                    return null;
+                  },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: '...',
+                  ),
+                ),
         ),
-        //Channel Fee
+        //Funding fee rate
         SwitchListTile(
           activeColor: AppColors.blue,
           contentPadding: EdgeInsets.zero,
@@ -435,12 +425,8 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
           value: _useDefaultFundingFee,
           title: Row(
             children: [
-              Text(
-                'Funding fee rate',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text('Funding fee rate'),
               IconButton(
-                padding: EdgeInsets.only(bottom: 4),
                 icon: Icon(
                   Icons.info_outline,
                   color: Colors.blue,
@@ -453,10 +439,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
             ],
           ),
           subtitle: _useDefaultFundingFee
-              ? Text(
-                  'Default = 2 sats per vbyte',
-                  style: Theme.of(context).textTheme.labelSmall,
-                )
+              ? Text('Default = 2 sats per vbyte')
               : TextFormField(
                   controller: fundingFeeController,
                   validator: (value) {
@@ -467,35 +450,29 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                   },
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                      errorStyle:
-                          Theme.of(context).inputDecorationTheme.errorStyle,
-                      contentPadding: EdgeInsets.zero,
-                      focusedBorder:
-                          Theme.of(context).inputDecorationTheme.focusedBorder,
-                      hintText: '...'),
-                  style: Theme.of(context).textTheme.bodySmall,
+                    hintText: '...',
+                  ),
                 ),
         ),
         //Private channel
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: SwitchListTile(
-            activeColor: AppColors.blue,
-            contentPadding: EdgeInsets.zero,
-            onChanged: ((value) {
-              if (!mounted) return;
-              setState(() {
-                _privateChannel = value;
-              });
-            }),
-            value: _privateChannel,
-            title: Text(
-              'Private Channel',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
+        SizedBox(
+          height: _formSpacing,
         ),
-        _buttonBar()
+        SwitchListTile(
+          activeColor: AppColors.blue,
+          contentPadding: EdgeInsets.zero,
+          onChanged: ((value) {
+            if (!mounted) return;
+            setState(() {
+              _privateChannel = value;
+            });
+          }),
+          value: _privateChannel,
+          title: Text('Private Channel'),
+        ),
+        SizedBox(
+          height: _formSpacing,
+        ),
       ],
     );
   }
