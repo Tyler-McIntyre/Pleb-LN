@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/node_setting.dart';
 import 'package:grpc/grpc.dart';
 import '../database/secure_storage.dart';
 import '../generated/lightning.pbgrpc.dart';
 import '../generated/router.pbgrpc.dart';
+import '../provider/balance_provider.dart';
+import '../provider/channel_provider.dart';
+import '../provider/transaction_provider.dart';
 
 class LND {
   static Future<LightningClient> get _lightningStub => createLightningClient();
@@ -317,5 +321,33 @@ class LND {
     }
 
     return response;
+  }
+
+  static Future<bool> fetchEssentialData(WidgetRef ref) async {
+    try {
+      LND rpc = LND();
+      //on-chain balance
+      WalletBalanceResponse walletBalance = await rpc.getWalletBalance();
+      ref.read(BalanceProvider.onChainBalance.notifier).state = walletBalance;
+      //off-chain balance
+      ChannelBalanceResponse channelBalance = await rpc.getChannelBalance();
+      ref.read(BalanceProvider.channelBalance.notifier).state = channelBalance;
+      //payments
+      ListPaymentsResponse payments = await rpc.getPayments();
+      ref.read(TransactionProvider.payments.notifier).state = payments;
+      //invoices
+      ListInvoiceResponse invoices = await rpc.listInvoices();
+      ref.read(TransactionProvider.invoices.notifier).state = invoices;
+      //open channels
+      ListChannelsResponse openChannels = await rpc.getChannels();
+      ref.read(ChannelProvider.openChannels.notifier).state = openChannels;
+      //pending channels
+      PendingChannelsResponse pendingChannels = await rpc.getPendingChannels();
+      ref.read(ChannelProvider.pendingChannels.notifier).state =
+          pendingChannels;
+      return true;
+    } catch (ex) {
+      throw Exception(ex);
+    }
   }
 }

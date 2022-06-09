@@ -1,44 +1,47 @@
 import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/node_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_state_button/iconed_button.dart';
 import 'package:progress_state_button/progress_button.dart';
+import '../generated/lightning.pb.dart';
+import '../models/settings.dart';
+import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import '../database/secure_storage.dart';
 import '../models/lnd_connect.dart';
 import 'widgets/snackbars.dart';
 
-class NodeConfigScreen extends StatefulWidget {
-  const NodeConfigScreen({Key? key}) : super(key: key);
-  static late LNDConnect lndConnectParams;
-
+class NodeConfigScreen extends ConsumerWidget {
+  NodeConfigScreen({Key? key}) : super(key: key);
   @override
-  State<NodeConfigScreen> createState() => _NodeConfigScreenState();
-}
-
-class _NodeConfigScreenState extends State<NodeConfigScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          body: NodeConfigForm(),
+          body: NodeConfigForm(
+            ref: ref,
+          ),
         ));
   }
 }
 
 class NodeConfigForm extends StatefulWidget {
-  const NodeConfigForm({Key? key}) : super(key: key);
+  const NodeConfigForm({
+    Key? key,
+    required this.ref,
+  }) : super(key: key);
+  final WidgetRef ref;
 
   @override
   State<NodeConfigForm> createState() => _NodeConfigFormState();
 }
 
 class _NodeConfigFormState extends State<NodeConfigForm> {
-  static final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   static bool useTorIsSwitched = false;
-  TextEditingController nicknameController = TextEditingController();
+  TextEditingController aliasController = TextEditingController();
   TextEditingController nodeInterfaceController = TextEditingController();
   TextEditingController hostController = TextEditingController();
   TextEditingController portController = TextEditingController();
@@ -55,8 +58,8 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
   }
 
   Future init() async {
-    final String nickname =
-        await SecureStorage.readValue(NodeSetting.nickname.name) ?? '';
+    final String alias =
+        await SecureStorage.readValue(NodeSetting.alias.name) ?? '';
     final String host =
         await SecureStorage.readValue(NodeSetting.host.name) ?? '';
     final String port =
@@ -67,13 +70,12 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         await SecureStorage.readValue(NodeSetting.useTor.name) ?? 'false';
 
     setState(() {
-      nicknameController.text = nickname;
+      aliasController.text = alias;
       hostController.text = host;
       portController.text = port;
       macaroonController.text = macaroon;
       useTorIsSwitched = useTor.toLowerCase() == 'true' ? true : false;
       configSettings = {
-        NodeSetting.nickname.name: nicknameController,
         NodeSetting.host.name: hostController,
         NodeSetting.grpcport.name: portController,
         NodeSetting.macaroon.name: macaroonController,
@@ -122,15 +124,10 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
       child: Column(
         children: [
           TextFormField(
-            controller: nicknameController,
-            validator: (value) {
-              if (value != null && value.isEmpty) {
-                return 'Please enter a value';
-              }
-              return null;
-            },
+            controller: aliasController,
             decoration: InputDecoration(
-              label: Text('Nickname'),
+              enabled: false,
+              label: Text('Alias'),
             ),
           ),
           SizedBox(
@@ -194,28 +191,6 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         ],
       ),
     );
-  }
-
-  Future<bool> _saveUserSettings() async {
-    String userTorSetting = 'false';
-    if (useTorIsSwitched) {
-      userTorSetting = 'true';
-      connectionParams.useTor = true;
-    }
-    try {
-      for (MapEntry<String, TextEditingController> entry
-          in configSettings.entries) {
-        await SecureStorage.writeValue(entry.key, entry.value.text);
-      }
-      await SecureStorage.writeValue(NodeSetting.useTor.name, userTorSetting);
-      await SecureStorage.writeValue(NodeSetting.isConfigured.name, 'true');
-      return true;
-    } catch (ex) {
-      await Snackbars.error(
-          context, 'An error occured while saving the node configuration');
-
-      return false;
-    }
   }
 
   void _setConfigFormFields(String data) async {
@@ -295,10 +270,39 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
               switch (stateTextWithIcon) {
                 case ButtonState.idle:
                   stateTextWithIcon = ButtonState.loading;
-                  bool saveSuccessful = await _saveUserSettings();
+                  bool saveSuccesful = false;
+                  bool fetchSuccessful = false;
+
+                  Settings settings = Settings(
+                      hostController.text,
+                      portController.text,
+                      macaroonController.text,
+                      useTorIsSwitched);
+                  String nodeAlias = '';
+                  try {
+                    saveSuccesful =
+                        await SecureStorage.saveUserSettings(settings);
+                    nodeAlias = await _fetchAndSaveNodeInfo();
+                    fetchSuccessful = await LND.fetchEssentialData(widget.ref);
+                    if (saveSuccesful && fetchSuccessful) {
+                      await SecureStorage.writeValue(
+                        NodeSetting.isConfigured.name,
+                        'true',
+                      );
+                    }
+                  } catch (ex) {
+                    await Snackbars.error(context, ex.toString());
+                  }
+
+                  if (saveSuccesful) {
+                    setState(() {
+                      aliasController.text = nodeAlias;
+                    });
+                  }
+
                   Future.delayed(Duration(seconds: 1), () {
                     setState(() {
-                      stateTextWithIcon = saveSuccessful
+                      stateTextWithIcon = (saveSuccesful && fetchSuccessful)
                           ? ButtonState.success
                           : ButtonState.fail;
                     });
@@ -366,5 +370,15 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
         ),
       ),
     );
+  }
+
+  Future<String> _fetchAndSaveNodeInfo() async {
+    LND rpc = LND();
+    GetInfoResponse nodeInfo = await rpc.getInfo();
+    await SecureStorage.writeValue(
+      NodeSetting.alias.name,
+      nodeInfo.alias,
+    );
+    return nodeInfo.alias;
   }
 }

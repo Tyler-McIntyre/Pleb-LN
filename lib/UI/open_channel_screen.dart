@@ -1,19 +1,32 @@
 import 'package:convert/convert.dart';
 import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:progress_state_button/iconed_button.dart';
 import 'package:progress_state_button/progress_button.dart';
 import '../generated/lightning.pb.dart';
+import '../provider/balance_provider.dart';
+import '../provider/channel_provider.dart';
 import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'widgets/info_dialog.dart';
 import 'widgets/snackbars.dart';
 
+class OpenChannelProvider extends ConsumerWidget {
+  const OpenChannelProvider({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return OpenChannelScreen(ref: ref);
+  }
+}
+
 class OpenChannelScreen extends StatefulWidget {
-  const OpenChannelScreen({Key? key}) : super(key: key);
+  const OpenChannelScreen({Key? key, required this.ref}) : super(key: key);
+  final WidgetRef ref;
 
   @override
   State<OpenChannelScreen> createState() => _OpenChannelScreenState();
@@ -71,7 +84,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const DashboardScreen(
+                              builder: (context) => DashboardScreen(
                                 tabIndex: 1,
                               ),
                             ));
@@ -189,8 +202,6 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                         : Int64.parseInt(fundingFeeController.text).toInt64();
                     Int64 localFundingAmount =
                         Int64.parseInt(fundingAmountController.text).toInt64();
-                    // List<int> nodePubKey = hex.decode(
-                    //     '0296722cbe8e8ef3208f56c28d79fa52ef61cbe5421aaabc2ac78de7a2eadaec3b');
                     List<int> nodePubKey =
                         hex.decode(nodePubkeyController.text);
                     int? minConfs = _useDefaultMinConf
@@ -214,8 +225,10 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
                       pushSat: pushSat,
                     );
 
-                    var response = await _openChannel(openChannelRequest);
+                    OpenStatusUpdate response =
+                        await _openChannel(openChannelRequest);
                     requestSuccessful = response.hasChanPending();
+                    _refreshOpenChannelScreenState(widget.ref);
                   } catch (ex) {
                     requestSuccessful = false;
                   }
@@ -480,5 +493,15 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
       throw Exception(ex);
     }
     return response;
+  }
+
+  void _refreshOpenChannelScreenState(WidgetRef ref) async {
+    LND rpc = LND();
+    ListChannelsResponse openChannels = await rpc.getChannels();
+    ref.read(ChannelProvider.openChannels.notifier).state = openChannels;
+    ChannelBalanceResponse channelBalance = await rpc.getChannelBalance();
+    ref.read(BalanceProvider.channelBalance.notifier).state = channelBalance;
+    PendingChannelsResponse pendingChannels = await rpc.getPendingChannels();
+    ref.read(ChannelProvider.pendingChannels.notifier).state = pendingChannels;
   }
 }

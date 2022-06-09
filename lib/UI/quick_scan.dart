@@ -81,12 +81,15 @@ class _QuickScanState extends State<QuickScan>
           paymentRequest: invoiceResp.paymentRequest);
     } else {
       Invoice? invoice = await _lookupInvoice(Int64.parseInt(addIndex));
-
+      bool isSettled = false;
+      bool hasExpired = false;
       bool lookupFailed = invoice == null;
-      bool isSettled = invoice!.amtPaidSat > 0;
-      bool hasExpired = !Formatting.getExpirationDate(
-              invoice.creationDate.toInt(), invoice.expiry.toInt())
-          .isAfter(DateTime.now());
+      if (!lookupFailed) {
+        isSettled = invoice.amtPaidSat > 0;
+        hasExpired = !Formatting.getExpirationDate(
+                invoice.creationDate.toInt(), invoice.expiry.toInt())
+            .isAfter(DateTime.now());
+      }
 
       if (lookupFailed || isSettled || hasExpired) {
         AddInvoiceResponse invoiceResp = await _createInvoice();

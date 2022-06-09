@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:money_formatter/money_formatter.dart';
-import '../../rest/coin_gecko.dart';
+import '../../provider/coin_gecko_provider.dart';
 
 class Balance {
-  static Future<List<Widget>> buildWidgets(
-      String amt, BuildContext context) async {
+  static List<Widget> buildWidgets(
+      String amt, BuildContext context, WidgetRef ref) {
     List<Widget> balanceWidgets = [];
     if (amt.isNotEmpty) {
       balanceWidgets.add(Text.rich(
@@ -44,20 +45,22 @@ class Balance {
     }
 
     try {
-      bool successResponse = await CoinGecko.serverStatus();
+      bool successResponse =
+          ref.watch(CoinGeckoProvider.serverStatus).value ?? false;
       if (successResponse) {
-        double usdToBtcRate = await CoinGecko.fetchBtcExchangeRate();
-
-        balanceWidgets.add(
-          Text(
-            //balance in USD = balance in bitcoin / the current exchange rate
-            (MoneyFormatter(
-                    amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
-                .output
-                .symbolOnLeft),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        );
+        double? usdToBtcRate = ref.watch(CoinGeckoProvider.usdToBtcRate).value;
+        if (usdToBtcRate != null) {
+          balanceWidgets.add(
+            Text(
+              //balance in USD = balance in bitcoin / the current exchange rate
+              (MoneyFormatter(
+                      amount: ((int.parse(amt) / 10000000) * usdToBtcRate))
+                  .output
+                  .symbolOnLeft),
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          );
+        }
       }
     } catch (ex) {
       //Do nothing

@@ -1,203 +1,62 @@
 import 'dart:async';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:firebolt/provider/balance_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/widgets/balance.dart';
 import '../generated/lightning.pbgrpc.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import '../constants/channel_list_tile_icon.dart';
 import '../constants/channel_sort_type.dart';
 import '../constants/channel_status.dart';
 import '../constants/channel_type.dart';
-import '../database/secure_storage.dart';
 import '../models/channel_detail.dart';
-import '../rpc/lnd.dart';
+import '../provider/channel_provider.dart';
+import '../provider/database_provider.dart';
+import '../provider/index_provider.dart';
+import '../provider/sorting_provider.dart';
 import '../util/app_colors.dart';
-import '../util/refresh_timer.dart';
 import 'channel_details_screen.dart';
-import 'widgets/future_builder_widgets.dart';
 
-class ChannelsScreen extends StatefulWidget {
-  const ChannelsScreen({Key? key}) : super(key: key);
-
-  @override
-  State<ChannelsScreen> createState() => _ChannelsScreenState();
-}
-
-class _ChannelsScreenState extends State<ChannelsScreen> {
-  ChannelSortType _channelSortType = ChannelSortType.Id;
-  Duration refreshInterval = Duration(seconds: 15);
-  late Future<List<ChannelDetail>> _channels;
-  late List<Widget> _offChainBalanceWidgets;
-  static int offChainBalanceWidgetIndex = 0;
-  late Future<ChannelBalanceResponse> _offChainBalance;
-  TextEditingController nicknameController = TextEditingController();
-  final List<ChannelSortType> filters = [
-    ChannelSortType.Active,
-    ChannelSortType.Capacity,
-    ChannelSortType.Id,
-    ChannelSortType.Inactive,
-    ChannelSortType.Pending,
-    ChannelSortType.Private,
-    ChannelSortType.Public,
-  ];
-  ChannelSortType? selectedValue;
-  int count = 0;
+class ChannelsScreen extends ConsumerWidget {
+  ChannelsScreen({Key? key}) : super(key: key);
 
   @override
-  void initState() {
-    _offChainBalance = _getOffChainBalance();
-    selectedValue = _channelSortType;
-    _channels = _getChannels(_channelSortType);
+  Widget build(BuildContext context, WidgetRef ref) {
+    //poll for updates
+    ref.watch(BalanceProvider.channelBalanceStream);
+    ref.watch(ChannelProvider.channelStream);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      String nickname = await _getNickname();
-      RefreshTimer.refreshTimer = Timer.periodic(
-          refreshInterval, (timer) => _sweepForChannelUpdates(timer));
-      if (!mounted) return;
-      setState(() {
-        nicknameController.text = nickname;
-      });
-    });
+    //fetch the alias
+    String alias = ref.watch(DatabaseProvider.alias).value ?? '';
 
-    super.initState();
-  }
+    //fetch the local channel balance
+    ChannelBalanceResponse channelBalanceResponse =
+        ref.watch(BalanceProvider.channelBalance);
+    int balanceIndex = ref.watch(IndexProvider.balanceTypeIndex);
 
-  @override
-  void dispose() {
-    RefreshTimer.refreshTimer!.cancel();
-    super.dispose();
-  }
+    //build the balance widgets
+    List<Widget> _balanceWidgets = Balance.buildWidgets(
+        channelBalanceResponse.localBalance.sat.toString(), context, ref);
 
-  _sweepForChannelUpdates(Timer t) async {
-    List<ChannelDetail> result = await _getChannels(_channelSortType);
-    List<ChannelDetail> currentChanDetails = await _channels;
+    //set the sort type
+    ChannelSortType _channelSortType =
+        ref.watch(SortingProvider.channelSortTypeProvider);
 
-    Map<int, int> currentChanCounts = {
-      currentChanDetails.where((item) => item.channel != null).length:
-          currentChanDetails.where((item) => item.pendingChannel != null).length
-    };
+    //fetch the channel data
+    ListChannelsResponse openChannels = ref.watch(ChannelProvider.openChannels);
 
-    Map<int, int> newChanCounts = {
-      result.where((item) => item.channel != null).length:
-          result.where((item) => item.pendingChannel != null).length
-    };
+    PendingChannelsResponse pendingChannels =
+        ref.watch(ChannelProvider.pendingChannels);
+    List<ChannelDetail> _channelDetails = _getChannelDetails(
+        _channelSortType, openChannels, pendingChannels, ref);
 
-    bool areEqual = mapEquals(currentChanCounts, newChanCounts);
-
-    if (!areEqual) {
-      if (!mounted) return;
-      setState(() {
-        _channels = Future.value(result);
-        _offChainBalance = _getOffChainBalance();
-      });
-    }
-  }
-
-  Future<String> _getNickname() async {
-    final String nickname = await SecureStorage.readValue('nickname') ?? '';
-    return nickname;
-  }
-
-  Future<List<ChannelDetail>> _getChannels(ChannelSortType sortType) async {
-    LND rpc = LND();
-    ListChannelsResponse channels = await rpc.getChannels();
-    PendingChannelsResponse pendingChannels = await rpc.getPendingChannels();
-    List<ChannelDetail> channelDetailList = [];
-
-    for (PendingChannelsResponse_PendingOpenChannel pendingChannel
-        in pendingChannels.pendingOpenChannels) {
-      String? remotePubkeyLabel =
-          await SecureStorage.readValue(pendingChannel.channel.remoteNodePub);
-
-      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
-          ? remotePubkeyLabel = remotePubkeyLabel
-          : remotePubkeyLabel = pendingChannel.channel.remoteNodePub;
-
-      channelDetailList.add(
-        ChannelDetail(
-          ChannelStatus.Pending,
-          pendingChannel.channel.private
-              ? ChannelType.private
-              : ChannelType.public,
-          pendingChannel.channel.capacity.toInt(),
-          '',
-          remotePubkeyLabel,
-          ChannelStatus.Pending.name,
-          pendingChannel: pendingChannel,
-        ),
-      );
+    void _changeOffChainBalanceWidget() {
+      balanceIndex >= _balanceWidgets.length - 1
+          ? ref.read(IndexProvider.balanceTypeIndex.notifier).state = 0
+          : ref.read(IndexProvider.balanceTypeIndex.notifier).state += 1;
     }
 
-    for (Channel channel in channels.channels) {
-      String channelLabel =
-          await SecureStorage.readValue(channel.chanId.toString()) ?? '';
-      String? remotePubkeyLabel =
-          await SecureStorage.readValue(channel.remotePubkey);
-
-      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
-          ? remotePubkeyLabel = remotePubkeyLabel
-          : remotePubkeyLabel = channel.remotePubkey;
-
-      channelDetailList.add(
-        ChannelDetail(
-          channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
-          channel.private ? ChannelType.private : ChannelType.public,
-          channel.capacity.toInt(),
-          channel.chanId.toString(),
-          channelLabel.isNotEmpty ? channelLabel : channel.chanId.toString(),
-          remotePubkeyLabel,
-          channel: channel,
-        ),
-      );
-    }
-
-    switch (sortType) {
-      case ChannelSortType.Inactive:
-        channelDetailList = channelDetailList
-            .where((channel) => channel.channelStatus == ChannelStatus.Inactive)
-            .toList();
-        break;
-      case ChannelSortType.Active:
-        channelDetailList = channelDetailList
-            .where((channel) => channel.channelStatus == ChannelStatus.Active)
-            .toList();
-        break;
-      case ChannelSortType.Capacity:
-        channelDetailList.sort((a, b) {
-          return b.capacity.compareTo(a.capacity);
-        });
-        break;
-      case ChannelSortType.Private:
-        channelDetailList = channelDetailList
-            .where((channel) =>
-                channel.channelType == ChannelType.private &&
-                channel.channelStatus != ChannelStatus.Pending)
-            .toList();
-        break;
-      case ChannelSortType.Public:
-        channelDetailList = channelDetailList
-            .where((channel) =>
-                channel.channelType == ChannelType.public &&
-                channel.channelStatus != ChannelStatus.Pending)
-            .toList();
-        break;
-      case ChannelSortType.Id:
-        channelDetailList.sort((a, b) {
-          return b.channelLabel.compareTo(a.channelLabel);
-        });
-        break;
-      case ChannelSortType.Pending:
-        channelDetailList = channelDetailList
-            .where((channel) => channel.channelStatus == ChannelStatus.Pending)
-            .toList();
-        break;
-    }
-    return channelDetailList;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
@@ -205,61 +64,95 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(nicknameController.text,
-                  style: Theme.of(context).textTheme.bodyLarge),
-              _offChainBalanceFutureBuilder(),
+              Text(alias, style: Theme.of(context).textTheme.bodyLarge),
+              //Balance widget
+              TextButton(
+                onPressed: () {
+                  _changeOffChainBalanceWidget();
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _balanceWidgets[balanceIndex],
+                  ],
+                ),
+              )
+              //Balance widget
             ],
           ),
         ),
-        _buttonBar(),
-        _channelFutureBuilder(),
-      ],
-    );
-  }
-
-  FutureBuilder _channelFutureBuilder() {
-    return FutureBuilder<List<ChannelDetail>>(
-      future: _channels,
-      builder: (
-        context,
-        AsyncSnapshot<List<ChannelDetail>> snapshot,
-      ) {
-        Widget child;
-        if (snapshot.hasData) {
-          child = MediaQuery.removePadding(
-            context: context,
-            child: Scrollbar(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Column(children: _buildChannelListTiles(snapshot.data!))
-                ],
-              ),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          child = Column(
+        //ButtonBar
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: FutureBuilderWidgets.error(
-                  context,
-                  snapshot.error.toString(),
+              Text(
+                'Channels:',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  style: TextStyle(color: AppColors.white),
+                  items: ChannelFilters.filters
+                      .map((item) => DropdownMenuItem<ChannelSortType>(
+                            value: item,
+                            child: Text(
+                              item.name,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ))
+                      .toList(),
+                  value: _channelSortType,
+                  onChanged: (value) {
+                    switch (value) {
+                      case (ChannelSortType.Active):
+                        _channelSortType = ChannelSortType.Active;
+                        break;
+                      case (ChannelSortType.Capacity):
+                        _channelSortType = ChannelSortType.Capacity;
+                        break;
+                      case (ChannelSortType.Id):
+                        _channelSortType = ChannelSortType.Id;
+                        break;
+                      case (ChannelSortType.Inactive):
+                        _channelSortType = ChannelSortType.Inactive;
+                        break;
+                      case (ChannelSortType.Pending):
+                        _channelSortType = ChannelSortType.Pending;
+                        break;
+                      case (ChannelSortType.Private):
+                        _channelSortType = ChannelSortType.Private;
+                        break;
+                      case (ChannelSortType.Public):
+                        _channelSortType = ChannelSortType.Public;
+                        break;
+                    }
+                    ref
+                        .read(SortingProvider.channelSortTypeProvider.notifier)
+                        .state = value as ChannelSortType;
+                    _channelDetails = _getChannelDetails(
+                        _channelSortType, openChannels, pendingChannels, ref);
+                  },
+                  buttonHeight: 40,
+                  buttonWidth: 140,
+                  itemHeight: 40,
+                  dropdownMaxHeight: 250,
+                  dropdownWidth: 140,
+                  dropdownPadding: EdgeInsets.only(bottom: 8),
+                  dropdownDecoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.black,
+                  ),
                 ),
-              )
-            ],
-          );
-        } else {
-          child = Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: FutureBuilderWidgets.circularProgressIndicator(),
               ),
             ],
-          );
-        }
-        return Expanded(
+          ),
+        ),
+        //ButtonBar,
+        //Channel list
+        Expanded(
           flex: 2,
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -274,14 +167,28 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
               ),
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
-            child: child,
+            child: MediaQuery.removePadding(
+              context: context,
+              child: Scrollbar(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Column(
+                        children:
+                            _buildChannelListTiles(context, _channelDetails))
+                  ],
+                ),
+              ),
+            ),
           ),
-        );
-      },
+        )
+        //Channel list
+      ],
     );
   }
 
-  _buildChannelListTiles(List<ChannelDetail> channelDetails) {
+  List<Widget> _buildChannelListTiles(
+      BuildContext context, List<ChannelDetail> channelDetails) {
     List<ListTile> channelListTiles = [];
 
     for (ChannelDetail channel in channelDetails) {
@@ -301,8 +208,8 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChannelDetailsScreen(
-                      channel: channel.channel!,
+                    builder: (context) => ChannelDetailProvider(
+                      channel.channel!,
                     ),
                   ));
             } else {
@@ -357,135 +264,6 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
     return channelListTiles;
   }
 
-  _buttonBar() {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'Channels:',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              style: TextStyle(color: AppColors.white),
-              items: filters
-                  .map((item) => DropdownMenuItem<ChannelSortType>(
-                        value: item,
-                        child: Text(
-                          item.name,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ))
-                  .toList(),
-              value: selectedValue,
-              onChanged: (value) {
-                switch (value) {
-                  case (ChannelSortType.Active):
-                    _channelSortType = ChannelSortType.Active;
-                    break;
-                  case (ChannelSortType.Capacity):
-                    _channelSortType = ChannelSortType.Capacity;
-                    break;
-                  case (ChannelSortType.Id):
-                    _channelSortType = ChannelSortType.Id;
-                    break;
-                  case (ChannelSortType.Inactive):
-                    _channelSortType = ChannelSortType.Inactive;
-                    break;
-                  case (ChannelSortType.Pending):
-                    _channelSortType = ChannelSortType.Pending;
-                    break;
-                  case (ChannelSortType.Private):
-                    _channelSortType = ChannelSortType.Private;
-                    break;
-                  case (ChannelSortType.Public):
-                    _channelSortType = ChannelSortType.Public;
-                    break;
-                }
-                if (!mounted) return;
-                setState(() {
-                  selectedValue = value as ChannelSortType;
-                  _channels = _getChannels(_channelSortType);
-                });
-              },
-              buttonHeight: 40,
-              buttonWidth: 140,
-              itemHeight: 40,
-              dropdownMaxHeight: 200,
-              dropdownWidth: 140,
-              dropdownPadding: EdgeInsets.only(bottom: 8),
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: AppColors.black,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  FutureBuilder _offChainBalanceFutureBuilder() {
-    return FutureBuilder<ChannelBalanceResponse>(
-      future: _offChainBalance,
-      builder: (BuildContext context,
-          AsyncSnapshot<ChannelBalanceResponse> snapshot) {
-        Widget child;
-        if (snapshot.hasData) {
-          child = TextButton(
-            onPressed: () {
-              if (!mounted) return;
-              setState(() {
-                _changeOffChainBalanceWidget();
-              });
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _offChainBalanceWidgets[offChainBalanceWidgetIndex],
-              ],
-            ),
-          );
-        } else if (snapshot.hasError) {
-          child = FutureBuilderWidgets.error(
-            context,
-            snapshot.error.toString(),
-          );
-        } else {
-          child = Center(
-            child: SizedBox(
-              height: 30,
-              width: 30,
-              child: CircularProgressIndicator(
-                color: AppColors.white,
-              ),
-            ),
-          );
-        }
-        return child;
-      },
-    );
-  }
-
-  void _changeOffChainBalanceWidget() {
-    offChainBalanceWidgetIndex >= _offChainBalanceWidgets.length - 1
-        ? offChainBalanceWidgetIndex = 0
-        : offChainBalanceWidgetIndex += 1;
-  }
-
-  Future<ChannelBalanceResponse> _getOffChainBalance() async {
-    LND rpc = LND();
-    ChannelBalanceResponse result = await rpc.getChannelBalance();
-    String localChannelBalance = result.localBalance.sat.toString();
-
-    _offChainBalanceWidgets =
-        await Balance.buildWidgets(localChannelBalance, context);
-    return result;
-  }
-
   Future<void> pendingChannelDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
@@ -520,5 +298,109 @@ class _ChannelsScreenState extends State<ChannelsScreen> {
         ],
       ),
     );
+  }
+
+  List<ChannelDetail> _getChannelDetails(
+    ChannelSortType sortType,
+    ListChannelsResponse openChannels,
+    PendingChannelsResponse pendingChannels,
+    WidgetRef ref,
+  ) {
+    List<ChannelDetail> channelDetailList = [];
+
+    for (PendingChannelsResponse_PendingOpenChannel pendingChannel
+        in pendingChannels.pendingOpenChannels) {
+      String? remotePubKey = pendingChannel.channel.remoteNodePub;
+      String? remotePubkeyLabel =
+          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey)).value;
+
+      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
+          ? remotePubkeyLabel = remotePubkeyLabel
+          : remotePubkeyLabel = remotePubKey;
+
+      channelDetailList.add(
+        ChannelDetail(
+          ChannelStatus.Pending,
+          pendingChannel.channel.private
+              ? ChannelType.private
+              : ChannelType.public,
+          pendingChannel.channel.capacity.toInt(),
+          '',
+          remotePubkeyLabel,
+          ChannelStatus.Pending.name,
+          pendingChannel: pendingChannel,
+        ),
+      );
+    }
+
+    for (Channel channel in openChannels.channels) {
+      String chanId = channel.chanId.toString();
+      String channelLabel =
+          ref.watch(DatabaseProvider.channelLabel(chanId)).value ?? '';
+
+      String remotePubKey = channel.remotePubkey;
+      String? remotePubkeyLabel =
+          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey)).value;
+
+      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
+          ? remotePubkeyLabel = remotePubkeyLabel
+          : remotePubkeyLabel = remotePubKey;
+
+      channelDetailList.add(
+        ChannelDetail(
+          channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
+          channel.private ? ChannelType.private : ChannelType.public,
+          channel.capacity.toInt(),
+          chanId,
+          channelLabel.isNotEmpty ? channelLabel : chanId,
+          remotePubkeyLabel,
+          channel: channel,
+        ),
+      );
+    }
+
+    switch (sortType) {
+      case ChannelSortType.Inactive:
+        channelDetailList = channelDetailList
+            .where((channel) => channel.channelStatus == ChannelStatus.Inactive)
+            .toList();
+        break;
+      case ChannelSortType.Active:
+        channelDetailList = channelDetailList
+            .where((channel) => channel.channelStatus == ChannelStatus.Active)
+            .toList();
+        break;
+      case ChannelSortType.Capacity:
+        channelDetailList.sort((a, b) {
+          return b.capacity.compareTo(a.capacity);
+        });
+        break;
+      case ChannelSortType.Private:
+        channelDetailList = channelDetailList
+            .where((channel) =>
+                channel.channelType == ChannelType.private &&
+                channel.channelStatus != ChannelStatus.Pending)
+            .toList();
+        break;
+      case ChannelSortType.Public:
+        channelDetailList = channelDetailList
+            .where((channel) =>
+                channel.channelType == ChannelType.public &&
+                channel.channelStatus != ChannelStatus.Pending)
+            .toList();
+        break;
+      case ChannelSortType.Id:
+        channelDetailList.sort((a, b) {
+          return b.channelLabel.compareTo(a.channelLabel);
+        });
+        break;
+      case ChannelSortType.Pending:
+        channelDetailList = channelDetailList
+            .where((channel) => channel.channelStatus == ChannelStatus.Pending)
+            .toList();
+        break;
+    }
+
+    return channelDetailList;
   }
 }

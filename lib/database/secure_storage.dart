@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-//TODO: test if further settings are needed for IOS Storage. currently only tested on Android.
+import '../constants/node_setting.dart';
+import '../models/settings.dart';
 
 class SecureStorage {
   // Create storage
@@ -24,5 +24,29 @@ class SecureStorage {
   static Future wipeStorage() async {
     // Delete all
     await _storage.deleteAll();
+  }
+
+  static Future<bool> saveUserSettings(Settings settings) async {
+    try {
+      await SecureStorage.writeValue(
+        NodeSetting.host.name,
+        settings.host,
+      );
+      await SecureStorage.writeValue(
+        NodeSetting.grpcport.name,
+        settings.gRPCPort,
+      );
+      await SecureStorage.writeValue(
+        NodeSetting.macaroon.name,
+        settings.macaroon,
+      );
+      await SecureStorage.writeValue(
+        NodeSetting.useTor.name,
+        settings.useTor.toString(),
+      );
+      return true;
+    } catch (ex) {
+      return false;
+    }
   }
 }

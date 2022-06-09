@@ -1,5 +1,5 @@
 enum NodeSetting {
-  nickname,
+  alias,
   host,
   grpcport,
   macaroon,

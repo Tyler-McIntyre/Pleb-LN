@@ -1,25 +1,39 @@
+import 'package:firebolt/UI/Widgets/snackbars.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'constants/node_setting.dart';
+import 'database/secure_storage.dart';
+import 'rpc/lnd.dart';
 import 'util/app_colors.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  runApp(const FireBolt());
+  runApp(ProviderScope(child: const FireBolt()));
 }
 
-class FireBolt extends StatefulWidget {
+class FireBolt extends ConsumerWidget {
   const FireBolt({Key? key}) : super(key: key);
 
   @override
-  State<FireBolt> createState() => _FireBoltState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    initAppData() async {
+      try {
+        String result =
+            await SecureStorage.readValue(NodeSetting.isConfigured.name) ??
+                'false';
+        bool isConfigured = false;
+        result == 'true' ? isConfigured = true : isConfigured = false;
+        if (isConfigured) {
+          await LND.fetchEssentialData(ref);
+        }
+      } catch (ex) {
+        Snackbars.error(context, ex.toString());
+      }
+    }
 
-// Neue Haas Grotesk
-class _FireBoltState extends State<FireBolt> {
-  @override
-  Widget build(BuildContext context) {
+    initAppData();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -91,9 +105,7 @@ class _FireBoltState extends State<FireBolt> {
         scaffoldBackgroundColor: AppColors.black,
         appBarTheme: AppBarTheme(backgroundColor: AppColors.black),
       ),
-      home: const DashboardScreen(
-        tabIndex: 2,
-      ),
+      home: DashboardScreen(),
     );
   }
 }

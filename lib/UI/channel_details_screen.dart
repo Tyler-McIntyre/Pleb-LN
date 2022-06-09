@@ -1,4 +1,6 @@
 import 'package:convert/convert.dart';
+import 'package:firebolt/provider/channel_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -7,18 +9,37 @@ import 'package:progress_state_button/progress_button.dart';
 import '../constants/channel_list_tile_icon.dart';
 import '../database/secure_storage.dart';
 import '../generated/lightning.pb.dart';
+import '../provider/balance_provider.dart';
 import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import 'package:fixnum/fixnum.dart';
 import '../util/clipboard_helper.dart';
 import 'widgets/future_builder_widgets.dart';
 
+class ChannelDetailProvider extends ConsumerWidget {
+  const ChannelDetailProvider(
+    this.channel, {
+    Key? key,
+  }) : super(key: key);
+  final Channel channel;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ChannelDetailsScreen(
+      channel: channel,
+      ref: ref,
+    );
+  }
+}
+
 class ChannelDetailsScreen extends StatefulWidget {
   const ChannelDetailsScreen({
     Key? key,
     required this.channel,
+    required this.ref,
   }) : super(key: key);
   final Channel channel;
+  final WidgetRef ref;
 
   @override
   State<ChannelDetailsScreen> createState() => _ChannelDetailsScreenState();
@@ -765,8 +786,8 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                     stateTextWithIcon_close = ButtonState.loading;
 
                     CloseStatusUpdate closeSuccessful;
-
                     closeSuccessful = await _closeChannel();
+                    _refreshOpenChannelScreenState(widget.ref);
 
                     Future.delayed(Duration(seconds: 1), () {
                       setState(() {
@@ -781,7 +802,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const DashboardScreen(
+                              builder: (context) => DashboardScreen(
                                 tabIndex: 1,
                               ),
                             ),
@@ -870,6 +891,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
 
                   PolicyUpdateResponse updateSuccessful =
                       await _updateChannelPolicy(channelPoint);
+                  _refreshOpenChannelScreenState(widget.ref);
 
                   Future.delayed(Duration(seconds: 1), () {
                     setState(() {
@@ -883,7 +905,7 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const DashboardScreen(
+                          builder: (context) => DashboardScreen(
                             tabIndex: 1,
                           ),
                         ),
@@ -917,5 +939,15 @@ class _ChannelDetailsScreenState extends State<ChannelDetailsScreen> {
         ),
       ),
     );
+  }
+
+  void _refreshOpenChannelScreenState(WidgetRef ref) async {
+    LND rpc = LND();
+    ListChannelsResponse openChannels = await rpc.getChannels();
+    ref.read(ChannelProvider.openChannels.notifier).state = openChannels;
+    ChannelBalanceResponse channelBalance = await rpc.getChannelBalance();
+    ref.read(BalanceProvider.channelBalance.notifier).state = channelBalance;
+    PendingChannelsResponse pendingChannels = await rpc.getPendingChannels();
+    ref.read(ChannelProvider.pendingChannels.notifier).state = pendingChannels;
   }
 }
