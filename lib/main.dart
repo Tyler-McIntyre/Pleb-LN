@@ -1,4 +1,3 @@
-import '../UI/Widgets/snackbars.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
@@ -19,17 +18,13 @@ class PlebLN extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     initAppData() async {
-      try {
-        String result =
-            await SecureStorage.readValue(NodeSetting.isConfigured.name) ??
-                'false';
-        bool isConfigured = false;
-        result == 'true' ? isConfigured = true : isConfigured = false;
-        if (isConfigured) {
-          await LND.fetchEssentialData(ref);
-        }
-      } catch (ex) {
-        Snackbars.error(context, ex.toString());
+      String result =
+          await SecureStorage.readValue(NodeSetting.isConfigured.name) ??
+              'false';
+      bool isConfigured = false;
+      result == 'true' ? isConfigured = true : isConfigured = false;
+      if (isConfigured) {
+        await LND.fetchEssentialData(ref);
       }
     }
 
