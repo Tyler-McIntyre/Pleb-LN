@@ -1,4 +1,4 @@
-package com.example.firebolt
+package com.example.plebLN
 
 import io.flutter.embedding.android.FlutterActivity
 

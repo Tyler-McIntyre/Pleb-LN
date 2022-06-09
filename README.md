@@ -1,4 +1,4 @@
-# Firebolt
+# Pleb LN
 
 
 ## Prerequisites for instructions below
