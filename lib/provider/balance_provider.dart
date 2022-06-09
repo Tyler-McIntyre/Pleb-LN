@@ -8,20 +8,19 @@ class BalanceProvider {
       StateProvider<WalletBalanceResponse>((ref) => WalletBalanceResponse());
   static StateProvider<ChannelBalanceResponse> channelBalance =
       StateProvider<ChannelBalanceResponse>((ref) => ChannelBalanceResponse());
-  static AutoDisposeStreamProvider<Future<bool>> channelBalanceStream =
-      StreamProvider.autoDispose(
-          (ref) => Stream.periodic(Duration(seconds: 15), ((_) async {
-                ChannelBalanceResponse channelBalanceResponse =
-                    await _rpc.getChannelBalance();
+  static final channelBalanceStream = StreamProvider(
+      (ref) => Stream.periodic(Duration(seconds: 15), ((_) async {
+            ChannelBalanceResponse channelBalanceResponse =
+                await _rpc.getChannelBalance();
 
-                ChannelBalanceResponse currentChannelBalanceResponse =
-                    ref.read(BalanceProvider.channelBalance);
+            ChannelBalanceResponse currentChannelBalanceResponse =
+                ref.read(BalanceProvider.channelBalance);
 
-                if (currentChannelBalanceResponse != channelBalanceResponse) {
-                  ref.read(BalanceProvider.channelBalance.notifier).state =
-                      channelBalanceResponse;
-                }
+            if (currentChannelBalanceResponse != channelBalanceResponse) {
+              ref.read(BalanceProvider.channelBalance.notifier).state =
+                  channelBalanceResponse;
+            }
 
-                return true;
-              })));
+            return true;
+          })));
 }

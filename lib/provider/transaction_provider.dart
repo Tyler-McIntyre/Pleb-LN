@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebolt/provider/balance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../generated/lightning.pb.dart';
@@ -11,9 +10,8 @@ class TransactionProvider {
       StateProvider<ListPaymentsResponse>((ref) => ListPaymentsResponse());
   static StateProvider<ListInvoiceResponse> invoices =
       StateProvider<ListInvoiceResponse>((ref) => ListInvoiceResponse());
-  static AutoDisposeStreamProvider<Future<bool>> transactionStream =
-      StreamProvider.autoDispose((ref) =>
-          Stream.periodic(Duration(seconds: 15), ((_) async {
+  static final transactionStream = StreamProvider(
+      (ref) => Stream.periodic(Duration(seconds: 15), ((_) async {
             ListPaymentsResponse payments = await _rpc.getPayments();
             ListInvoiceResponse invoices = await _rpc.listInvoices();
 
