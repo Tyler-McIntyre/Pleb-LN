@@ -1,4 +1,4 @@
-import 'package:firebolt/UI/Widgets/snackbars.dart';
+import '../UI/Widgets/snackbars.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +10,11 @@ import 'util/app_colors.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(child: const FireBolt()));
+  runApp(ProviderScope(child: const PlebLN()));
 }
 
-class FireBolt extends ConsumerWidget {
-  const FireBolt({Key? key}) : super(key: key);
+class PlebLN extends ConsumerWidget {
+  const PlebLN({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

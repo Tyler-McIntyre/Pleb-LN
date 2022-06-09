@@ -1,5 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:firebolt/provider/database_provider.dart';
+import '../provider/database_provider.dart';
 import '../generated/lightning.pb.dart';
 import '../provider/balance_provider.dart';
 import '../provider/index_provider.dart';

@@ -1,4 +1,4 @@
-import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
+import '../UI/Widgets/qr_code_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:money_formatter/money_formatter.dart';

@@ -1,4 +1,4 @@
-import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
+import '../UI/Widgets/qr_code_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/node_setting.dart';
 import 'package:flutter/material.dart';

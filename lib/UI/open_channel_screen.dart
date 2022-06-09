@@ -1,5 +1,5 @@
 import 'package:convert/convert.dart';
-import 'package:firebolt/UI/Widgets/qr_code_helper.dart';
+import '../UI/Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:firebolt/provider/balance_provider.dart';
+import '../provider/balance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../generated/lightning.pb.dart';
 import '../rpc/lnd.dart';

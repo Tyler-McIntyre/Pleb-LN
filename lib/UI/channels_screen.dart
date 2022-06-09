@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:firebolt/provider/balance_provider.dart';
+import '../provider/balance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/widgets/balance.dart';
 import '../generated/lightning.pbgrpc.dart';

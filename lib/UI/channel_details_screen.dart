@@ -1,5 +1,5 @@
 import 'package:convert/convert.dart';
-import 'package:firebolt/provider/channel_provider.dart';
+import '../provider/channel_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
