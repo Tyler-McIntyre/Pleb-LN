@@ -1,19 +1,18 @@
 import '../util/formatting.dart';
 
 class LNDConnect {
-  late String host;
-  late String port;
-  late String macaroonHexFormat;
+  String host = '';
+  String port = '';
+  String macaroonHexFormat = '';
   bool useTor = false;
 
   static Map<String, RegExp> _lndConnectParsePatterns = {
     'findHost': RegExp('.*(?=:)'),
     'findPort': RegExp('(?<=:)[0-9]*'),
-    'findMacaroon': RegExp('(?<=macaroon=).*')
+    'findMacaroon': RegExp('(?<=macaroon=).*[&]')
   };
 
-  static Future<LNDConnect> parseConnectionString(
-      String connectionString) async {
+  static LNDConnect parseConnectionString(String connectionString) {
     LNDConnect lndConnectParams = LNDConnect();
     String? hostMatch;
     String? portMatch;
@@ -26,12 +25,13 @@ class LNDConnect {
           ?.allMatches(connectionString)
           .last
           .group(0);
+
       macaroonMatch = _lndConnectParsePatterns['findMacaroon']
           ?.firstMatch(connectionString)!
           .group(0);
     } catch (ex) {
       throw Exception(
-          'Invalid LND connection string. Format: lndconnect://{host}:{gRPCPort}?cert={cert}&macaroon={macaroon}');
+          'Invalid LND connection string. Format: lndconnect://{host}:{gRPCPort}?macaroon={macaroon}&cert={cert}');
     }
 
     hostMatch != null
