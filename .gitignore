@@ -49,3 +49,6 @@ app.*.map.json
 
 # Rust related
 /rust/target*
+lib/rust_bridge/bridge_generated.dart
+rust/src/bridge_generated.rs
+.gitignore
