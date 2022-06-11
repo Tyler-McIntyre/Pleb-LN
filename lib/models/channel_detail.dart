@@ -5,7 +5,7 @@ import '../generated/lightning.pb.dart';
 class ChannelDetail {
   ChannelStatus channelStatus;
   ChannelType channelType;
-  int capacity;
+  int localBalance;
   String chanId;
   String channelLabel;
   String pubKeyLabel;
@@ -15,7 +15,7 @@ class ChannelDetail {
   ChannelDetail(
     this.channelStatus,
     this.channelType,
-    this.capacity,
+    this.localBalance,
     this.chanId,
     this.channelLabel,
     this.pubKeyLabel, {

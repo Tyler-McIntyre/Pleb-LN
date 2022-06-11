@@ -257,9 +257,7 @@ class ChannelsScreen extends ConsumerWidget {
               Text.rich(
                 TextSpan(
                     text: MoneyFormatter(
-                      amount:
-                          int.parse(channel.channel!.localBalance.toString())
-                              .toDouble(),
+                      amount: channel.localBalance.toInt().toDouble(),
                     ).output.withoutFractionDigits,
                     children: [
                       TextSpan(
@@ -334,7 +332,7 @@ class ChannelsScreen extends ConsumerWidget {
           pendingChannel.channel.private
               ? ChannelType.private
               : ChannelType.public,
-          pendingChannel.channel.capacity.toInt(),
+          pendingChannel.channel.localBalance.toInt(),
           '',
           remotePubkeyLabel.when(
               data: (remotePubkeyLabel) {
@@ -363,7 +361,7 @@ class ChannelsScreen extends ConsumerWidget {
         ChannelDetail(
           channel.active ? ChannelStatus.Active : ChannelStatus.Inactive,
           channel.private ? ChannelType.private : ChannelType.public,
-          channel.capacity.toInt(),
+          channel.localBalance.toInt(),
           chanId,
           channelLabel.when(
               data: (channelLabel) {
@@ -397,7 +395,7 @@ class ChannelsScreen extends ConsumerWidget {
         break;
       case ChannelSortType.LocalBalance:
         channelDetailList.sort((a, b) {
-          return b.channel!.localBalance.compareTo(a.channel!.localBalance);
+          return b.localBalance.compareTo(a.localBalance);
         });
         break;
       case ChannelSortType.Private:
@@ -415,7 +413,7 @@ class ChannelsScreen extends ConsumerWidget {
             .toList();
         break;
       case ChannelSortType.Id:
-        channelDetailList.sort((a, b) {
+        channelDetailList.reversed.toList().sort((a, b) {
           return b.channelLabel.compareTo(a.channelLabel);
         });
         break;
