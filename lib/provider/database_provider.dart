@@ -4,16 +4,10 @@ import '../database/secure_storage.dart';
 
 class DatabaseProvider {
   static final remotePubKeyLabel = FutureProvider.autoDispose
-      .family<String?, String>((ref, remotePubKey) async {
-    String? label = await SecureStorage.readValue(remotePubKey);
-    return label;
-  });
-  static final channelLabel =
-      FutureProvider.autoDispose.family<String, String>((ref, chanId) async {
-    String label = await SecureStorage.readValue(chanId) ?? '';
-
-    return label;
-  });
+      .family<String, String>((ref, remotePubKey) async =>
+          await SecureStorage.readValue(remotePubKey) ?? '');
+  static final channelLabel = FutureProvider.autoDispose.family<String, String>(
+      (ref, chanId) async => await SecureStorage.readValue(chanId) ?? '');
   static final alias = FutureProvider.autoDispose<String>((ref) async =>
       await SecureStorage.readValue(NodeSetting.alias.name) ?? '');
   static final host = FutureProvider.autoDispose<String>((ref) async =>

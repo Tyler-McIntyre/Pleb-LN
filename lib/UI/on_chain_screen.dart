@@ -15,6 +15,7 @@ import '../models/transaction_detail.dart';
 import '../util/app_colors.dart';
 import '../util/formatting.dart';
 import 'Widgets/balance.dart';
+import 'widgets/future_builder_widgets.dart';
 
 class OnChainScreen extends ConsumerWidget {
   OnChainScreen({Key? key}) : super(key: key);
@@ -25,7 +26,7 @@ class OnChainScreen extends ConsumerWidget {
     ref.watch(TransactionProvider.transactionStream);
 
     //fetch the alias
-    String alias = ref.watch(DatabaseProvider.alias).value ?? '';
+    AsyncValue<String> alias = ref.watch(DatabaseProvider.alias);
     //fetch the confirmed total balance
     WalletBalanceResponse walletBalance =
         ref.watch(BalanceProvider.onChainBalance);
@@ -57,7 +58,16 @@ class OnChainScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(alias, style: Theme.of(context).textTheme.bodyLarge),
+              alias.when(
+                data: (alias) {
+                  return Text(alias,
+                      style: Theme.of(context).textTheme.bodyLarge);
+                },
+                error: (err, stack) =>
+                    FutureBuilderWidgets.error(context, err.toString()),
+                loading: () =>
+                    CircularProgressIndicator(color: AppColors.white),
+              ),
               Column(children: [
                 TextButton(
                   onPressed: () {

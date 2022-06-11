@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:plebLN/UI/widgets/future_builder_widgets.dart';
 import '../provider/balance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/widgets/balance.dart';
@@ -28,7 +29,7 @@ class ChannelsScreen extends ConsumerWidget {
     ref.watch(ChannelProvider.channelStream);
 
     //fetch the alias
-    String alias = ref.watch(DatabaseProvider.alias).value ?? '';
+    AsyncValue<String> alias = ref.watch(DatabaseProvider.alias);
 
     //fetch the local channel balance
     ChannelBalanceResponse channelBalanceResponse =
@@ -64,7 +65,16 @@ class ChannelsScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(alias, style: Theme.of(context).textTheme.bodyLarge),
+              alias.when(
+                data: (alias) {
+                  return Text(alias,
+                      style: Theme.of(context).textTheme.bodyLarge);
+                },
+                error: (err, stack) =>
+                    FutureBuilderWidgets.error(context, err.toString()),
+                loading: () =>
+                    CircularProgressIndicator(color: AppColors.white),
+              ),
               //Balance widget
               TextButton(
                 onPressed: () {
@@ -311,12 +321,8 @@ class ChannelsScreen extends ConsumerWidget {
     for (PendingChannelsResponse_PendingOpenChannel pendingChannel
         in pendingChannels.pendingOpenChannels) {
       String? remotePubKey = pendingChannel.channel.remoteNodePub;
-      String? remotePubkeyLabel =
-          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey)).value;
-
-      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
-          ? remotePubkeyLabel = remotePubkeyLabel
-          : remotePubkeyLabel = remotePubKey;
+      AsyncValue<String> remotePubkeyLabel =
+          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey));
 
       channelDetailList.add(
         ChannelDetail(
@@ -326,7 +332,14 @@ class ChannelsScreen extends ConsumerWidget {
               : ChannelType.public,
           pendingChannel.channel.capacity.toInt(),
           '',
-          remotePubkeyLabel,
+          remotePubkeyLabel.when(
+              data: (remotePubkeyLabel) {
+                return remotePubkeyLabel.isNotEmpty
+                    ? remotePubkeyLabel = remotePubkeyLabel
+                    : remotePubkeyLabel = remotePubKey;
+              },
+              error: (err, stack) => '',
+              loading: () => remotePubKey),
           ChannelStatus.Pending.name,
           pendingChannel: pendingChannel,
         ),
@@ -335,16 +348,12 @@ class ChannelsScreen extends ConsumerWidget {
 
     for (Channel channel in openChannels.channels) {
       String chanId = channel.chanId.toString();
-      String channelLabel =
-          ref.watch(DatabaseProvider.channelLabel(chanId)).value ?? '';
+      AsyncValue<String> channelLabel =
+          ref.watch(DatabaseProvider.channelLabel(chanId));
 
       String remotePubKey = channel.remotePubkey;
-      String? remotePubkeyLabel =
-          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey)).value;
-
-      remotePubkeyLabel != null && remotePubkeyLabel.isNotEmpty
-          ? remotePubkeyLabel = remotePubkeyLabel
-          : remotePubkeyLabel = remotePubKey;
+      AsyncValue<String> remotePubkeyLabel =
+          ref.watch(DatabaseProvider.remotePubKeyLabel(remotePubKey));
 
       channelDetailList.add(
         ChannelDetail(
@@ -352,8 +361,20 @@ class ChannelsScreen extends ConsumerWidget {
           channel.private ? ChannelType.private : ChannelType.public,
           channel.capacity.toInt(),
           chanId,
-          channelLabel.isNotEmpty ? channelLabel : chanId,
-          remotePubkeyLabel,
+          channelLabel.when(
+              data: (channelLabel) {
+                return channelLabel.isNotEmpty ? channelLabel : chanId;
+              },
+              error: (err, stack) => '',
+              loading: () => chanId),
+          remotePubkeyLabel.when(
+              data: (remotePubkeyLabel) {
+                return remotePubkeyLabel.isNotEmpty
+                    ? remotePubkeyLabel = remotePubkeyLabel
+                    : remotePubkeyLabel = remotePubKey;
+              },
+              error: (err, stack) => '',
+              loading: () => remotePubKey),
           channel: channel,
         ),
       );
