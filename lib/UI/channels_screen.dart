@@ -109,7 +109,9 @@ class ChannelsScreen extends ConsumerWidget {
                       .map((item) => DropdownMenuItem<ChannelSortType>(
                             value: item,
                             child: Text(
-                              item.name,
+                              item.name == ChannelSortType.LocalBalance.name
+                                  ? 'Local Balance'
+                                  : item.name,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ))
@@ -120,8 +122,8 @@ class ChannelsScreen extends ConsumerWidget {
                       case (ChannelSortType.Active):
                         _channelSortType = ChannelSortType.Active;
                         break;
-                      case (ChannelSortType.Capacity):
-                        _channelSortType = ChannelSortType.Capacity;
+                      case (ChannelSortType.LocalBalance):
+                        _channelSortType = ChannelSortType.LocalBalance;
                         break;
                       case (ChannelSortType.Id):
                         _channelSortType = ChannelSortType.Id;
@@ -249,13 +251,15 @@ class ChannelsScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Capacity',
+                'Local Balance',
                 style: Theme.of(context).textTheme.labelSmall,
               ),
               Text.rich(
                 TextSpan(
                     text: MoneyFormatter(
-                      amount: int.parse(channel.capacity.toString()).toDouble(),
+                      amount:
+                          int.parse(channel.channel!.localBalance.toString())
+                              .toDouble(),
                     ).output.withoutFractionDigits,
                     children: [
                       TextSpan(
@@ -391,9 +395,9 @@ class ChannelsScreen extends ConsumerWidget {
             .where((channel) => channel.channelStatus == ChannelStatus.Active)
             .toList();
         break;
-      case ChannelSortType.Capacity:
+      case ChannelSortType.LocalBalance:
         channelDetailList.sort((a, b) {
-          return b.capacity.compareTo(a.capacity);
+          return b.channel!.localBalance.compareTo(a.channel!.localBalance);
         });
         break;
       case ChannelSortType.Private:
