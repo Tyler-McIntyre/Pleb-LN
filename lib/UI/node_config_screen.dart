@@ -194,35 +194,27 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
   }
 
   void _setConfigFormFields(String data) async {
-    if (!data.isEmpty && !data.contains('Error') && data.isNotEmpty) {
-      try {
-        connectionParams = LNDConnect.parseConnectionString(data);
-      } catch (ex) {
-        await Snackbars.error(
-          context,
-          ex.toString(),
-        );
-      }
+    if (data.isEmpty && data.toLowerCase().contains('error') || data == '-1')
+      return;
 
-      if (connectionParams.host.isEmpty ||
-          connectionParams.port.isEmpty ||
-          connectionParams.macaroonHexFormat.isEmpty) {
-        await Snackbars.error(
-          context,
-          'Failed to parse connection string',
-        );
-      } else {
-        bool enableTor = false;
-        if (connectionParams.host.contains('.onion')) {
-          enableTor = true;
-        }
-        setState(() {
-          hostController.text = connectionParams.host;
-          portController.text = connectionParams.port;
-          macaroonController.text = connectionParams.macaroonHexFormat;
-          useTorIsSwitched = enableTor;
-        });
+    try {
+      connectionParams = LNDConnect.parseConnectionString(data);
+
+      bool enableTor = false;
+      if (connectionParams.host.contains('.onion')) {
+        enableTor = true;
       }
+      setState(() {
+        hostController.text = connectionParams.host;
+        portController.text = connectionParams.port;
+        macaroonController.text = connectionParams.macaroonHexFormat;
+        useTorIsSwitched = enableTor;
+      });
+    } catch (ex) {
+      await Snackbars.error(
+        context,
+        ex.toString(),
+      );
     }
   }
 

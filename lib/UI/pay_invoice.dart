@@ -99,7 +99,7 @@ class _PayInvoiceState extends State<PayInvoice> {
           String data = await helper.scanQrCode(mounted);
           PayReq payReq = PayReq();
           try {
-            if (data.isEmpty) return;
+            if (data.isEmpty || data == '-1') return;
             payReq = await _decodePaymentRequest(data);
           } catch (ex) {
             await Snackbars.error(context, ex.toString());
