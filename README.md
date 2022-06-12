@@ -1,104 +1,46 @@
-# Pleb LN
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/pleb_banner.png)
 
+#Power to the Plebs!
 
-## Prerequisites for instructions below
-#### 1. Install Git
-https://git-scm.com/downloads
+Pleb LN is a remote control for your LND node. capable of paying invoices, creating invoices, managing your channels and channel policies and viewing your balances all at *lightning* fast speeds. Communicates via gRPC on the [LND api](https://api.lightning.community/). 
 
-#### 2. Install Flutter && Android Studio
-https://docs.flutter.dev/get-started/install
-##### Make sure you've also created a virtual device (an emulator) to use in android studio
+A huge thank you to all the Bitcoin, and Lightning devs out there for inspiring this and making it possible.
 
-#### 3. Install Visual Studio Code
-https://code.visualstudio.com/
+Quick PSA, Pleb LN **DOES NOT** currently support connecting to your node through the Tor network and I do not reccomend using your node without Tor. You can however connect to your node with Pleb on your home network by using the same host you used to SSH into your node. You **DO NOT** need to disable tor on your node in order to do this.  
 
-### 4. Install Node.js
-https://nodejs.org/en/download/
-
-
-## Getting Started
-
-### Set your username in git
-open the terminal and set your username with...
-```
-git config --global user.name "YourGitHubUsername"
-```
-You can then check that it was successful by entering
-```
-git config --global user.name
-```
-
-### Clone the repository
-open a terminal and navigate to where you'd like to keep the repo. Use 'cd' to change the directory you're in,
-for instance if my terminal is currently pointed at...
-```
-C:\Users\tmcin
-```
-and I want to store the repo in...
-```
-C:\Users\tmcin\repos
-```
-Then I will enter 'change directory' followed by the folder name
-```
-cd repos
-```
-I should then be in my repos folder where I will run the line below...
-```
-git clone https://github.com/Tyler-McIntyre/FireBolt
-```
-Git will check if you have permission to clone this repo by having you login to GitHub and confim your identity.
-#### HEADS UP. Sometimes the window prompting you for your credentials will be hidden behind your other open windows on the screen!!!
-
-### Open Visual Studio Code
-File >> Open Folder >> Navigate to the cloned repo and select the folder
-
-### Build the project dependencies 
-In the toolbar click... Terminal >> New Terminal and enter...
-```
-flutter pub get
-```
-This will fetch the dependencies listed in the pubspec.yaml
-
-### Run the emulator
-Press
-```
-SHIFT + CTRL + P
-```
-This opens the command palette 
-Enter & select 'Flutter: Launch Emulator' in the search bar.
-Then choose the emulator you created earlier in Android studio
-
-### Run the application
-Use 
-```
-CTRL + F5 
-```
-to run the project without the debugger or open 'Run' in the top toolbar and select 'Run without the debugger'
-
-
-
-
-
-## The backlog
-A running list of tasks that need to be completed for this application. Anyone is welcome to edit it. If you see a task you'd like to work on, just add your name and it's yours! If there's any questions (which there will be a lot of) just ping me on discord in the #firebolt channel.
-https://docs.google.com/spreadsheets/d/1LSVl5OSKyrjWt00WewR-J-PChMhZRTFUALc_x9mfIak/edit?usp=sharing
-
-#### Design related items
-Since we do not have a designated designer, and we are the users of this app. It would most likely be a good idea to bring UI related design tasks to the team to have a conversation about the direction we'd like to take with whatever the given task might be.
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/channels_screen.png)
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/config_screen.png)
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/on-chain_screen.png)
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/pay_screen.png)
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/quick_scan.png)
 
 ## Testing with polar
 Download Polar for testing locally
 https://lightningpolar.com/
 
-As of now, Firebolt only support LND nodes, so when creating your local network make sure you're using LND nodes only.
+As of now, Pleb only support LND nodes, so when creating your local network make sure you're using LND nodes only.
 
 You'll need three parameters to make the connection
 select a node, select 'connect'
 #### If you're using an an android emulator, 
-The host will be 10.0.2.2. Android emulators use this as an alias for the local host (127.0.0.1)
+The host will be 10.0.2.2. Android emulators
 
 #### find the port number
-Under the connect tab, look at the rest host. You'll see the port number listed after the host. I.E. 127.0.0.1:8082. 8082 is your port.
+Under the connect tab, look at the gRPC host. You'll see the port number listed after the host. I.E. 127.0.0.1:10003. 10003 is your port.
 
 #### find the macaroon
-Under base64 you'll find the admin macaroon. This delegates read and write permissions to the user. Invoice and read-only are more restrictive.
+Under hex you'll find the admin macaroon. This delegates read and write permissions to the user. Invoice and read-only are more restrictive. 
+
+
+### Road map
+ - Connecting through Tor
+ - Optional pins (Android & IOS) and Face ID (IOS)
+ - Keysends
+ - On-chain transactions
+ - Deep links
+ - LNURL withdraw request
+ - Pay Joins
+
+
+
+
