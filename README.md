@@ -6,7 +6,7 @@ Pleb LN is a remote control for your LND node. capable of paying invoices, creat
 
 A huge thank you to all the Bitcoin, and Lightning devs out there for inspiring this and making it possible.
 
-Quick PSA, Pleb LN **DOES NOT** currently support connecting to your node through the Tor network and I do not reccomend using your node without Tor. You can however connect to your node with Pleb on your home network by using the same host you used to SSH into your node. You **DO NOT** need to disable tor on your node in order to do this.  
+Quick PSA, Pleb LN **DOES NOT** currently support connecting to your node through the Tor network and I do not reccomend using your node without Tor. You can however connect to your node with Pleb on your home network by using the same host you used to SSH into your node.
 
 <p float="left">
 <img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/on-chain_screen.png" width="250" height="525">
@@ -18,19 +18,7 @@ Quick PSA, Pleb LN **DOES NOT** currently support connecting to your node throug
 Download Polar for testing locally
 https://lightningpolar.com/
 
-As of now, Pleb only support LND nodes, so when creating your local network make sure you're using LND nodes only.
-
-You'll need three parameters to make the connection
-select a node, select 'connect'
-#### If you're using an an android emulator, 
-The host will be 10.0.2.2. Android emulators
-
-#### find the port number
-Under the connect tab, look at the gRPC host. You'll see the port number listed after the host. I.E. 127.0.0.1:10003. 10003 is your port.
-
-#### find the macaroon
-Under hex you'll find the admin macaroon. This delegates read and write permissions to the user. Invoice and read-only are more restrictive. 
-
+As of now, Pleb only supports LND.
 
 ### Road map
  - Connecting through Tor
