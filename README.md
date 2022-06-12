@@ -9,9 +9,9 @@ A huge thank you to all the Bitcoin, and Lightning devs out there for inspiring 
 Quick PSA, Pleb LN **DOES NOT** currently support connecting to your node through the Tor network and I do not reccomend using your node without Tor. You can however connect to your node with Pleb on your home network by using the same host you used to SSH into your node. You **DO NOT** need to disable tor on your node in order to do this.  
 
 <p float="left">
-<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/on-chain_screen.png" width="275" height="550">
-<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/quick_scan.png" width="275" height="550">
-<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/channels_screen.png" width="275" height="550">
+<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/on-chain_screen.png" width="250" height="525">
+<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/quick_scan.png" width="250" height="525">
+<img src="https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/channels_screen.png" width="250" height="525">
 </p>
 
 ## Testing with polar
