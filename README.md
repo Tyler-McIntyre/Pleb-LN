@@ -1,4 +1,4 @@
-![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/tree/master/images/readme/pleb_banner.png)
+![Pleb Banner](https://github.com/Tyler-McIntyre/Pleb-LN/blob/master/images/readme/Pleb%20banner.png)
 
 #Power to the Plebs!
 
