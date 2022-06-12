@@ -2,7 +2,7 @@
 
 # Power to the Plebs!
 
-Pleb LN is a remote control for your LND node. capable of paying invoices, creating invoices, managing your channels and channel policies and viewing your balances all at *lightning* fast speeds. Communicates via gRPC on the [LND api](https://api.lightning.community/). 
+Pleb LN is a remote control for your LND node. capable of paying invoices, creating invoices, managing your channels, updating channel policies and viewing your balances all at *lightning* fast speeds. Communicates via gRPC on the [LND api](https://api.lightning.community/). 
 
 A huge thank you to all the Bitcoin, and Lightning devs out there for inspiring this and making it possible.
 
