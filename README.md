@@ -27,7 +27,6 @@ As of now, Pleb only supports LND.
  - On-chain transactions
  - Deep links
  - LNURL withdraw request
- - Pay Joins
 
 
 
