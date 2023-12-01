@@ -1,3 +1,5 @@
+import 'package:plebLN/UI/widgets/qr_code_helper.dart';
+
 import '../UI/create_invoice_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fixnum/fixnum.dart';
@@ -10,7 +12,6 @@ import '../rpc/lnd.dart';
 import '../util/app_colors.dart';
 import '../util/clipboard_helper.dart';
 import '../util/formatting.dart';
-import 'Widgets/qr_code_helper.dart';
 import 'widgets/future_builder_widgets.dart';
 import 'widgets/snackbars.dart';
 import 'package:collection/collection.dart';
@@ -25,7 +26,7 @@ class QuickScan extends StatefulWidget {
 class _QuickScanState extends State<QuickScan>
     with SingleTickerProviderStateMixin {
   late Future<Invoice> invoiceSubscription;
-  late QrImage _qrImage;
+  late QrImageView _qrImage;
   TextEditingController _paymentRequestController = TextEditingController();
   double _formSpacing = 12;
   late Future<bool> _init;
@@ -61,7 +62,7 @@ class _QuickScanState extends State<QuickScan>
     Invoice invoice = await _getInvoice();
     String paymentRequest = invoice.paymentRequest;
 
-    _qrImage = QrCodeHelper.createQrImage(paymentRequest);
+    this._qrImage = QrCodeHelper.createQrImage(paymentRequest);
     _paymentRequestController.text = paymentRequest;
     Int64 addIndex = invoice.addIndex;
     _invoiceSubscription(addIndex);
@@ -259,8 +260,8 @@ class _QuickScanState extends State<QuickScan>
         label: Text('Create a New Invoice'),
         style: ElevatedButton.styleFrom(
           elevation: 3,
+          backgroundColor: Colors.transparent,
           minimumSize: Size(double.infinity, 50),
-          primary: Colors.transparent,
           textStyle: Theme.of(context).textTheme.labelMedium,
         ),
       ),

@@ -11,7 +11,7 @@ class FutureBuilderWidgets {
       children: [
         Icon(
           Icons.error_outline,
-          color: Theme.of(context).errorColor,
+          color: Theme.of(context).colorScheme.error,
           size: 45,
         ),
         Padding(

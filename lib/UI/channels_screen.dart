@@ -147,16 +147,16 @@ class ChannelsScreen extends ConsumerWidget {
                     _channelDetails = _getChannelDetails(
                         _channelSortType, openChannels, pendingChannels, ref);
                   },
-                  buttonHeight: 40,
-                  buttonWidth: 140,
-                  itemHeight: 40,
-                  dropdownMaxHeight: 250,
-                  dropdownWidth: 140,
-                  dropdownPadding: EdgeInsets.only(bottom: 8),
-                  dropdownDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: AppColors.black,
-                  ),
+                  // buttonHeight: 40,
+                  // buttonWidth: 140,
+                  // itemHeight: 40,
+                  // dropdownMaxHeight: 250,
+                  // dropdownWidth: 140,
+                  // dropdownPadding: EdgeInsets.only(bottom: 8),
+                  // dropdownDecoration: BoxDecoration(
+                  //   borderRadius: BorderRadius.circular(14),
+                  //   color: AppColors.black,
+                  // ),
                 ),
               ),
             ],

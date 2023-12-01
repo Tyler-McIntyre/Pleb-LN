@@ -122,8 +122,8 @@ class _CreateInvoiceFormState extends State<CreateInvoiceForm> {
         label: Text('Create'),
         style: ElevatedButton.styleFrom(
           elevation: 3,
+          backgroundColor: Colors.transparent,
           minimumSize: Size(double.infinity, 50),
-          primary: Colors.transparent,
           textStyle: Theme.of(context).textTheme.labelMedium,
         ),
       ),

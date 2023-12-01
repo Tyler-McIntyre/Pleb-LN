@@ -1,4 +1,5 @@
-import '../UI/Widgets/qr_code_helper.dart';
+import 'package:plebLN/UI/widgets/qr_code_helper.dart';
+
 import '../UI/dashboard_screen.dart';
 import '../generated/lightning.pb.dart';
 import '../util/app_colors.dart';
@@ -8,7 +9,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../constants/images.dart';
 import '../rpc/lnd.dart';
 import '../util/clipboard_helper.dart';
-import 'Widgets/qr_code_helper.dart';
 import 'package:fixnum/fixnum.dart';
 import 'widgets/future_builder_widgets.dart';
 
@@ -25,7 +25,7 @@ class InvoiceScreen extends StatefulWidget {
 
 class _InvoiceScreenState extends State<InvoiceScreen>
     with SingleTickerProviderStateMixin {
-  late QrImage _qrImage;
+  late QrImageView _qrImage;
   TextEditingController _paymentRequestController = TextEditingController();
   double _formSpacing = 12;
   late Future<bool> _init;
@@ -206,8 +206,8 @@ class _InvoiceScreenState extends State<InvoiceScreen>
         label: Text('Back to dashboard'),
         style: ElevatedButton.styleFrom(
           elevation: 3,
+          backgroundColor: Colors.transparent,
           minimumSize: Size(double.infinity, 50),
-          primary: Colors.transparent,
           textStyle: Theme.of(context).textTheme.labelMedium,
         ),
       ),

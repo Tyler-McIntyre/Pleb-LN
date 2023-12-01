@@ -124,16 +124,16 @@ class OnChainScreen extends ConsumerWidget {
                     _transactions =
                         _getTransactions(_txSortType, payments, invoices);
                   },
-                  buttonHeight: 40,
-                  buttonWidth: 140,
-                  itemHeight: 40,
-                  dropdownMaxHeight: 200,
-                  dropdownWidth: 140,
-                  dropdownPadding: EdgeInsets.only(bottom: 8),
-                  dropdownDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    color: AppColors.black,
-                  ),
+                  // buttonHeight: 40,
+                  // buttonWidth: 140,
+                  // itemHeight: 40,
+                  // dropdownMaxHeight: 200,
+                  // dropdownWidth: 140,
+                  // dropdownPadding: EdgeInsets.only(bottom: 8),
+                  // dropdownDecoration: BoxDecoration(
+                  //   borderRadius: BorderRadius.circular(14),
+                  //   color: AppColors.black,
+                  // ),
                 ),
               ),
             ],

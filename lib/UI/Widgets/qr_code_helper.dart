@@ -6,8 +6,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../util/app_colors.dart';
 
 class QrCodeHelper {
-  static QrImage createQrImage(String data) {
-    return QrImage(
+  static QrImageView createQrImage(String data) {
+    return QrImageView(
       data: data,
       version: QrVersions.auto,
       size: 270,
