@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../UI/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'constants/node_setting.dart';
-import 'database/secure_storage.dart';
-import 'rpc/lnd.dart';
+import 'services/app_initializer.dart';
 import 'util/app_colors.dart';
 
 void main() {
@@ -13,23 +11,22 @@ void main() {
   runApp(ProviderScope(child: const PlebLN()));
 }
 
-class PlebLN extends ConsumerWidget {
+class PlebLN extends ConsumerStatefulWidget {
   const PlebLN({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    initAppData() async {
-      String result =
-          await SecureStorage.readValue(NodeSetting.isConfigured.name) ??
-              'false';
-      bool isConfigured = false;
-      result == 'true' ? isConfigured = true : isConfigured = false;
-      if (isConfigured) {
-        await LND.fetchEssentialData(ref);
-      }
-    }
+  ConsumerState<PlebLN> createState() => _PlebLNState();
+}
 
-    initAppData();
+class _PlebLNState extends ConsumerState<PlebLN> {
+  @override
+  void initState() {
+    super.initState();
+    AppInitializer.initialize(ref);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

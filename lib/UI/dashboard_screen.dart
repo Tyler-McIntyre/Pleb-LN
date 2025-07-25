@@ -91,18 +91,18 @@ class DashboardScreen extends ConsumerWidget {
                           if (_selectedIndex == 1)
                             IconButton(
                                 onPressed: () {
-                                  Navigate.toRoute(Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            OpenChannelProvider(),
-                                      )));
+                                  Navigate.toRoute(() => Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              OpenChannelProvider(),
+                                        )));
                                 },
                                 icon: Icon(
                                   Icons.add,
                                 )),
                           IconButton(
-                              onPressed: () => Navigate.toRoute(
+                              onPressed: () => Navigate.toRoute(() =>
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
