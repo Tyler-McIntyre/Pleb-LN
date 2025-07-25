@@ -194,7 +194,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
   }
 
   void _setConfigFormFields(String data) async {
-    if (data.isEmpty && data.toLowerCase().contains('error') || data == '-1')
+    if (data.isEmpty || data.toLowerCase().contains('error') || data == '-1')
       return;
 
     try {
