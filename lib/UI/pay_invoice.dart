@@ -96,7 +96,7 @@ class _PayInvoiceState extends State<PayInvoice> {
         icon: Icon(Icons.qr_code_scanner),
         onPressed: () async {
           QrCodeHelper helper = QrCodeHelper();
-          String data = await helper.scanQrCode(mounted);
+          String data = await helper.scanQrCode(context);
           PayReq payReq = PayReq();
           try {
             if (data.isEmpty || data == '-1') return;

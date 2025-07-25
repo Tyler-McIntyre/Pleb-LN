@@ -1,7 +1,12 @@
 // Microsoft Visual C++ generated resource script.
 //
 #pragma code_page(65001)
-#include "resource.h"
+#include "            VALUE "FileDescription", "pleb-ln" "\0"
+            VALUE "FileVersion", VER_AS_STRING "\0"
+            VALUE "InternalName", "pleb-ln" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2021 com.pleb.ln. All rights reserved." "\0"
+            VALUE "OriginalFilename", "pleb-ln.exe" "\0"
+            VALUE "ProductName", "pleb-ln" "\0"ce.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////

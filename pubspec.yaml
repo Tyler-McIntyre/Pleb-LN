@@ -1,4 +1,4 @@
-name: plebLN
+name: pleb_ln
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -18,7 +18,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.16.1 <3.0.0"
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,36 +30,67 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  money_formatter: ^0.0.5
+    
+  # State Management (updated to latest version)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.3.5
+  
+  # Existing dependencies (updated to latest versions)
+  money_formatter: ^0.0.6
   qr_flutter: ^4.1.0
-  tuple: ^2.0.0
-  flutter_secure_storage: ^9.0.0
-  flutter_barcode_scanner: ^2.0.0
-  rename: ^3.0.1
-  cupertino_icons: ^1.0.2
-  json_annotation: ^4.5.0
-  json_serializable: ^6.2.0
-  build_runner: ^2.1.10
-  http: ^1.1.2
-  intl: ^0.18.1
-  font_awesome_flutter: ^10.1.0
-  numberpicker: ^2.1.1
-  google_fonts: ^6.1.0
-  page_transition: ^2.0.5
-  convert: ^3.0.1
-  percent_indicator: ^4.2.2
+  tuple: ^2.0.2
+  flutter_secure_storage: ^9.2.2
+  mobile_scanner: ^5.2.3
+  rename: ^3.0.2
+  cupertino_icons: ^1.0.8
+  json_annotation: ^4.9.0
+  http: ^1.2.2
+  intl: ^0.19.0
+  font_awesome_flutter: ^10.7.0
+  numberpicker: ^2.1.2
+  google_fonts: ^6.2.1
+  page_transition: ^2.1.0
+  convert: ^3.1.1
+  percent_indicator: ^4.2.3
   http_plus: ^0.2.3
   protobuf: ^3.1.0
-  grpc: ^3.0.2
-  curved_navigation_bar: ^1.0.3
-  progress_state_button: "^1.0.4"
+  grpc: ^4.0.1
+  fixnum: ^1.1.1
+  curved_navigation_bar: ^1.0.6
+  progress_state_button: ^1.0.4
   dropdown_button2: ^2.3.9
-  carousel_slider: ^4.1.1
+  carousel_slider: ^5.0.0
   carousel_indicator: ^1.0.6
-  lottie: ^2.7.0
-  coingecko_api: ^1.1.1+1
-  flutter_riverpod: ^2.4.9
-  flutter_native_splash: ^2.3.6
+  lottie: ^3.1.2
+  # Removed coingecko_api due to dependency conflicts
+  # Will use direct HTTP calls instead
+  
+  # New modern dependencies (updated to latest)
+  dio: ^5.7.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  crypto: ^3.0.5
+  flutter_svg: ^2.0.10+1
+  shimmer: ^3.0.0
+  go_router: ^14.6.1
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.2
+  clipboard: ^0.1.3
+  # Removed device_info_plus and package_info_plus due to web dependency conflicts
+  # Will implement platform-specific solutions
+  connectivity_plus: ^6.0.5
+  local_auth: ^2.3.0
+  image: ^4.2.0
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  flutter_native_splash: ^2.4.1
+  equatable: ^2.0.5
+  collection: ^1.18.0
+  freezed_annotation: ^2.4.4
+
+# Force newer versions of packages that don't support latest AGP
+dependency_overrides:
+  flutter_plugin_android_lifecycle: ^2.0.28
   
 flutter_native_splash:
   color: "#000000"
@@ -69,7 +101,16 @@ flutter_native_splash:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.1
+  
+  # Code generation (updated to latest)
+  freezed: ^2.5.7
+  riverpod_generator: ^2.4.3
+  build_runner: ^2.4.13
+  json_serializable: ^6.8.0
+  
+  # Linting (updated to latest)
+  flutter_lints: ^5.0.0
 
 flutter_icons:
   android: true
@@ -77,13 +118,6 @@ flutter_icons:
   image_path: "images/Pleb-black_backdrop.png"
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "images/Pleb-logos_white.png"
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^1.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -129,5 +163,5 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
+# For details regarding fonts from package dependencies,
+# see https://flutter.dev/custom-fonts/#from-packages

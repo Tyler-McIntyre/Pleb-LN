@@ -1,4 +1,4 @@
-import 'package:plebLN/UI/widgets/qr_code_helper.dart';
+import 'package:pleb_ln/UI/widgets/qr_code_helper.dart';
 
 import '../UI/create_invoice_screen.dart';
 import 'package:flutter/material.dart';

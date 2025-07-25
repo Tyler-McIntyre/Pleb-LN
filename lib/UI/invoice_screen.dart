@@ -1,4 +1,4 @@
-import 'package:plebLN/UI/widgets/qr_code_helper.dart';
+import 'package:pleb_ln/UI/widgets/qr_code_helper.dart';
 
 import '../UI/dashboard_screen.dart';
 import '../generated/lightning.pb.dart';

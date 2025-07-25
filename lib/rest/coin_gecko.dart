@@ -1,29 +1,23 @@
-import 'package:coingecko_api/coingecko_api.dart';
-import 'package:coingecko_api/data/exchange_rate.dart';
-import 'package:coingecko_api/coingecko_result.dart';
+import '../services/price_service.dart';
 
 class CoinGecko {
   static Future<double> fetchBtcExchangeRate() async {
-    CoinGeckoApi api = CoinGeckoApi();
-    CoinGeckoResult<Map<String, ExchangeRate>> exchanges;
+    final priceService = PriceService();
     try {
-      exchanges = await api.exchangeRates.getBtcExchangeRates();
+      final bitcoinPrice = await priceService.getBitcoinPrice();
+      return bitcoinPrice.currentPrice;
     } catch (ex) {
       throw Exception(ex);
     }
-
-    double usdToBtcRate = exchanges.data['usd']!.value;
-
-    return usdToBtcRate;
   }
 
   static Future<bool> serverStatus() async {
-    CoinGeckoApi api = CoinGeckoApi();
-    CoinGeckoResult<bool> response = await api.ping.ping();
-    if (response.isError) {
-      return false;
-    } else {
+    final priceService = PriceService();
+    try {
+      await priceService.getBitcoinPrice();
       return true;
+    } catch (ex) {
+      return false;
     }
   }
 }

@@ -345,7 +345,7 @@ class _NodeConfigFormState extends State<NodeConfigForm> {
           String data = '';
           try {
             QrCodeHelper helper = QrCodeHelper();
-            data = await helper.scanQrCode(mounted);
+            data = await helper.scanQrCode(context);
           } catch (ex) {
             Snackbars.error(context, ex.toString());
           }

@@ -129,7 +129,7 @@ class _OpenChannelScreenState extends State<OpenChannelScreen> {
         icon: Icon(Icons.qr_code_scanner),
         onPressed: () async {
           QrCodeHelper helper = QrCodeHelper();
-          String data = await helper.scanQrCode(mounted);
+          String data = await helper.scanQrCode(context);
 
           RegExpMatch? matches = RegExp('.*(?=@)').firstMatch(data);
           String? pubKeyMatch;

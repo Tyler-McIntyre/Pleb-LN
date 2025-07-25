@@ -8,6 +8,7 @@ class AppColors {
   static const blue = Color(0xff1985A1);
   static const green = Color(0xff388A4B);
   static const red = Color.fromARGB(255, 245, 22, 37);
+  static const error = Color.fromARGB(255, 245, 22, 37); // alias for red
   static const white = Color(0xffF2FCF3);
   static const black = Colors.black;
   static const black2 = Color.fromARGB(185, 42, 49, 43);
